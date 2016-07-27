@@ -857,8 +857,8 @@ private slots:
     void editLdrawIniFile();
     void generateFadeColourPartsList();
 
-    void toggleLCStatusBar();
-    void showLCStatusMessage();
+    void toggleViewerStatusBar();
+    void showViewerStatusMessage();
 
     // Begin Jaco's code
 
@@ -944,7 +944,7 @@ private:
   void createActions();
   void createMenus();
   void createToolBars();
-  void createStatusBar();
+  void createViewerStatusBar();
   void createDockWindows();
   void readSettings();
   void writeSettings();

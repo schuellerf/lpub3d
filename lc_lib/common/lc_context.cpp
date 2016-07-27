@@ -924,6 +924,7 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 
 	if (!Texture)
 	{
+		SetProgram(LC_PROGRAM_SIMPLE);
 		SetVertexFormat(VertexBufferOffset, 3, 0, 0);
 
 		if (mTexture)
@@ -935,6 +936,7 @@ void lcContext::DrawMeshSection(lcMesh* Mesh, lcMeshSection* Section)
 	else
 	{
 		VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
+		SetProgram(LC_PROGRAM_TEXTURE);
 		SetVertexFormat(VertexBufferOffset, 3, 2, 0);
 
 		if (Texture != mTexture)
@@ -962,7 +964,7 @@ void lcContext::DrawOpaqueMeshes(const lcArray<lcRenderMesh>& OpaqueMeshes)
 
 	for (int MeshIdx = 0; MeshIdx < OpaqueMeshes.GetSize(); MeshIdx++)
 	{
-		lcRenderMesh& RenderMesh = OpaqueMeshes[MeshIdx];
+		const lcRenderMesh& RenderMesh = OpaqueMeshes[MeshIdx];
 		lcMesh* Mesh = RenderMesh.Mesh;
 		int LodIndex = RenderMesh.LodIndex;
 
@@ -1039,7 +1041,7 @@ void lcContext::DrawTranslucentMeshes(const lcArray<lcRenderMesh>& TranslucentMe
 
 	for (int MeshIdx = 0; MeshIdx < TranslucentMeshes.GetSize(); MeshIdx++)
 	{
-		lcRenderMesh& RenderMesh = TranslucentMeshes[MeshIdx];
+		const lcRenderMesh& RenderMesh = TranslucentMeshes[MeshIdx];
 		lcMesh* Mesh = RenderMesh.Mesh;
 		int LodIndex = RenderMesh.LodIndex;
 
@@ -1083,7 +1085,7 @@ void lcContext::DrawTranslucentMeshes(const lcArray<lcRenderMesh>& TranslucentMe
 	glDisable(GL_BLEND);
 }
 
-void lcContext::DrawInterfaceObjects(const lcArray<lcObject*>& InterfaceObjects)
+void lcContext::DrawInterfaceObjects(const lcArray<const lcObject*>& InterfaceObjects)
 {
 	for (int ObjectIdx = 0; ObjectIdx < InterfaceObjects.GetSize(); ObjectIdx++)
 		InterfaceObjects[ObjectIdx]->DrawInterface(this);

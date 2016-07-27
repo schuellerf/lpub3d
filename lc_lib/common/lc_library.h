@@ -6,9 +6,11 @@
 #include "lc_math.h"
 #include "lc_array.h"
 #include "str.h"
+/*** LPub3D modification 9: - Includes ***/
 #include "name.h"
 
 #include "QsLog.h"
+/*** LPub3D modification end ***/
 class PieceInfo;
 class lcZipFile;
 
@@ -80,8 +82,11 @@ public:
 			mSections[MeshDataIdx].DeleteAll();
 	}
 
-	void AddLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcVector3* Vertices);
-	void AddTexturedLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, const lcVector3* Vertices);
+	lcLibraryMeshSection* AddSection(lcMeshDataType MeshDataType, LC_MESH_PRIMITIVE_TYPE PrimitiveType, lcuint32 ColorCode, lcTexture* Texture);
+	void AddVertices(lcMeshDataType MeshDataType, int VertexCount, int* BaseVertex, lcVertex** VertexBuffer);
+	void AddIndices(lcMeshDataType MeshDataType, LC_MESH_PRIMITIVE_TYPE PrimitiveType, lcuint32 ColorCode, int IndexCount, lcuint32** IndexBuffer);
+	void AddLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcVector3* Vertices, bool Optimize);
+	void AddTexturedLine(lcMeshDataType MeshDataType, int LineType, lcuint32 ColorCode, const lcLibraryTextureMap& Map, const lcVector3* Vertices, bool Optimize);
 	void AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
 	void AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, lcuint32 CurrentColorCode, lcLibraryTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
 	void TestQuad(int* QuadIndices, const lcVector3* Vertices);
@@ -129,7 +134,9 @@ public:
 	~lcPiecesLibrary();
 
 	bool Load(const char* LibraryPath);
+	/*** LPub3D modification 137: - library reload ***/
 	bool ReloadUnoffLib();
+	/*** LPub3D modification end ***/
 	void Unload();
 	void RemoveTemporaryPieces();
 	void RemovePiece(PieceInfo* Info);
@@ -158,9 +165,15 @@ public:
 			mNumOfficialPieces = mPieces.GetSize();
 	}
 
-	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType);
-	void CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData);
+	void SetCurrentModelPath(const QString& ModelPath)
+	{
+		mCurrentModelPath = ModelPath;
+	}
+
+	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, lcuint32 CurrentColorCode, lcArray<lcLibraryTextureMap>& TextureStack, lcLibraryMeshData& MeshData, lcMeshDataType MeshDataType, bool Optimize);
+	lcMesh* CreateMesh(PieceInfo* Info, lcLibraryMeshData& MeshData);
 	void UpdateBuffers(lcContext* Context);
+	void UnloadUnusedParts();
 
 	lcArray<PieceInfo*> mPieces;
 	lcArray<lcLibraryPrimitive*> mPrimitives;
@@ -178,8 +191,9 @@ protected:
 	bool OpenArchive(const char* FileName, lcZipFileType ZipFileType);
 	bool OpenArchive(lcFile* File, const char* FileName, lcZipFileType ZipFileType);
 	bool OpenDirectory(const char* Path);
+	/*** LPub3D modification 194: - read part desc and type ***/
 	void ReadArchiveDescriptionsAndPartTypes(const QString& OfficialFileName, const QString& UnofficialFileName);
-
+	/*** LPub3D modification end ***/
 	bool ReadCacheFile(const QString& FileName, lcMemFile& CacheFile);
 	bool WriteCacheFile(const QString& FileName, lcMemFile& CacheFile);
 	bool LoadCacheIndex(const QString& FileName);
@@ -191,6 +205,7 @@ protected:
 	bool LoadPrimitive(int PrimitiveIndex);
 
 	QString mCachePath;
+	QString mCurrentModelPath;
 	qint64 mArchiveCheckSum[4];
 	char mLibraryFileName[LC_MAXPATH];
 	char mUnofficialFileName[LC_MAXPATH];

@@ -28,68 +28,6 @@ void lcGLWidget::Redraw()
 	Widget->mUpdateTimer.start(0);
 }
 
-
-void lcGLWidget::ShowPopupMenu()
-{
-	QGLWidget* Widget = (QGLWidget*)mWidget;
-	QAction **actions = gMainWindow->mActions;
-
-	QMenu *popup = new QMenu(Widget);
-
-	QMenu *tools = new QMenu("Tools");
-	popup->addMenu(tools);
-	for (int actionIdx = LC_EDIT_ACTION_FIRST; actionIdx <= LC_EDIT_ACTION_LAST; actionIdx++)
-		tools->addAction(actions[actionIdx]);
-    
-//    QMenu *rotateStepMenu = new QMenu("Step Rotation");
-//    rotateStepMenu->addAction(actions[LC_EDIT_ROTATESTEP_RELATIVE_ROTATION]);
-//    rotateStepMenu->addAction(actions[LC_EDIT_ROTATESTEP_ABSOLUTE_ROTATION]);
-//    actions[LC_EDIT_ACTION_ROTATESTEP]->setMenu(rotateStepMenu);
-
-//    QMenu *SnapAngleMenu = new QMenu("Snap Angle Menu");
-//    for (int actionIdx = LC_EDIT_SNAP_ANGLE0; actionIdx <= LC_EDIT_SNAP_ANGLE9; actionIdx++)
-//        SnapAngleMenu->addAction(actions[actionIdx]);
-//    actions[LC_EDIT_SNAP_ANGLE_TOGGLE]->setMenu(SnapAngleMenu);
-
-//    tools->addSeparator();
-//    tools->addAction(actions[LC_EDIT_SNAP_ANGLE_TOGGLE]);
-
-    /*** management - popupMenu ***/
-    //tools->removeAction(actions[LC_EDIT_ACTION_SELECT]);
-    tools->removeAction(actions[LC_EDIT_ACTION_ROTATESTEP]);
-    tools->removeAction(actions[LC_EDIT_ACTION_INSERT]);
-    tools->removeAction(actions[LC_EDIT_ACTION_LIGHT]);
-    tools->removeAction(actions[LC_EDIT_ACTION_SPOTLIGHT]);
-    tools->removeAction(actions[LC_EDIT_ACTION_CAMERA]);
-    tools->removeAction(actions[LC_EDIT_ACTION_MOVE]);
-    tools->removeAction(actions[LC_EDIT_ACTION_ZOOM]);
-    tools->removeAction(actions[LC_EDIT_ACTION_ROLL]);
-    //tools->removeAction(actions[LC_EDIT_ACTION_ROTATE]);
-    tools->removeAction(actions[LC_EDIT_ACTION_DELETE]);
-    tools->removeAction(actions[LC_EDIT_ACTION_PAINT]);
-    /*** management - end ***/
-
-	QMenu *cameras = new QMenu("Cameras");
-	popup->addMenu(cameras);
-	cameras->addAction(actions[LC_VIEW_CAMERA_NONE]);
-	for (int actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
-		cameras->addAction(actions[actionIdx]);
-	cameras->addSeparator();
-	cameras->addAction(actions[LC_VIEW_CAMERA_RESET]);
-
-    popup->addSeparator();
-    popup->addAction(actions[LC_EDIT_UNDO]);
-    popup->addAction(actions[LC_EDIT_REDO]);
-
-	popup->addSeparator();
-	popup->addAction(actions[LC_VIEW_SPLIT_HORIZONTAL]);
-	popup->addAction(actions[LC_VIEW_SPLIT_VERTICAL]);
-	popup->addAction(actions[LC_VIEW_REMOVE_VIEW]);
-	popup->addAction(actions[LC_VIEW_RESET_VIEWS]);
-
-	popup->exec(QCursor::pos());
-}
-
 void lcGLWidget::SetCursor(LC_CURSOR_TYPE CursorType)
 {
 	if (mCursorType == CursorType)
@@ -121,12 +59,14 @@ void lcGLWidget::SetCursor(LC_CURSOR_TYPE CursorType)
 		{ 15, 15, ":/resources/cursor_pan" },             // LC_CURSOR_PAN
 		{ 15, 15, ":/resources/cursor_roll" },            // LC_CURSOR_ROLL
 		{ 15, 15, ":/resources/cursor_rotate_view" },     // LC_CURSOR_ROTATE_VIEW
-		{  0,  0, "" },
+		{  0,  0, "" },		/*** LPub3D modification 62: - rotate step ***/
 	};
 
 	QGLWidget* widget = (QGLWidget*)mWidget;
+	/*** LPub3D modification 66: - rotate step ***/	
     //if (CursorType != LC_CURSOR_DEFAULT && CursorType < LC_CURSOR_COUNT)
     if (CursorType != LC_CURSOR_DEFAULT && CursorType < LC_CURSOR_COUNT - 1)
+	/*** LPub3D modification end ***/		
 	{
 		const lcCursorInfo& Cursor = Cursors[CursorType];
 		widget->setCursor(QCursor(QPixmap(Cursor.Name), Cursor.x, Cursor.y));
@@ -183,7 +123,6 @@ lcQGLWidget::~lcQGLWidget()
 	makeCurrent();
 	if (!gWidgetCount)
 	{
-//		widget->MakeCurrent(); //Rem on update to 1867
 		View::DestroyResources(widget->mContext);
 		lcContext::DestroyResources();
 
@@ -191,8 +130,7 @@ lcQGLWidget::~lcQGLWidget()
 		gPlaceholderMesh = NULL;
 	}
 
-	if (isView)
-		delete widget;
+	delete widget;
 }
 
 QSize lcQGLWidget::sizeHint() const
@@ -228,7 +166,7 @@ void lcQGLWidget::keyPressEvent(QKeyEvent *event)
 {
 	if (isView && event->key() == Qt::Key_Control)
 	{
-		widget->mInputState.Control = true;
+		widget->mInputState.Modifiers = event->modifiers();
 		widget->OnUpdateCursor();
 	}
 
@@ -239,7 +177,7 @@ void lcQGLWidget::keyReleaseEvent(QKeyEvent *event)
 {
 	if (isView && event->key() == Qt::Key_Control)
 	{
-		widget->mInputState.Control = false;
+		widget->mInputState.Modifiers = event->modifiers();
 		widget->OnUpdateCursor();
 	}
 
@@ -252,18 +190,18 @@ void lcQGLWidget::mousePressEvent(QMouseEvent *event)
 
 	widget->mInputState.x = event->x() * scale;
 	widget->mInputState.y = widget->mHeight - event->y() * scale - 1;
-	widget->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
-	widget->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
-	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
+	widget->mInputState.Modifiers = event->modifiers();
 
 	switch (event->button())
 	{
 	case Qt::LeftButton:
 		widget->OnLeftButtonDown();
 		break;
+
 	case Qt::MidButton:
 		widget->OnMiddleButtonDown();
 		break;
+
 	case Qt::RightButton:
 		widget->OnRightButtonDown();
 		break;
@@ -289,18 +227,18 @@ void lcQGLWidget::mouseReleaseEvent(QMouseEvent *event)
 
 	widget->mInputState.x = event->x() * scale;
 	widget->mInputState.y = widget->mHeight - event->y() * scale - 1;
-	widget->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
-	widget->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
-	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
+	widget->mInputState.Modifiers = event->modifiers();
 
 	switch (event->button())
 	{
 	case Qt::LeftButton:
 		widget->OnLeftButtonUp();
 		break;
+
 	case Qt::MidButton:
 		widget->OnMiddleButtonUp();
 		break;
+
 	case Qt::RightButton:
 		widget->OnRightButtonUp();
 		break;
@@ -326,9 +264,7 @@ void lcQGLWidget::mouseDoubleClickEvent(QMouseEvent *event)
 
 	widget->mInputState.x = event->x() * scale;
 	widget->mInputState.y = widget->mHeight - event->y() * scale - 1;
-	widget->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
-	widget->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
-	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
+	widget->mInputState.Modifiers = event->modifiers();
 
 	switch (event->button())
 	{
@@ -346,9 +282,7 @@ void lcQGLWidget::mouseMoveEvent(QMouseEvent *event)
 
 	widget->mInputState.x = event->x() * scale;
 	widget->mInputState.y = widget->mHeight - event->y() * scale - 1;
-	widget->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
-	widget->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
-	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
+	widget->mInputState.Modifiers = event->modifiers();
 
 	widget->OnMouseMove();
 }
@@ -365,9 +299,7 @@ void lcQGLWidget::wheelEvent(QWheelEvent *event)
 
 	widget->mInputState.x = event->x() * scale;
 	widget->mInputState.y = widget->mHeight - event->y() * scale - 1;
-	widget->mInputState.Control = (event->modifiers() & Qt::ControlModifier) != 0;
-	widget->mInputState.Shift = (event->modifiers() & Qt::ShiftModifier) != 0;
-	widget->mInputState.Alt = (event->modifiers() & Qt::AltModifier) != 0;
+	widget->mInputState.Modifiers = event->modifiers();
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
 	mWheelAccumulator += event->angleDelta().y() / 8;
@@ -422,9 +354,7 @@ void lcQGLWidget::dragMoveEvent(QDragMoveEvent *event)
 
 	widget->mInputState.x = event->pos().x() * scale;
 	widget->mInputState.y = widget->mHeight - event->pos().y() * scale - 1;
-	widget->mInputState.Control = (event->keyboardModifiers() & Qt::ControlModifier) != 0;
-	widget->mInputState.Shift = (event->keyboardModifiers() & Qt::ShiftModifier) != 0;
-	widget->mInputState.Alt = (event->keyboardModifiers() & Qt::AltModifier) != 0;
+	widget->mInputState.Modifiers = event->keyboardModifiers();
 
 	widget->OnMouseMove();
 

@@ -5,7 +5,7 @@
 #include "lc_model.h"
 #include "project.h"
 #include "system.h"
- 
+
 lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, int DefaultValue)
 {
 	mType = LC_PROFILE_ENTRY_INT;
@@ -38,6 +38,14 @@ lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, const char*
 	mDefault.StringValue = DefaultValue;
 }
 
+lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, const QStringList& /*StringList*/)
+{
+	mType = LC_PROFILE_ENTRY_STRINGLIST;
+	mSection = Section;
+	mKey = Key;
+	mDefault.IntValue = 0;
+}
+
 lcProfileEntry::lcProfileEntry(const char* Section, const char* Key)
 {
 	mType = LC_PROFILE_ENTRY_BUFFER;
@@ -64,6 +72,7 @@ lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "ProjectsPath", ""),                                  // LC_PROFILE_PROJECTS_PATH
 	lcProfileEntry("Settings", "PartsLibrary", ""),                                  // LC_PROFILE_PARTS_LIBRARY
 	lcProfileEntry("Settings", "Shortcuts"),                                         // LC_PROFILE_SHORTCUTS
+    lcProfileEntry("Settings", "MouseShortcuts", QStringList()),                     // LC_PROFILE_MOUSE_SHORTCUTS
 	lcProfileEntry("Settings", "Categories"),                                        // LC_PROFILE_CATEGORIES
 	lcProfileEntry("Settings", "RecentFile1", ""),                                   // LC_PROFILE_RECENT_FILE1
 	lcProfileEntry("Settings", "RecentFile2", ""),                                   // LC_PROFILE_RECENT_FILE2
@@ -99,7 +108,7 @@ lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("HTML", "PartsWidth", 128),                                       // LC_PROFILE_HTML_PARTS_WIDTH
 	lcProfileEntry("HTML", "PartsHeight", 128),                                      // LC_PROFILE_HTML_PARTS_HEIGHT
 
-    lcProfileEntry("POVRay", "POVRayPath", ""),                                      // LC_PROFILE_POVRAY_PATH
+    lcProfileEntry("POVRay", "POVRayPath", ""),                                      // LC_PROFILE_POVRAY_PATH          /*** LPub3D modification 109: - POV-ray settings ***/
 	lcProfileEntry("POVRay", "LGEOPath", ""),                                        // LC_PROFILE_POVRAY_LGEO_PATH
 	lcProfileEntry("POVRay", "Render", 1),                                           // LC_PROFILE_POVRAY_RENDER
 };
@@ -157,6 +166,16 @@ QString lcGetProfileString(LC_PROFILE_KEY Key)
 	return Settings.value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Entry.mDefault.StringValue).toString();
 }
 
+QStringList lcGetProfileStringList(LC_PROFILE_KEY Key)
+{
+	lcProfileEntry& Entry = gProfileEntries[Key];
+	QSettings Settings;
+
+	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_STRINGLIST);
+
+	return Settings.value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), QStringList()).toStringList();
+}
+
 QByteArray lcGetProfileBuffer(LC_PROFILE_KEY Key)
 {
 	lcProfileEntry& Entry = gProfileEntries[Key];
@@ -165,22 +184,6 @@ QByteArray lcGetProfileBuffer(LC_PROFILE_KEY Key)
 	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_BUFFER);
 
 	return Settings.value(QString("%1/%2").arg(Entry.mSection, Entry.mKey)).toByteArray();
-}
-
-void lcGetProfileBuffer(LC_PROFILE_KEY Key, lcMemFile& Buffer) // todo: deprecated
-{
-	lcProfileEntry& Entry = gProfileEntries[Key];
-	QSettings Settings;
-	QByteArray Value;
-
-	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_BUFFER);
-
-	Value = Settings.value(QString("%1/%2").arg(Entry.mSection, Entry.mKey)).toByteArray();
-
-	Buffer.Seek(0, SEEK_SET);
-	Buffer.SetLength(Value.size());
-	Buffer.WriteBuffer(Value.constData(), Value.size());
-	Buffer.Seek(0, SEEK_SET);
 }
 
 void lcSetProfileInt(LC_PROFILE_KEY Key, int Value)
@@ -213,6 +216,16 @@ void lcSetProfileString(LC_PROFILE_KEY Key, const QString& Value)
 	Settings.setValue(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Value);
 }
 
+void lcSetProfileStringList(LC_PROFILE_KEY Key, const QStringList& Value)
+{
+	lcProfileEntry& Entry = gProfileEntries[Key];
+	QSettings Settings;
+
+	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_STRINGLIST);
+
+	Settings.setValue(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Value);
+}
+
 void lcSetProfileBuffer(LC_PROFILE_KEY Key, const QByteArray& Buffer)
 {
 	lcProfileEntry& Entry = gProfileEntries[Key];
@@ -221,15 +234,4 @@ void lcSetProfileBuffer(LC_PROFILE_KEY Key, const QByteArray& Buffer)
 	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_BUFFER);
 
 	Settings.setValue(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Buffer);
-}
-
-void lcSetProfileBuffer(LC_PROFILE_KEY Key, const lcMemFile& Buffer) // todo: deprecated
-{
-	lcProfileEntry& Entry = gProfileEntries[Key];
-	QSettings Settings;
-	QByteArray Value = QByteArray::fromRawData((const char*)Buffer.mBuffer, Buffer.GetLength());
-
-	LC_ASSERT(Entry.mType == LC_PROFILE_ENTRY_BUFFER);
-
-	Settings.setValue(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Value);
 }

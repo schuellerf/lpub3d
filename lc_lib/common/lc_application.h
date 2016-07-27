@@ -2,12 +2,14 @@
 #define _LC_APPLICATION_H_
 
 #include "lc_array.h"
-#include "str.h"
+/*** LPub3D modification 5: - include and forward initialization ***/
 #include "threadworkers.h"
 
+class PartWorker;
+/*** LPub3D modification end ***/
 class Project;
 class lcPiecesLibrary;
-class PartWorker;
+class String;
 
 enum lcLightingMode
 {
@@ -44,9 +46,10 @@ public:
 	~lcApplication();
 
 	void SetProject(Project* Project);
-	bool Initialize(int argc, char *argv[], const char* LibraryInstallPath, const char* LDrawPath, QMainWindow *parent = 0);
+	bool Initialize(int argc, char *argv[], const char* LibraryInstallPath, const char* LDrawPath);
 	void Shutdown();
 	void ShowPreferencesDialog();
+
 	bool LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LDrawPath);
 
 	void GetFileList(const char* Path, lcArray<String>& FileList);
@@ -54,11 +57,13 @@ public:
 	void ExportClipboard(const QByteArray& Clipboard);
 
 	Project* mProject;
-	lcPiecesLibrary* mLibrary;        	
+	lcPiecesLibrary* mLibrary;
 	lcPreferences mPreferences;
 	QByteArray mClipboard;
-	PartWorker partWorkerLDSearchDirs;  // part worker to process search directories and fade color parts
+    /*** LPub3D modification 63: - initialization ***/
+    PartWorker partWorkerLDSearchDirs;  // part worker to process search directories and fade color parts
     char *mLoadFile;
+    /*** LPub3D modification end ***/
 
 protected:
 	void ParseIntegerArgument(int* CurArg, int argc, char* argv[], int* Value);

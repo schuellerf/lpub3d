@@ -2,10 +2,11 @@
 #define _VIEW_H_
 
 #include "lc_glwidget.h"
-#include "lc_model.h"
 #include "camera.h"
 
+/*** LPub3D modification 8: - add logging ***/
 #include "QsLog.h"
+/*** LPub3D modification end ***/
 
 enum lcTrackButton
 {
@@ -35,6 +36,8 @@ enum lcTrackTool
 	LC_TRACKTOOL_ROTATE_Z,
 	LC_TRACKTOOL_ROTATE_XY,
 	LC_TRACKTOOL_ROTATE_XYZ,
+	LC_TRACKTOOL_SCALE_PLUS,
+	LC_TRACKTOOL_SCALE_MINUS,
 	LC_TRACKTOOL_ERASER,
 	LC_TRACKTOOL_PAINT,
 	LC_TRACKTOOL_ZOOM,
@@ -44,7 +47,7 @@ enum lcTrackTool
 	LC_TRACKTOOL_ORBIT_XY,
 	LC_TRACKTOOL_ROLL,
     LC_TRACKTOOL_ZOOM_REGION,
-    LC_TRACKTOOL_ROTATESTEP
+    LC_TRACKTOOL_ROTATESTEP		/*** LPub3D modification 50: - Rotate Step ***/
 };
 
 enum lcDragState
@@ -62,8 +65,6 @@ public:
 
 	static void CreateResources(lcContext* Context);
 	static void DestroyResources(lcContext* Context);
-
-	void SetModel(lcModel* Model);
 
 	void OnDraw();
 	void OnInitialUpdate();
@@ -88,7 +89,6 @@ public:
 	void LookAt();
 	void ZoomExtents();
 
-	void ClearCameras();
 	void RemoveCamera();
 	void SetCamera(lcCamera* Camera, bool ForceCopy);
 	void SetCameraIndex(int Index);
@@ -96,16 +96,16 @@ public:
 	void SetDefaultCamera();
 	lcMatrix44 GetProjectionMatrix() const;
 	LC_CURSOR_TYPE GetCursor() const;
+	void ShowContextMenu() const;
 
 	lcVector3 GetMoveDirection(const lcVector3& Direction) const;
 	lcMatrix44 GetPieceInsertPosition() const;
+	void GetRayUnderPointer(lcVector3& Start, lcVector3& End) const;
 	lcObjectSection FindObjectUnderPointer(bool PiecesOnly) const;
 	lcArray<lcObject*> FindObjectsInBox(float x1, float y1, float x2, float y2) const;
 
 	lcModel* mModel;
 	lcCamera* mCamera;
-
-	QMap<lcModel*, lcCamera*> mCameras;
 
 	lcVector3 ProjectPoint(const lcVector3& Point) const
 	{
@@ -136,17 +136,24 @@ protected:
 	void DrawAxes();
 	void DrawViewport();
 
+	/*** LPub3D modification 143: - Rotate Step ***/
     void GetRotateStepAngles();
+	/*** LPub3D modification end ***/
+
 	void UpdateTrackTool();
+	bool IsTrackToolAllowed(lcTrackTool TrackTool, lcuint32 AllowedTransforms) const;
 	lcTool GetCurrentTool() const;
+	lcTrackTool GetOverrideTrackTool(Qt::MouseButton Button) const;
 	float GetOverlayScale() const;
 	void StartTracking(lcTrackButton TrackButton);
 	void StopTracking(bool Accept);
+	void OnButtonDown(lcTrackButton TrackButton);
 
 	lcScene mScene;
 	lcDragState mDragState;
 	lcTrackButton mTrackButton;
 	lcTrackTool mTrackTool;
+	bool mTrackUpdated;
 	int mMouseDownX;
 	int mMouseDownY;
 

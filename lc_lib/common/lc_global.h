@@ -3,6 +3,7 @@
 
 #include <QtGlobal>
 #include <QtOpenGL>
+/*** LPub3D modification 6: - Includes ***/
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 #include <QtWidgets/QWidget>
 #include <QtWidgets>
@@ -12,7 +13,7 @@
 #include <QtGui>
 #include <QGLWidget>
 #endif
-
+/*** LPub3D modification end ***/
 #include <QPrinter>
 
 #undef GL_LINES_ADJACENCY_EXT
@@ -36,6 +37,7 @@ typedef qint64 lcint64;
 typedef quint64 lcuint64;
 typedef quintptr lcuintptr;
 
+/*** LPub3D modification 40: - Build ***/
 #ifdef Q_OS_WIN
 #define snprintf _snprintf
 #define isnan _isnan
@@ -43,6 +45,8 @@ typedef quintptr lcuintptr;
 #define strcasecmp stricmp
 #define strncasecmp strnicmp
 #endif
+/*** LPub3D modification end ***/
+
 char* strcasestr(const char *s, const char *find);
 #else
 char* strupr(char* string);
@@ -52,10 +56,13 @@ int stricmp(const char* str1, const char* str2);
 
 // Version number.
 #define LC_VERSION_MAJOR 0
-#define LC_VERSION_MINOR 82
-#define LC_VERSION_PATCH 1
-#define LC_VERSION_TEXT "0.82.1"
-#define LC_VERSION_BUILD "1867"
+#define LC_VERSION_MINOR 83
+#define LC_VERSION_PATCH 0
+#define LC_VERSION_TEXT "0.83.0"
+/*** LPub3D modification 60: - Build ***/
+#define LC_VERSION_BUILD "1952"
+/*** LPub3D modification end ***/
+
 
 // Forward declarations.
 class Project;

@@ -55,9 +55,26 @@ public:
 		return *this;
 	}
 
-	T& operator[](int Index) const
+	const T& operator[](int Index) const
 	{
 		return mData[Index];
+	}
+
+	T& operator[](int Index)
+	{
+		return mData[Index];
+	}
+
+	bool operator==(const lcArray<T>& Array) const
+	{
+		if (mLength != Array.mLength)
+			return false;
+
+		for (int i = 0; i < mLength; i++)
+			if (mData[i] != Array.mData[i])
+				return false;
+
+		return true;
 	}
 
 	bool IsEmpty() const
@@ -73,14 +90,15 @@ public:
 	void SetSize(int NewSize)
 	{
 		if (NewSize > mAlloc)
-			AllocGrow(NewSize - mAlloc);
+			AllocGrow(NewSize - mLength);
 
 		mLength = NewSize;
 	}
 
 	void SetGrow(int Grow)
 	{
-		mGrow = Grow;
+		if (Grow)
+			mGrow = Grow;
 	}
 
 	void AllocGrow(int Grow)

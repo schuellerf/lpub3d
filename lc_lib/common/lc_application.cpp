@@ -1,24 +1,25 @@
 #include "lc_global.h"
 #include <stdio.h>
 #include "lc_application.h"
-#include "lc_colors.h"
 #include "lc_library.h"
 #include "lc_profile.h"
-#include "system.h"
 #include "project.h"
-#include "image.h"
 #include "lc_mainwindow.h"
 #include "lc_shortcuts.h"
+
+/*** LPub3D modification 10: - includes ***/
 #include "view.h"
 #include "application.h"
 #include "name.h"
+/*** LPub3D modification end ***/
 
 lcApplication* g_App;
 
 void lcPreferences::LoadDefaults()
 {
+	/*** LPub3D modification 20: - Splash message viewer defaults ***/
 	emit Application::instance()->splashMsgSig("65% - Viewer defaults loading...");
-
+	/*** LPub3D modification end ***/
 	mFixedAxes = lcGetProfileInt(LC_PROFILE_FIXED_AXES);
 	mMouseSensitivity = lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY);
 	mLightingMode = (lcLightingMode)lcGetProfileInt(LC_PROFILE_LIGHTING_MODE);
@@ -52,10 +53,12 @@ lcApplication::lcApplication()
 	mProject = NULL;
 	mLibrary = NULL;
 	mClipboard = NULL;
+	/*** LPub3D modification 56: - initialize loadFile param; run search dirs preferences ***/
     mLoadFile = NULL;
 
-	mPreferences.LoadDefaults();
 	partWorkerLDSearchDirs.ldsearchDirPreferences();
+	/*** LPub3D modification end ***/
+	mPreferences.LoadDefaults();
 }
 
 lcApplication::~lcApplication()
@@ -69,13 +72,7 @@ void lcApplication::SetProject(Project* Project)
 	delete mProject;
 	mProject = Project;
 
-	const lcArray<View*>& Views = gMainWindow->GetViews();
-	for (int ViewIdx = 0; ViewIdx < Views.GetSize(); ViewIdx++)
-	{
-		View* View = Views[ViewIdx];
-		View->ClearCameras();
-		View->SetModel(lcGetActiveModel());
-	}
+	gMainWindow->RemoveAllModelTabs();
 
 	Project->SetActiveModel(0);
 	lcGetPiecesLibrary()->RemoveTemporaryPieces();
@@ -115,10 +112,11 @@ void lcApplication::GetFileList(const char* Path, lcArray<String>& FileList)
 
 bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryInstallPath, const char* LDrawPath)
 {
-        // process search directories to update library archive
-        partWorkerLDSearchDirs.processLDSearchDirParts();
-
+	/*** LPub3D modification 115: - process search directories to update library archive ***/
+    partWorkerLDSearchDirs.processLDSearchDirParts();
+	
 	emit Application::instance()->splashMsgSig("90% - Libraries loading...");
+	/*** LPub3D modification end ***/
 
 	if (mLibrary == NULL)
 		mLibrary = new lcPiecesLibrary();
@@ -144,7 +142,7 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 
 		strcpy(LibraryPath, LibraryInstallPath);
 
-		int i = strlen(LibraryPath) - 1;
+		size_t i = strlen(LibraryPath) - 1;
 		if ((LibraryPath[i] != '\\') && (LibraryPath[i] != '/'))
 			strcat(LibraryPath, "/");
 
@@ -163,7 +161,7 @@ bool lcApplication::LoadPiecesLibrary(const char* LibPath, const char* LibraryIn
 
 		strcpy(LibraryPath, LDrawPath);
 
-		int i = strlen(LibraryPath) - 1;
+		size_t i = strlen(LibraryPath) - 1;
 		if ((LibraryPath[i] != '\\') && (LibraryPath[i] != '/'))
 			strcat(LibraryPath, "/");
 
@@ -206,7 +204,7 @@ void lcApplication::ParseStringArgument(int* CurArg, int argc, char* argv[], cha
 	}
 }
 
-bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstallPath, const char* LDrawPath, QMainWindow *parent)
+bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstallPath, const char* LDrawPath)
 {
 	char* LibPath = NULL;
 
@@ -224,7 +222,9 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 	char* SaveWavefrontName = NULL;
 	char* Save3DSName = NULL;
 
+	/*** LPub3D modification 225: - Splash message initialize ***/
 	emit Application::instance()->splashMsgSig("70% - Viewer window defaults loading...");
+	/*** LPub3D modification end ***/
 
 	// Parse the command line arguments.
 	for (int i = 1; i < argc; i++)
@@ -308,7 +308,7 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 				printf("  -t, --to <time>: Sets the last frame or step to save pictures.\n");
 //				printf("  --highlight: Highlight pieces in the steps they appear.\n");
 				printf("  -wf, --export-wavefront <outfile.obj>: Exports the model to Wavefront format.\n");
-                printf("  -3ds, --export-3ds <outfile.3ds>: Exports the model to 3DS format.\n");
+				printf("  -3ds, --export-3ds <outfile.3ds>: Exports the model to 3DS format.\n");
 				printf("  \n");
 
 				return false;
@@ -319,14 +319,13 @@ bool lcApplication::Initialize(int argc, char* argv[], const char* LibraryInstal
 		else
 		{
 			ProjectName = Param;
-            mLoadFile = Param;
 		}
 	}
 
-	gMainWindow = new lcMainWindow(parent);
+	gMainWindow = new lcMainWindow();
 	lcLoadDefaultKeyboardShortcuts();
+	lcLoadDefaultMouseShortcuts();
 
-	// Load all parts
 	if (!LoadPiecesLibrary(LibPath, LibraryInstallPath, LDrawPath))
 	{
 		if (SaveImage || SaveWavefront || Save3DS)
@@ -492,8 +491,11 @@ void lcApplication::ShowPreferencesDialog()
 	Options.CategoriesDefault = false;
 
 	Options.KeyboardShortcuts = gKeyboardShortcuts;
-	Options.ShortcutsModified = false;
-	Options.ShortcutsDefault = false;
+	Options.KeyboardShortcutsModified = false;
+	Options.KeyboardShortcutsDefault = false;
+	Options.MouseShortcuts = gMouseShortcuts;
+	Options.MouseShortcutsModified = false;
+	Options.MouseShortcutsDefault = false;
 
 	if (!gMainWindow->DoDialog(LC_DIALOG_PREFERENCES, &Options))
 		return;
@@ -514,11 +516,11 @@ void lcApplication::ShowPreferencesDialog()
 	lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
 
 	if (LibraryChanged && AAChanged)
-        QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Parts library and Anti-aliasing changes will only take effect the next time LeoCAD is loaded."));
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Parts library and Anti-aliasing changes will only take effect the next time you start LeoCAD."));
 	else if (LibraryChanged)
-        QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Parts library changes will only take effect the next time LeoCAD is loaded."));
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Parts library changes will only take effect the next time you start LeoCAD."));
 	else if (AAChanged)
-        QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Anti-aliasing changes will only take effect the next time LeoCAD is loaded."));
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Anti-aliasing changes will only take effect the next time you start LeoCAD."));
 
 	if (Options.CategoriesModified)
 	{
@@ -533,9 +535,9 @@ void lcApplication::ShowPreferencesDialog()
 		gMainWindow->UpdateCategories();
 	}
 
-	if (Options.ShortcutsModified)
+	if (Options.KeyboardShortcutsModified)
 	{
-		if (Options.ShortcutsDefault)
+		if (Options.KeyboardShortcutsDefault)
 			lcResetDefaultKeyboardShortcuts();
 		else
 		{
@@ -544,6 +546,17 @@ void lcApplication::ShowPreferencesDialog()
 		}
 
 		gMainWindow->UpdateShortcuts();
+	}
+
+	if (Options.MouseShortcutsModified)
+	{
+		if (Options.MouseShortcutsDefault)
+			lcResetDefaultMouseShortcuts();
+		else
+		{
+			gMouseShortcuts = Options.MouseShortcuts;
+			lcSaveDefaultMouseShortcuts();
+		}
 	}
 
 	// TODO: printing preferences

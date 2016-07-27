@@ -74,7 +74,9 @@ void lcMesh::CreateBox()
 
 	lcVector3 Min(-10.0f, -10.0f, -24.0f);
 	lcVector3 Max(10.0f, 10.0f, 4.0f);
-	mRadius = lcLength((Max - Min) / 2.0f);
+	mRadius = lcLength(Max - Min) / 2.0f;
+	mBoundingBox.Min = Min;
+	mBoundingBox.Max = Max;
 
 	float* Verts = (float*)mVertexData;
 	lcuint16* Indices = (lcuint16*)mIndexData;
@@ -131,10 +133,15 @@ void lcMesh::CreateBox()
 }
 
 template<typename IndexType>
-bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& Intersection)
+bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance)
 {
+	float Distance;
+	if (!lcBoundingBoxRayIntersectDistance(mBoundingBox.Min, mBoundingBox.Max, Start, End, &Distance, NULL) || (Distance >= MinDistance))
+		return false;
+
 	float* Verts = (float*)mVertexData;
 	bool Hit = false;
+	lcVector3 Intersection;
 
 	for (int SectionIdx = 0; SectionIdx < mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 	{
@@ -154,7 +161,7 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 			lcVector3 v2(p2[0], p2[1], p2[2]);
 			lcVector3 v3(p3[0], p3[1], p3[2]);
 
-			if (lcLineTriangleMinIntersection(v1, v2, v3, Start, End, &MinDist, &Intersection))
+			if (lcLineTriangleMinIntersection(v1, v2, v3, Start, End, &MinDistance, &Intersection))
 				Hit = true;
 		}
 	}
@@ -162,12 +169,12 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 	return Hit;
 }
 
-bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& Intersection)
+bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist)
 {
 	if (mIndexType == GL_UNSIGNED_SHORT)
-		return MinIntersectDist<GLushort>(Start, End, MinDist, Intersection);
+		return MinIntersectDist<GLushort>(Start, End, MinDist);
 	else
-		return MinIntersectDist<GLuint>(Start, End, MinDist, Intersection);
+		return MinIntersectDist<GLuint>(Start, End, MinDist);
 }
 
 template<typename IndexType>
@@ -296,6 +303,10 @@ bool lcMesh::FileLoad(lcMemFile& File)
 	if (File.ReadU32() != LC_MESH_FILE_ID || File.ReadU32() != LC_MESH_FILE_VERSION)
 		return false;
 
+	mBoundingBox.Min = File.ReadVector3();
+	mBoundingBox.Max = File.ReadVector3();
+	mRadius = File.ReadFloat();
+
 	lcuint32 NumVertices, NumTexturedVertices, NumIndices;
 	lcuint16 NumLods, NumSections[LC_NUM_MESH_LODS];
 
@@ -358,6 +369,10 @@ bool lcMesh::FileSave(lcMemFile& File)
 	File.WriteU32(LC_MESH_FILE_ID);
 	File.WriteU32(LC_MESH_FILE_VERSION);
 
+	File.WriteVector3(mBoundingBox.Min);
+	File.WriteVector3(mBoundingBox.Max);
+	File.WriteFloat(mRadius);
+
 	File.WriteU32(mNumVertices);
 	File.WriteU32(mNumTexturedVertices);
 	File.WriteU32(mIndexDataSize / (mIndexType == GL_UNSIGNED_SHORT ? 2 : 4));
@@ -379,7 +394,7 @@ bool lcMesh::FileSave(lcMemFile& File)
 
 			if (Section.Texture)
 			{
-				int Length = strlen(Section.Texture->mName);
+				lcuint16 Length = (lcuint16)strlen(Section.Texture->mName);
 				File.WriteU16(Length);
 				File.WriteBuffer(Section.Texture->mName, Length);
 			}

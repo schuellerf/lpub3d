@@ -23,7 +23,7 @@ enum LC_CURSOR_TYPE
 	LC_CURSOR_PAN,
 	LC_CURSOR_ROLL,
 	LC_CURSOR_ROTATE_VIEW,
-    LC_CURSOR_ROTATESTEP,           // add back
+    LC_CURSOR_ROTATESTEP,           /*** LPub3D modification 26: - Rotate Step ***/
     LC_CURSOR_COUNT
 };
 
@@ -31,9 +31,7 @@ struct lcInputState
 {
 	int x;
 	int y;
-	bool Control;
-	bool Shift;
-	bool Alt;
+	Qt::KeyboardModifiers Modifiers;
 };
 
 class lcGLWidget
@@ -45,9 +43,7 @@ public:
 		mWidget = NULL;
 		mInputState.x = 0;
 		mInputState.y = 0;
-		mInputState.Control = false;
-		mInputState.Shift = false;
-		mInputState.Alt = false;
+		mInputState.Modifiers = Qt::NoModifier;
 		mContext = new lcContext();
 		mDeleteContext = true;
 	}
@@ -57,8 +53,6 @@ public:
 		if (mDeleteContext)
 			delete mContext;
 	}
-
-	void ShowPopupMenu();
 
 	void SetContext(lcContext* Context)
 	{
@@ -88,7 +82,7 @@ public:
 	virtual void OnForwardButtonDown() { }
 	virtual void OnForwardButtonUp() { }
 	virtual void OnMouseMove() { }
-	virtual void OnMouseWheel(float Direction) { }
+	virtual void OnMouseWheel(float Direction) { Q_UNUSED(Direction); }
 
 	lcInputState mInputState;
 	int mWidth;

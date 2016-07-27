@@ -1034,7 +1034,7 @@ Gui::Gui()
 //    createStatusBar();
 
 //    createDockWindows();
-//    toggleLCStatusBar();
+//    toggleViewerStatusBar();
 
 //    readSettings();
 
@@ -1152,15 +1152,15 @@ bool Gui::InitializeApp(int argc, char *argv[], const char* LibraryInstallPath, 
   if (Preferences::preferredRenderer == "LDGLite")
     partWorkerLdgLiteSearchDirs.populateLdgLiteSearchDirs();
 
-  bool initialized = g_App->Initialize(argc, argv, LibraryInstallPath, LDrawPath, this);
+  bool initialized = g_App->Initialize(argc, argv, LibraryInstallPath, LDrawPath);
   if (initialized){
 
       gMainWindow->SetColorIndex(lcGetColorIndex(4));
       gMainWindow->UpdateRecentFiles();
 
-      createStatusBar();
+      createViewerStatusBar();
       createDockWindows();
-      toggleLCStatusBar();
+      toggleViewerStatusBar();
 
       readSettings();
 
@@ -1900,18 +1900,17 @@ void Gui::statusBarMsg(QString msg)
   statusBar()->showMessage(msg);
 }
 
-void Gui::createStatusBar()
+void Gui::createViewerStatusBar()
 {
-
   statusBar()->showMessage(tr("Ready"));
-  connect(gMainWindow->mLCStatusBar, SIGNAL(messageChanged(QString)), this, SLOT(showLCStatusMessage()));
-
+  //connect(gMainWindow->mLCStatusBar, SIGNAL(messageChanged(QString)), this, SLOT(showViewerStatusMessage()));
 }
 
-void Gui::showLCStatusMessage(){
+void Gui::showViewerStatusMessage(){
 
     if(!modelDockWindow->isFloating())
-    statusBarMsg(gMainWindow->mLCStatusBar->currentMessage());
+        qDebug() << "Viewer Status Bar Placeholder";
+        //statusBarMsg(gMainWindow->mLCStatusBar->currentMessage());
 }
 
 void Gui::createDockWindows()
@@ -1937,10 +1936,10 @@ void Gui::createDockWindows()
     tabifyDockWidget(modelDockWindow, fileEditDockWindow);
     modelDockWindow->raise();
 
-    connect(modelDockWindow, SIGNAL (topLevelChanged(bool)), this, SLOT (toggleLCStatusBar()));
+    connect(modelDockWindow, SIGNAL (topLevelChanged(bool)), this, SLOT (toggleViewerStatusBar()));
 }
 
-void Gui::toggleLCStatusBar(){
+void Gui::toggleViewerStatusBar(){
 
     if(modelDockWindow->isFloating())
         gMainWindow->statusBar()->show();

@@ -365,6 +365,15 @@ inline bool operator!=(const lcVector3& a, const lcVector3& b)
 	return a.x != b.x || a.y != b.y || a.z != b.z;
 }
 
+#ifndef QT_NO_DEBUG
+
+inline QDebug operator<<(QDebug d, const lcVector3& v)
+{
+	return d << v.x << v.y << v.z;
+}
+
+#endif
+
 inline void lcVector3::Normalize()
 {
 	float InvLength = 1.0f / Length();
@@ -439,6 +448,18 @@ inline lcVector3 lcCross(const lcVector3& a, const lcVector3& b)
 	return lcVector3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
 }
 
+template<>
+inline lcVector3 lcMin<lcVector3>(const lcVector3& a, const lcVector3& b)
+{
+	return lcVector3(a.x < b.x ? a.x : b.x, a.y < b.y ? a.y : b.y, a.z < b.z ? a.z : b.z);
+}
+
+template<>
+inline lcVector3 lcMax<lcVector3>(const lcVector3& a, const lcVector3& b)
+{
+	return lcVector3(a.x > b.x ? a.x : b.x, a.y > b.y ? a.y : b.y, a.z > b.z ? a.z : b.z);
+}
+
 inline lcVector4 operator+(const lcVector4& a, const lcVector4& b)
 {
 	return lcVector4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
@@ -507,6 +528,11 @@ inline lcVector4& operator/=(lcVector4& a, float b)
 	a.w /= b;
 
 	return a;
+}
+
+inline lcVector3 lcVector3LDrawToLeoCAD(const lcVector3& Vector)
+{
+	return lcVector3(Vector[0], Vector[2], -Vector[1]);
 }
 
 inline lcVector3 lcVector3FromColor(lcuint32 Color)
@@ -614,6 +640,17 @@ inline lcMatrix33 lcMatrix33Identity()
 	m.r[0] = lcVector3(1.0f, 0.0f, 0.0f);
 	m.r[1] = lcVector3(0.0f, 1.0f, 0.0f);
 	m.r[2] = lcVector3(0.0f, 0.0f, 1.0f);
+
+	return m;
+}
+
+inline lcMatrix33 lcMatrix33Scale(const lcVector3& Scale)
+{
+	lcMatrix33 m;
+
+	m.r[0] = lcVector3(Scale.x, 0.0f, 0.0f);
+	m.r[1] = lcVector3(0.0f, Scale.y, 0.0f);
+	m.r[2] = lcVector3(0.0f, 0.0f, Scale.z);
 
 	return m;
 }
@@ -728,6 +765,37 @@ inline lcMatrix33 lcMatrix33FromEulerAngles(const lcVector3& Radians)
 	m.r[2] = lcVector3(CosYaw * SinPitch * CosRoll + SinYaw * SinRoll, SinYaw * SinPitch * CosRoll - CosYaw * SinRoll, CosPitch * CosRoll);
 
 	return m;
+}
+
+inline lcVector3 lcMatrix33ToEulerAngles(const lcMatrix33& RotMat)
+{
+	float SinPitch, CosPitch, SinRoll, CosRoll, SinYaw, CosYaw;
+
+	SinPitch = -RotMat.r[0][2];
+	CosPitch = sqrtf(1 - SinPitch*SinPitch);
+
+	if (fabsf(CosPitch) > 0.0005f)
+	{
+		SinRoll = RotMat.r[1][2] / CosPitch;
+		CosRoll = RotMat.r[2][2] / CosPitch;
+		SinYaw = RotMat.r[0][1] / CosPitch;
+		CosYaw = RotMat.r[0][0] / CosPitch;
+	}
+	else
+	{
+		SinRoll = -RotMat.r[2][1];
+		CosRoll = RotMat.r[1][1];
+		SinYaw = 0.0f;
+		CosYaw = 1.0f;
+	}
+
+	lcVector3 Rot(atan2f(SinRoll, CosRoll), atan2f(SinPitch, CosPitch), atan2f(SinYaw, CosYaw));
+
+	if (Rot[0] < 0) Rot[0] += LC_2PI;
+	if (Rot[1] < 0) Rot[1] += LC_2PI;
+	if (Rot[2] < 0) Rot[2] += LC_2PI;
+
+	return Rot;
 }
 
 inline lcMatrix44 lcMatrix44Identity()
@@ -1197,6 +1265,30 @@ inline lcMatrix44 lcMatrix44Inverse(const lcMatrix44& m)
 
 #undef MAT
 #undef SWAP_ROWS
+}
+
+inline lcMatrix44 lcMatrix44LeoCADToLDraw(const lcMatrix44& Matrix)
+{
+	lcMatrix44 m;
+
+	m.r[0] = lcVector4(Matrix[0][0], -Matrix[2][0], Matrix[1][0], 0.0f);
+	m.r[1] = lcVector4(-Matrix[0][2], Matrix[2][2], -Matrix[1][2], 0.0f);
+	m.r[2] = lcVector4(Matrix[0][1], -Matrix[2][1], Matrix[1][1], 0.0f);
+	m.r[3] = lcVector4(Matrix[3][0], -Matrix[3][2], Matrix[3][1], 1.0f);
+
+	return m;
+}
+
+inline lcMatrix44 lcMatrix44LDrawToLeoCAD(const lcMatrix44& Matrix)
+{
+	lcMatrix44 m;
+
+	m.r[0] = lcVector4(Matrix[0][0], Matrix[2][0], -Matrix[1][0], 0.0f);
+	m.r[1] = lcVector4(Matrix[0][2], Matrix[2][2], -Matrix[1][2], 0.0f);
+	m.r[2] = lcVector4(-Matrix[0][1], -Matrix[2][1], Matrix[1][1], 0.0f);
+	m.r[3] = lcVector4(Matrix[3][0], Matrix[3][2], -Matrix[3][1], 1.0f);
+
+	return m;
 }
 
 inline lcVector4 lcQuaternionRotationX(float Radians)
@@ -1717,26 +1809,19 @@ inline bool lcSphereRayMinIntersectDistance(const lcVector3& Center, float Radiu
 	}
 }
 
-/*
-float LinePointMinDistance(const Vector3& Point, const Vector3& Start, const Vector3& End)
+inline float lcRayPointDistance(const lcVector3& Point, const lcVector3& Start, const lcVector3& End)
 {
-	Vector3 Dir = End - Start;
+	lcVector3 Dir = Point - Start;
+	lcVector3 RayDir = End - Start;
 
-	float t1 = Dot3(Start - Point, Dir);
-	float t2 = LengthSquared(Dir);
+	float t = lcDot(Dir, RayDir) / lcLengthSquared(RayDir);
+	t = lcClamp(t, 0.0f, 1.0f);
 
-	float t = -t1 / t2;
+	lcVector3 Closest = Start + t * RayDir;
 
-	if (t < 0.0f)
-		t = 0.0f;
-	else if (t > 1.0f)
-		t = 1.0f;
-
-	Vector3 Closest = Start + t * Dir;
-
-	return Length(Closest - Point);
+	return lcLength(Closest - Point);
 }
-*/
+
 // Returns true if the axis aligned box intersects the volume defined by planes.
 inline bool lcBoundingBoxIntersectsVolume(const lcVector3& Min, const lcVector3& Max, const lcVector4 Planes[6])
 {
@@ -1806,6 +1891,30 @@ inline bool lcBoundingBoxIntersectsVolume(const lcVector3& Min, const lcVector3&
 
 	return false;
 }
+
+struct lcBoundingBox
+{
+	lcVector3 Min;
+	lcVector3 Max;
+};
+
+inline void lcGetBoxCorners(const lcVector3& Min, const lcVector3& Max, lcVector3 Points[8])
+{
+	Points[0] = lcVector3(Max.x, Max.y, Min.z);
+	Points[1] = lcVector3(Min.x, Max.y, Min.z);
+	Points[2] = lcVector3(Max.x, Max.y, Max.z);
+	Points[3] = lcVector3(Min.x, Min.y, Min.z);
+	Points[4] = lcVector3(Min.x, Min.y, Max.z);
+	Points[5] = lcVector3(Max.x, Min.y, Max.z);
+	Points[6] = lcVector3(Max.x, Min.y, Min.z);
+	Points[7] = lcVector3(Min.x, Max.y, Max.z);
+}
+
+inline void lcGetBoxCorners(const lcBoundingBox& BoundingBox, lcVector3 Points[8])
+{
+	lcGetBoxCorners(BoundingBox.Min, BoundingBox.Max, Points);
+}
+
 /*
 bool SphereIntersectsVolume(const Vector3& Center, float Radius, const Vector4* Planes, int NumPlanes)
 {

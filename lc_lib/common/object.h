@@ -44,23 +44,15 @@ struct lcObjectBoxTest
 	lcArray<lcObject*> Objects;
 };
 
-enum lcObjectPropertyType
-{
-	LC_PIECE_PROPERTY_POSITION,
-	LC_PIECE_PROPERTY_ROTATION,
-	LC_PIECE_PROPERTY_SHOW,
-	LC_PIECE_PROPERTY_HIDE,
-	LC_PIECE_PROPERTY_COLOR,
-	LC_PIECE_PROPERTY_ID,
-	LC_CAMERA_PROPERTY_POSITION,
-	LC_CAMERA_PROPERTY_TARGET,
-	LC_CAMERA_PROPERTY_UPVECTOR,
-	LC_CAMERA_PROPERTY_ORTHO,
-	LC_CAMERA_PROPERTY_FOV,
-	LC_CAMERA_PROPERTY_NEAR,
-	LC_CAMERA_PROPERTY_FAR,
-	LC_CAMERA_PROPERTY_NAME
-};
+#define LC_OBJECT_TRANSFORM_MOVE_X   0x001
+#define LC_OBJECT_TRANSFORM_MOVE_Y   0x002
+#define LC_OBJECT_TRANSFORM_MOVE_Z   0x004
+#define LC_OBJECT_TRANSFORM_ROTATE_X 0x010
+#define LC_OBJECT_TRANSFORM_ROTATE_Y 0x020
+#define LC_OBJECT_TRANSFORM_ROTATE_Z 0x040
+#define LC_OBJECT_TRANSFORM_SCALE_X  0x100
+#define LC_OBJECT_TRANSFORM_SCALE_Y  0x200
+#define LC_OBJECT_TRANSFORM_SCALE_Z  0x400
 
 class lcObject
 {
@@ -98,8 +90,8 @@ public:
 	virtual void SetFocused(lcuint32 Section, bool Focused) = 0;
 	virtual lcuint32 GetFocusSection() const = 0;
 
+	virtual lcuint32 GetAllowedTransforms() const = 0;
 	virtual lcVector3 GetSectionPosition(lcuint32 Section) const = 0;
-	virtual void Move(lcStep Step, bool AddKey, const lcVector3& Distance) = 0;
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const = 0;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const = 0;
 	virtual void DrawInterface(lcContext* Context) const = 0;
@@ -112,7 +104,7 @@ protected:
 		const int Count = sizeof(T) / sizeof(float);
 		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
 		{
-			lcObjectKey<T>& Key = Keys[KeyIdx];
+			const lcObjectKey<T>& Key = Keys[KeyIdx];
 			Stream << QLatin1String("0 !LEOCAD ") << KeyName << Key.Step << ' ';
 			for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
 				Stream << ((float*)&Key.Value)[ValueIdx] << ' ';
@@ -139,7 +131,7 @@ protected:
 	template<typename T>
 	const T& CalculateKey(const lcArray<lcObjectKey<T> >& Keys, lcStep Step)
 	{
-		lcObjectKey<T>* PreviousKey = &Keys[0];
+		const lcObjectKey<T>* PreviousKey = &Keys[0];
 
 		for (int KeyIdx = 0; KeyIdx < Keys.GetSize(); KeyIdx++)
 		{

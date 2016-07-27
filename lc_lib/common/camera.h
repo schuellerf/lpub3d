@@ -6,7 +6,6 @@
 #include "lc_array.h"
 
 class TiledRender;
-class View;
 
 #define LC_CAMERA_HIDDEN            0x0001
 #define LC_CAMERA_SIMPLE            0x0002
@@ -195,6 +194,11 @@ public:
 		return ~0;
 	}
 
+	virtual lcuint32 GetAllowedTransforms() const
+	{
+		return LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z;
+	}
+
 	virtual lcVector3 GetSectionPosition(lcuint32 Section) const
 	{
 		switch (Section)
@@ -206,7 +210,7 @@ public:
 			return mTargetPosition;
 
 		case LC_CAMERA_SECTION_UPVECTOR:
-			return lcMul31(lcVector3(0, 1, 0), lcMatrix44AffineInverse(mWorldView));
+			return lcMul31(lcVector3(0, 25, 0), lcMatrix44AffineInverse(mWorldView));
 		}
 
 		return lcVector3(0.0f, 0.0f, 0.0f);
@@ -268,7 +272,7 @@ public:
 	bool FileLoad(lcFile& file);
 	void Select(bool bSelecting, bool bFocus, bool bMultiple);
 
-	void CompareBoundingBox(float box[6]);
+	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);
 	void UpdatePosition(lcStep Step);
 	void CopyPosition(const lcCamera* camera);
 

@@ -21,4 +21,26 @@ void lcLoadDefaultKeyboardShortcuts();
 void lcSaveDefaultKeyboardShortcuts();
 void lcResetDefaultKeyboardShortcuts();
 
+class lcMouseShortcuts
+{
+public:
+	void Reset();
+	bool Save(QStringList& Shortcuts);
+	bool Load(const QStringList& Shortcuts);
+	lcTool GetTool(Qt::MouseButton Button, Qt::KeyboardModifiers Modifiers) const;
+
+	struct
+	{
+		Qt::KeyboardModifiers Modifiers;
+		Qt::MouseButton Button;
+	}
+	mShortcuts[LC_NUM_TOOLS];
+};
+
+extern lcMouseShortcuts gMouseShortcuts;
+
+void lcLoadDefaultMouseShortcuts();
+void lcSaveDefaultMouseShortcuts();
+void lcResetDefaultMouseShortcuts();
+
 #endif // _LC_SHORTCUTS_H_

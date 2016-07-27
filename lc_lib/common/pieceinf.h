@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include "lc_math.h"
 #include "lc_array.h"
-#include "lc_mesh.h"
 
 #define LC_PIECE_HAS_DEFAULT        0x01 // Piece has triangles using the default color
 #define LC_PIECE_HAS_SOLID          0x02 // Piece has triangles using a solid color
@@ -15,6 +14,8 @@
 
 #define LC_PIECE_NAME_LEN 256
 
+class lcSynthInfo;
+
 class PieceInfo
 {
 public:
@@ -22,6 +23,27 @@ public:
 	~PieceInfo();
 
 	QString GetSaveID() const;
+
+	const lcBoundingBox& GetBoundingBox() const
+	{
+		return mBoundingBox;
+	}
+
+	void SetBoundingBox(const lcVector3& Min, const lcVector3& Max)
+	{
+		mBoundingBox.Min = Min;
+		mBoundingBox.Max = Max;
+	}
+
+	lcSynthInfo* GetSynthInfo() const
+	{
+		return mSynthInfo;
+	}
+
+	void SetSynthInfo(lcSynthInfo* SynthInfo)
+	{
+		mSynthInfo = SynthInfo;
+	}
 
 	lcMesh* GetMesh() const
 	{
@@ -42,21 +64,27 @@ public:
 	{
 		mRefCount++;
 
-		if (mRefCount == 1)
+		if (!mLoaded)
 			Load();
 	}
 
-	void Release()
+	void Release(bool AllowUnload)
 	{
 		mRefCount--;
 
-		if (!mRefCount)
+		if (!mRefCount && AllowUnload)
+			Unload();
+	}
+
+	void UnloadIfUnused()
+	{
+		if (!mRefCount && mLoaded)
 			Unload();
 	}
 
 	bool IsLoaded() const
 	{
-		return mRefCount != 0;
+		return mLoaded;
 	}
 
 	bool IsPlaceholder() const
@@ -103,17 +131,12 @@ public:
 		return (m_strDescription[0] == '~');
 	}
 
+	/*** LPub3D modification 134 - part type check ***/
 	bool IsPartType () const
 	{
 		return (m_iPartType != 0);
 	}
-
-	lcVector3 GetCenter() const
-	{
-		return lcVector3((m_fDimensions[0] + m_fDimensions[3]) * 0.5f,
-		                 (m_fDimensions[1] + m_fDimensions[4]) * 0.5f,
-		                 (m_fDimensions[2] + m_fDimensions[5]) * 0.5f);
-	}
+	/*** LPub3D modification end ***/
 
 	void ZoomExtents(const lcMatrix44& ProjectionMatrix, lcMatrix44& ViewMatrix, float* EyePos = NULL) const;
 	void AddRenderMesh(lcScene& Scene);
@@ -124,7 +147,7 @@ public:
 	void SetPlaceholder();
 	void SetModel(lcModel* Model, bool UpdateMesh);
 	bool IncludesModel(const lcModel* Model) const;
-	bool MinIntersectDist(const lcMatrix44& WorldMatrix, const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance) const;
+	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance) const;
 	bool BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 Planes[6]) const;
 	void GetPartsList(int DefaultColorIndex, lcArray<lcPartsListEntry>& PartsList) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
@@ -134,16 +157,20 @@ public:
 	// Attributes
 	char m_strName[LC_PIECE_NAME_LEN];
 	char m_strDescription[128];
-	float m_fDimensions[6];
-	int m_iPartType;
+    /*** LPub3D modification 160 - part type check ***/
+    int m_iPartType;
+    /*** LPub3D modification end ***/
 	int mZipFileType;
 	int mZipFileIndex;
 	lcuint32 mFlags;
 
 protected:
+	bool mLoaded;
 	int mRefCount;
 	lcModel* mModel;
 	lcMesh* mMesh;
+	lcBoundingBox mBoundingBox;
+	lcSynthInfo* mSynthInfo;
 
 	void Load();
 	void Unload();

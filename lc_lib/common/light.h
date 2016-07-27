@@ -4,8 +4,6 @@
 #include "object.h"
 #include "lc_math.h"
 
-class View;
-
 #define LC_LIGHT_HIDDEN            0x0001
 #define LC_LIGHT_DISABLED          0x0002
 #define LC_LIGHT_SPOT              0x0004
@@ -156,6 +154,11 @@ public:
 		return ~0;
 	}
 
+	virtual lcuint32 GetAllowedTransforms() const
+	{
+		return LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z;
+	}
+
 	virtual lcVector3 GetSectionPosition(lcuint32 Section) const
 	{
 		switch (Section)
@@ -186,7 +189,7 @@ public:
 	const char* GetName() const
 	{ return m_strName; }
 
-	void CompareBoundingBox(float box[6]);
+	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);
 	void UpdatePosition(lcStep Step);
 	void Move(lcStep Step, bool AddKey, const lcVector3& Distance);
 	bool Setup(int LightIndex);

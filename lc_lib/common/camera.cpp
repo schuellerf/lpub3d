@@ -7,7 +7,6 @@
 #include <float.h>
 #include "lc_file.h"
 #include "camera.h"
-#include "view.h"
 #include "tr.h"
 #include "lc_application.h"
 #include "lc_context.h"
@@ -388,7 +387,7 @@ bool lcCamera::FileLoad(lcFile& file)
 	return true;
 }
 
-void lcCamera::CompareBoundingBox(float box[6])
+void lcCamera::CompareBoundingBox(lcVector3& Min, lcVector3& Max)
 {
 	const lcVector3 Points[2] =
 	{
@@ -399,12 +398,10 @@ void lcCamera::CompareBoundingBox(float box[6])
 	{
 		const lcVector3& Point = Points[i];
 
-		if (Point[0] < box[0]) box[0] = Point[0];
-		if (Point[1] < box[1]) box[1] = Point[1];
-		if (Point[2] < box[2]) box[2] = Point[2];
-		if (Point[0] > box[3]) box[3] = Point[0];
-		if (Point[1] > box[4]) box[4] = Point[1];
-		if (Point[2] > box[5]) box[5] = Point[2];
+		// TODO: this should check the entire mesh
+
+		Min = lcMin(Point, Min);
+		Max = lcMax(Point, Max);
 	}
 }
 
@@ -471,6 +468,8 @@ void lcCamera::CopyPosition(const lcCamera* camera)
 
 void lcCamera::DrawInterface(lcContext* Context) const
 {
+	Context->SetProgram(LC_PROGRAM_SIMPLE);
+
 	lcMatrix44 ViewWorldMatrix = lcMatrix44AffineInverse(mWorldView);
 	ViewWorldMatrix.SetTranslation(lcVector3(0, 0, 0));
 
@@ -872,11 +871,7 @@ void lcCamera::Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPo
 	lcVector3 FrontVector(mPosition - mTargetPosition);
 
 	lcVector3 Z(lcNormalize(lcVector3(FrontVector[0], FrontVector[1], 0)));
-//#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
-//	if (std::isnan(Z[0]) || std::isnan(Z[1]))
-//#else
 	if (isnan(Z[0]) || isnan(Z[1]))
-//#endif
 		Z = lcNormalize(lcVector3(mUpVector[0], mUpVector[1], 0));
 
 	if (mUpVector[2] < 0)

@@ -3,7 +3,6 @@
 #include "project.h"
 #include "lc_model.h"
 #include "pieceinf.h"
-#include "system.h"
 #include "lc_application.h"
 #include "lc_mainwindow.h"
 #include "lc_library.h"
@@ -21,7 +20,7 @@ PiecePreview::PiecePreview()
 PiecePreview::~PiecePreview()
 {
 	if (m_PieceInfo)
-		m_PieceInfo->Release();
+		m_PieceInfo->Release(true);
 }
 
 void PiecePreview::OnDraw()
@@ -46,18 +45,21 @@ void PiecePreview::OnDraw()
 	lcMatrix44 ProjectionMatrix = lcMatrix44Perspective(30.0f, aspect, 1.0f, 2500.0f);
 	lcMatrix44 ViewMatrix;
 
+	const lcBoundingBox& BoundingBox = m_PieceInfo->GetBoundingBox();
+	lcVector3 Center = (BoundingBox.Min + BoundingBox.Max) / 2.0f;
+
 	if (m_AutoZoom)
 	{
 		Eye = Eye * 100.0f;
 		m_PieceInfo->ZoomExtents(ProjectionMatrix, ViewMatrix, Eye);
 
 		// Update the new camera distance.
-		lcVector3 d = Eye - m_PieceInfo->GetCenter();
+		lcVector3 d = Eye - Center;
 		m_Distance = d.Length();
 	}
 	else
 	{
-		ViewMatrix = lcMatrix44LookAt(Eye * m_Distance, m_PieceInfo->GetCenter(), lcVector3(0, 0, 1));
+		ViewMatrix = lcMatrix44LookAt(Eye * m_Distance, Center, lcVector3(0, 0, 1));
 	}
 
 	mContext->SetViewMatrix(ViewMatrix);
@@ -82,7 +84,7 @@ void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)
 	MakeCurrent();
 
 	if (m_PieceInfo != NULL)
-		m_PieceInfo->Release();
+		m_PieceInfo->Release(true);
 
 	m_PieceInfo = pInfo;
 

@@ -1,7 +1,6 @@
 #ifndef _LC_MESH_H_
 #define _LC_MESH_H_
 
-#include <stdlib.h>
 #include "lc_math.h"
 
 #define LC_MESH_FILE_ID      LC_FOURCC('M', 'E', 'S', 'H')
@@ -61,8 +60,8 @@ public:
 	void ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int VertexOffset);
 
 	template<typename IndexType>
-	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& Intersection);
-	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& Intersection);
+	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist);
+	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist);
 
 	template<typename IndexType>
 	bool IntersectsPlanes(const lcVector4 Planes[6]);
@@ -71,6 +70,7 @@ public:
 	int GetLodIndex(float Distance) const;
 
 	lcMeshLod mLods[LC_NUM_MESH_LODS];
+	lcBoundingBox mBoundingBox;
 	float mRadius;
 
 	void* mVertexData;

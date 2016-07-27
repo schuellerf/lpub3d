@@ -1,6 +1,5 @@
 #include "lc_global.h"
 #include <stdio.h>
-#include <memory.h>
 #include <stdlib.h>
 #include <string.h>
 #include "lc_file.h"
@@ -206,7 +205,7 @@ void lcDiskFile::Seek(long Offset, int From)
 
 void lcDiskFile::SetLength(size_t NewLength)
 {
-	fseek(mFile, (long)NewLength, SEEK_SET);
+	fseek(mFile, (int)NewLength, SEEK_SET);
 }
 
 size_t lcDiskFile::GetLength() const
@@ -238,14 +237,14 @@ void lcDiskFile::Close()
 	mFile = NULL;
 }
 
-size_t lcDiskFile::ReadBuffer(void* pBuf, size_t Bytes)
+size_t lcDiskFile::ReadBuffer(void* Buffer, size_t Bytes)
 {
-	return fread(pBuf, 1, Bytes, mFile);
+	return fread(Buffer, 1, Bytes, mFile);
 }
 
-size_t lcDiskFile::WriteBuffer(const void* pBuf, size_t Bytes)
+size_t lcDiskFile::WriteBuffer(const void* Buffer, size_t Bytes)
 {
-	return fwrite(pBuf, 1, Bytes, mFile);
+	return fwrite(Buffer, 1, Bytes, mFile);
 }
 
 bool lcDiskFile::Open(const QString& FileName, const char* Mode)

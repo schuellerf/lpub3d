@@ -13,8 +13,8 @@ public:
 	{ m_pData = NULL; *this = str; }
 	~String();
 
-	int GetLength() const
-	{ return (int)strlen(m_pData); }
+	size_t GetLength() const
+	{ return strlen(m_pData); }
 	bool IsEmpty() const
 	{ return m_pData[0] == '\0'; }
 	void Empty()
@@ -48,8 +48,6 @@ public:
 
 	// simple sub-string extraction
 	String& Mid(int first, int count) const;
-	String& Mid(int first) const
-	{ return Mid(first, GetLength() - first); }
 	String& Left(int count) const;
 	String& Right(int count) const;
 
@@ -106,12 +104,6 @@ public:
 			m_pData = tmp;
 		}
 		return m_pData;
-	}
-	void ReleaseBuffer(int len = -1)
-	{
-		if (len == -1)
-			len = (int)strlen(m_pData);
-		m_pData[len] = '\0';
 	}
 
 protected:

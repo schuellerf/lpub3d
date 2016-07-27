@@ -37,8 +37,9 @@ struct lcImageDialogOptions
 struct lcHTMLDialogOptions
 {
 	QString PathName;
-	LC_IMAGE_FORMAT ImageFormat;
 	bool TransparentImages;
+	bool SubModels;
+	bool CurrentOnly;
 	bool SinglePage;
 	bool IndexPage;
 	int StepImagesWidth;
@@ -106,8 +107,12 @@ struct lcPreferencesDialogOptions
 	bool CategoriesDefault;
 
 	lcKeyboardShortcuts KeyboardShortcuts;
-	bool ShortcutsModified;
-	bool ShortcutsDefault;
+	bool KeyboardShortcutsModified;
+	bool KeyboardShortcutsDefault;
+
+	lcMouseShortcuts MouseShortcuts;
+	bool MouseShortcutsModified;
+	bool MouseShortcutsDefault;
 };
 
 #endif // _LC_BASEWINDOW_H_

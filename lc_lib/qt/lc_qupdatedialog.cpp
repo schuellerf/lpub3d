@@ -12,14 +12,14 @@ void lcDoInitialUpdateCheck()
 	if (updateFrequency == 0)
 		return;
 
-	QSettings Settings;
-	QDateTime checkTime = Settings.value("Updates/LastCheck", QDateTime()).toDateTime();
+	QSettings settings;
+	QDateTime CheckTime = settings.value("Updates/LastCheck", QDateTime()).toDateTime();
 
-	if (!checkTime.isNull())
+	if (!CheckTime.isNull())
 	{
-		checkTime.addDays(updateFrequency == 1 ? 1 : 7);
+		QDateTime NextCheckTime = CheckTime.addDays(updateFrequency == 1 ? 1 : 7);
 
-		if (checkTime > QDateTime::currentDateTimeUtc())
+		if (NextCheckTime > QDateTime::currentDateTimeUtc())
 			return;
 	}
 
@@ -40,7 +40,7 @@ lcQUpdateDialog::lcQUpdateDialog(QWidget *parent, void *data) :
 	manager = new QNetworkAccessManager(this);
 	connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
 
-    updateReply = manager->get(QNetworkRequest(QUrl("http://www.leocad.org/updates.txt")));
+	updateReply = manager->get(QNetworkRequest(QUrl("http://www.leocad.org/updates.txt")));
 }
 
 lcQUpdateDialog::~lcQUpdateDialog()
@@ -59,8 +59,8 @@ lcQUpdateDialog::~lcQUpdateDialog()
 
 void lcQUpdateDialog::accept()
 {
-	QSettings Settings;
-	Settings.setValue("Updates/IgnoreVersion", versionData);
+	QSettings settings;
+	settings.setValue("Updates/IgnoreVersion", versionData);
 
 	QDialog::accept();
 }
@@ -79,6 +79,8 @@ void lcQUpdateDialog::reject()
 
 void lcQUpdateDialog::finished(int result)
 {
+	Q_UNUSED(result);
+
 	if (initialUpdate)
 		deleteLater();
 }
@@ -95,8 +97,8 @@ void lcQUpdateDialog::replyFinished(QNetworkReply *reply)
 		versionData = reply->readAll();
 		const char *update = versionData;
 
-		QSettings Settings;
-		QByteArray ignoreUpdate = Settings.value("Updates/IgnoreVersion", QByteArray()).toByteArray();
+		QSettings settings;
+		QByteArray ignoreUpdate = settings.value("Updates/IgnoreVersion", QByteArray()).toByteArray();
 
 		if (initialUpdate && ignoreUpdate == versionData)
 		{
@@ -147,7 +149,7 @@ void lcQUpdateDialog::replyFinished(QNetworkReply *reply)
 		else
 			ui->status->setText(tr("Error parsing update information."));
 
-		Settings.setValue("Updates/LastCheck", QDateTime::currentDateTimeUtc());
+		settings.setValue("Updates/LastCheck", QDateTime::currentDateTimeUtc());
 
 		updateReply = NULL;
 		reply->deleteLater();

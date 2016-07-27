@@ -181,7 +181,7 @@ void TexFont::GetStringDimensions(int* cx, int* cy, const char* Text) const
 
 void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, const char* Text) const
 {
-	int Length = strlen(Text);
+	size_t Length = strlen(Text);
 
 	if (!Length)
 		return;
@@ -224,7 +224,7 @@ void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, cons
 	Context->SetVertexBufferPointer(Verts);
 	Context->SetVertexFormat(0, 3, 2, 0);
 
-	Context->DrawPrimitives(GL_QUADS, 0, 4 * Length);
+	Context->DrawPrimitives(GL_QUADS, 0, 4 * (GLsizei)Length);
 
 	Context->ClearVertexBuffer(); // context remove
 

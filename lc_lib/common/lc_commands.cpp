@@ -2,7 +2,7 @@
 #include "lc_commands.h"
 #include "system.h"
 
-lcCommand gCommands[LC_NUM_COMMANDS] = 
+lcCommand gCommands[LC_NUM_COMMANDS] =
 {
 	// LC_FILE_NEW
 	{
@@ -567,8 +567,8 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_EDIT_ACTION_ROTATE
 	{
 		"Edit.Tool.Rotate",
-        QT_TRANSLATE_NOOP("Menu", "Rotate Step"),
-        QT_TRANSLATE_NOOP("Status", "Rotate selection"),
+		QT_TRANSLATE_NOOP("Menu", "Rotate"),
+		QT_TRANSLATE_NOOP("Status", "Rotate selected pieces"),
 		QT_TRANSLATE_NOOP("Shortcut", "Shift+R")
 	},
 	// LC_EDIT_ACTION_DELETE
@@ -602,8 +602,8 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 	// LC_EDIT_ACTION_ROTATE_VIEW
 	{
 		"Edit.Tool.RotateView",
-        QT_TRANSLATE_NOOP("Menu", "Rotate Camera View"),
-        QT_TRANSLATE_NOOP("Status", "Rotate the current camera view"),
+		QT_TRANSLATE_NOOP("Menu", "Rotate View"),
+		QT_TRANSLATE_NOOP("Status", "Rotate the current view"),
 		QT_TRANSLATE_NOOP("Shortcut", "Shift+T")
 	},
 	// LC_EDIT_ACTION_ROLL
@@ -620,6 +620,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Zoom into a region of the screen"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	/*** LPub3D modification 623: - Rotate Step Menu ***/
     // LC_EDIT_ACTION_ROTATESTEP
     {
         "Edit.Tool.RotateStep",
@@ -641,6 +642,7 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
         QT_TRANSLATE_NOOP("Status", "Switch to relative rotation mode when applying step rotation"),
         QT_TRANSLATE_NOOP("Shortcut", "")
     },
+	/*** LPub3D modification end ***/
 	// LC_EDIT_CANCEL
 	{
 		"Edit.Cancel",
@@ -970,6 +972,27 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Delete selected objects"),
 		QT_TRANSLATE_NOOP("Shortcut", "Delete")
 	},
+	// LC_PIECE_RESET_PIVOT_POINT
+	{
+		"Piece.ResetPivotPoint",
+		QT_TRANSLATE_NOOP("Menu", "Reset &Pivot Point"),
+		QT_TRANSLATE_NOOP("Status", "Reset the pivot point of the selected pieces to their origin"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_PIECE_CONTROL_POINT_INSERT
+	{
+		"Piece.ControlPoint.Insert",
+		QT_TRANSLATE_NOOP("Menu", "Insert Control Point"),
+		QT_TRANSLATE_NOOP("Status", "Insert a new control point"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_PIECE_CONTROL_POINT_REMOVE
+	{
+		"Piece.ControlPoint.Remove",
+		QT_TRANSLATE_NOOP("Menu", "Remove Control Point"),
+		QT_TRANSLATE_NOOP("Status", "Remove the currently selected control point"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_PIECE_MOVE_PLUSX
 	{
 		"Piece.Move.PlusX",
@@ -1066,6 +1089,27 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		"Piece.Array",
 		QT_TRANSLATE_NOOP("Menu", "A&rray..."),
 		QT_TRANSLATE_NOOP("Status", "Make copies of the selected pieces"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// 	LC_PIECE_VIEW_SELECTED_MODEL
+	{
+		"Piece.ViewSelectedModel",
+		QT_TRANSLATE_NOOP("Menu", "View Selected Model"),
+		QT_TRANSLATE_NOOP("Status", "View the model referenced by the currently selected piece"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_PIECE_MOVE_SELECTION_TO_MODEL
+	{
+		"Piece.MoveSelectionToModel",
+		QT_TRANSLATE_NOOP("Menu", "Move to New Model..."),
+		QT_TRANSLATE_NOOP("Status", "Move the currently selected pieces to a new model and replaces them with a reference to the model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_PIECE_INLINE_SELECTED_MODELS
+	{
+		"Piece.InlineSelectedModels",
+		QT_TRANSLATE_NOOP("Menu", "Inline Selected Models"),
+		QT_TRANSLATE_NOOP("Status", "Insert the contents of the selected model references into the current model"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
 	// LC_PIECE_GROUP
@@ -1285,6 +1329,62 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
 		QT_TRANSLATE_NOOP("Shortcut", "")
 	},
+	// LC_MODEL_17
+	{
+		"Model.Model17",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_18
+	{
+		"Model.Model18",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_19
+	{
+		"Model.Model19",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_20
+	{
+		"Model.Model20",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_21
+	{
+		"Model.Model21",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_22
+	{
+		"Model.Model22",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_23
+	{
+		"Model.Model23",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
+	// LC_MODEL_24
+	{
+		"Model.Model24",
+		QT_TRANSLATE_NOOP("Menu", ""),
+		QT_TRANSLATE_NOOP("Status", "Switch to this model"),
+		QT_TRANSLATE_NOOP("Shortcut", "")
+	},
 	// LC_HELP_HOMEPAGE
 	{
 		"Help.HomePage",
@@ -1316,3 +1416,24 @@ lcCommand gCommands[LC_NUM_COMMANDS] =
 };
 
 LC_CASSERT(sizeof(gCommands)/sizeof(gCommands[0]) == LC_NUM_COMMANDS);
+
+QString gToolNames[LC_NUM_TOOLS] =
+{
+	"NewPiece",      // LC_TOOL_INSERT
+	"NewPointLight", // LC_TOOL_LIGHT
+	"NewSpotLight",  // LC_TOOL_SPOTLIGHT
+	"NewCamera",     // LC_TOOL_CAMERA
+	"Select",        // LC_TOOL_SELECT
+	"Move",          // LC_TOOL_MOVE
+	"Rotate",        // LC_TOOL_ROTATE
+	"Delete",        // LC_TOOL_ERASER
+	"Paint",         // LC_TOOL_PAINT
+	"Zoom",          // LC_TOOL_ZOOM
+	"Pan",           // LC_TOOL_PAN
+	"Orbit",         // LC_TOOL_ROTATE_VIEW
+	"Roll",          // LC_TOOL_ROLL
+	"ZoomRegion",    // LC_TOOL_ZOOM_REGION
+	"RotateStep"	 // LC_TOOL_ROTATESTEP /*** LPub3D modification 1436: - Rotate Step Menu ***/
+};
+
+LC_CASSERT(sizeof(gToolNames) / sizeof(gToolNames[0]) == LC_NUM_TOOLS);

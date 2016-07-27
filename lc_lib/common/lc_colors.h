@@ -28,7 +28,7 @@ enum
 struct lcColorGroup
 {
 	lcArray<int> Colors;
-	char Name[LC_MAX_COLOR_NAME];
+	QString Name;
 };
 
 enum lcInterfaceColor
@@ -37,6 +37,8 @@ enum lcInterfaceColor
 	LC_COLOR_FOCUSED,
 	LC_COLOR_CAMERA,
 	LC_COLOR_LIGHT,
+	LC_COLOR_CONTROL_POINT,
+	LC_COLOR_CONTROL_POINT_FOCUSED,
 	LC_NUM_INTERFACECOLORS
 };
 
