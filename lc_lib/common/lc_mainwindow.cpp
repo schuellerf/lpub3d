@@ -118,16 +118,6 @@ void lcMainWindow::CreateWidgets()
 	mActions[LC_EDIT_ACTION_ROTATE_VIEW]->setDisabled(true);
 	mActions[LC_EDIT_ACTION_ZOOM_REGION]->setDisabled(true);
 	/*** LPub3D modification end ***/
-
-	/*** LPub3D modification 122: - read window management ***/
-	QSettings Settings;
-    Settings.beginGroup("3DViewerWindow");
-    restoreGeometry(Settings.value("Geometry").toByteArray());
-    restoreState(Settings.value("State").toByteArray());
-    QSize size = Settings.value("Size", QDesktopWidget().availableGeometry(this).size()*0.6).toSize();
-    resize(size);
-	Settings.endGroup();
-	/*** LPub3D modification end ***/
 }
 
 void lcMainWindow::CreateActions()
@@ -816,16 +806,6 @@ void lcMainWindow::closeEvent(QCloseEvent *event)
 	if (SaveProjectIfModified())
 	{
 		event->accept();
-
-		/*** LPub3D modification 820: - save settings ***/
-		QSettings settings;
-        settings.beginGroup("3DViewerWindow");
-        settings.setValue("Geometry", saveGeometry());
-        settings.setValue("State", saveState());
-        settings.setValue("Size", size());
-		settings.endGroup();
-		/*** LPub3D modification end ***/
-
 	}
 	else
 		event->ignore();
