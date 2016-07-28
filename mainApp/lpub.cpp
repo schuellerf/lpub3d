@@ -1903,14 +1903,13 @@ void Gui::statusBarMsg(QString msg)
 void Gui::createViewerStatusBar()
 {
   statusBar()->showMessage(tr("Ready"));
-  //connect(gMainWindow->mLCStatusBar, SIGNAL(messageChanged(QString)), this, SLOT(showViewerStatusMessage()));
+  connect(gMainWindow->mLCStatusBar, SIGNAL(messageChanged(QString)), this, SLOT(showViewerStatusMessage()));
 }
 
 void Gui::showViewerStatusMessage(){
 
     if(!modelDockWindow->isFloating())
-        qDebug() << "Viewer Status Bar Placeholder";
-        //statusBarMsg(gMainWindow->mLCStatusBar->currentMessage());
+        statusBarMsg(gMainWindow->mLCStatusBar->currentMessage());
 }
 
 void Gui::createDockWindows()

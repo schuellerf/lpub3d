@@ -791,19 +791,19 @@ void lcMainWindow::enable3DActions(){
 
 void lcMainWindow::CreateStatusBar()
 {
+    mLCStatusBar = new QStatusBar(this);
+    setStatusBar(mLCStatusBar);
 
-    //setStatusBar(mLCStatusBar);
-
-    //mStatusBarLabel = new QLabel();
-    //mLCStatusBar->addWidget(mStatusBarLabel);
+    mStatusBarLabel = new QLabel();
+    mLCStatusBar->addWidget(mStatusBarLabel);
 
 	/*** LPub3D modification 800: - disable position status ***/
 	//mStatusPositionLabel = new QLabel();
     //mLCStatusBar->addPermanentWidget(mStatusPositionLabel);
 	/*** LPub3D modification end ***/
 
-    //mStatusSnapLabel = new QLabel();
-    //mLCStatusBar->addPermanentWidget(mStatusSnapLabel);
+    mStatusSnapLabel = new QLabel();
+    mLCStatusBar->addPermanentWidget(mStatusSnapLabel);
 
 	/*** LPub3D modification 808: - disable time status ***/
 	//mStatusTimeLabel = new QLabel();
@@ -1573,7 +1573,7 @@ void lcMainWindow::SetRotateStepType(lcRotateStepType RotateStepType)
 }
 /*** LPub3D modification end ***/
 
-/*** LPub3D modification 144: - rotate step ***/
+/*** LPub3D modification 1576: - rotate step ***/
 lcVector3 lcMainWindow::GetRotateStepAmount()
 {
   lcVector3    rotateStep(0.0f, 0.0f, 0.0f);
@@ -1817,13 +1817,16 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 		}
 	}
 
+    /*** LPub3D modification 1820: - replace mStatusBarLabel ***/
     //mStatusBarLabel->setText(Message);
+    statusBar()->showMessage(Message);
+    /*** LPub3D modification end ***/
 	lcVector3 Position;
 	lcGetActiveModel()->GetFocusPosition(Position);
 
 	QString Label("X: %1 Y: %2 Z: %3");
 	Label = Label.arg(QString::number(Position[0], 'f', 2), QString::number(Position[1], 'f', 2), QString::number(Position[2], 'f', 2));
-	/*** LPub3D modification 1826: - disable position status ***/
+    /*** LPub3D modification 1829: - disable position status ***/
 	//mStatusPositionLabel->setText(Label);  //remarked on LPub3D Revision 244 build 05
 	/*** LPub3D modification end ***/
 }
@@ -1852,7 +1855,7 @@ void lcMainWindow::UpdateCurrentStep()
 	mActions[LC_VIEW_TIME_NEXT]->setEnabled(CurrentStep < LC_STEP_MAX);
 	mActions[LC_VIEW_TIME_LAST]->setEnabled(CurrentStep != LastStep);
 
-	/*** LPub3D modification 1855: - disable time status ***/
+    /*** LPub3D modification 1858: - disable time status ***/
 	//mStatusTimeLabel->setText(QString(tr("Step %1")).arg(QString::number(CurrentStep))); //remarked on LPub3D Rev 244 build 05
 	/*** LPub3D modification end ***/
 }
@@ -1883,9 +1886,9 @@ void lcMainWindow::UpdateSnap()
 	mActions[LC_EDIT_SNAP_MOVE_Z0 + mMoveZSnapIndex]->setChecked(true);
 	mActions[LC_EDIT_SNAP_ANGLE0 + mAngleSnapIndex]->setChecked(true);
 	
-	/*** LPub3D modification 1855: - update snap status ***/
+    /*** LPub3D modification 1889: - update snap status ***/
   	//mStatusSnapLabel->setText(QString(tr(" M: %1 %2 R: %3 ")).arg(GetMoveXYSnapText(), GetMoveZSnapText(), GetAngleSnapText())); // changed on LPub3D Rev 244 build 05
-    //mStatusSnapLabel->setText(QString(tr("Rot: %1 Snap: %2 ")).arg(GetRotateStep()).arg(GetAngleSnapText()));
+    mStatusSnapLabel->setText(QString(tr("Rot: %1 Snap: %2 ")).arg(GetRotateStep()).arg(GetAngleSnapText()));
 	/*** LPub3D modification end ***/
 }
 
@@ -2179,9 +2182,9 @@ bool lcMainWindow::SaveProjectIfModified()
 	Project* Project = lcGetActiveProject();
 	if (!Project->IsModified())
 		return true;
-	/*** LPub3D modification 2182: - suppress save-if-modified ***/
+    /*** LPub3D modification 2185: - suppress save-if-modified ***/
 	if (Project->IsModified())                
-	return true;                          
+        return true;
 	/*** LPub3D modification end ***/
 
 	switch (QMessageBox::question(this, tr("Save Project"), tr("Save changes to '%1'?").arg(Project->GetTitle()), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel))
@@ -2816,7 +2819,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_EDIT_ACTION_ROTATE:
 		SetTool(LC_TOOL_ROTATE);
-		/*** LPub3D modification 2819: - rotate step ***/
+        /*** LPub3D modification 2822: - rotate step ***/
 		gui->ResetStepRotation();
 		lcGetActiveModel()->SelectAllPieces();
 		/*** LPub3D modification end ***/	
@@ -2850,14 +2853,14 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		SetTool(LC_TOOL_ROLL);
 		break;
 
-	/*** LPub3D modification 2853: - rotate step ***/	  
+    /*** LPub3D modification 2856: - rotate step ***/
 	case LC_EDIT_ACTION_ROTATESTEP:
 		SetTool(LC_TOOL_ROTATESTEP);
 		lcGetActiveModel()->RotateStepSelectedObjects(GetRotateStepType(), GetRotateStepAmount());
 		break; 
 	/*** LPub3D modification end ***/
 
-	/*** LPub3D modification 2853: - rotate step ***/
+    /*** LPub3D modification 2863: - rotate step ***/
     case LC_EDIT_ROTATESTEP_ABSOLUTE_ROTATION:
     case LC_EDIT_ROTATESTEP_RELATIVE_ROTATION:
       SetRotateStepType((lcRotateStepType)(CommandId - LC_EDIT_ROTATESTEP_ABSOLUTE_ROTATION));

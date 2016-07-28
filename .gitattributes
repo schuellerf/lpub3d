@@ -1,5 +1,5 @@
 * text=auto !eol
-/LPub3D.pro -text
+/LPub3DNext.pro -text
 lc_lib/Lc_Lib.pri -text
 lc_lib/common/camera.cpp -text
 lc_lib/common/camera.h -text

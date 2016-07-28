@@ -7,8 +7,6 @@
 #include "lc_model.h"
 
 /*** LPub3D modification 9: - includes and logging ***/
-#include <QStatusBar>
-
 #include "QsLog.h"
 /*** LPub3D modification end ***/
 
@@ -131,7 +129,7 @@ public:
 		return mAddKeys;
 	}
 
-    /*** LPub3D modification 134: - halt viewer ***/
+    /*** LPub3D modification 132: - halt viewer ***/
     bool GetHalt3DViewer() const
     {
         return mHalt3DViewer;
@@ -241,7 +239,7 @@ public:
 
 	void SetTool(lcTool Tool);
 	void SetTransformType(lcTransformType TransformType);
-    /*** LPub3D modification 244: - rotate view ***/
+    /*** LPub3D modification 242: - rotate view ***/
 	void SetRotateStepType(lcRotateStepType RotateStepType);
 	/*** LPub3D modification end ***/
 	void SetColorIndex(int ColorIndex);
@@ -295,7 +293,7 @@ public:
 	void UpdateShortcuts();
 
 	lcVector3 GetTransformAmount();
-    /*** LPub3D modification 298: - rotate step ***/
+    /*** LPub3D modification 296: - rotate step ***/
 	lcVector3 GetRotateStepAmount();
 	/*** LPub3D modification end ***/
 
@@ -305,11 +303,11 @@ public:
 	lcSearchOptions mSearchOptions;
 	QAction* mActions[LC_NUM_COMMANDS];
 
-    /*** LPub3D modification 308: - status bar ***/
+    /*** LPub3D modification 306: - status bar ***/
     QStatusBar* mLCStatusBar;
     /*** LPub3D modification end ***/
 
-/*** LPub3D modification 312: - halt viewer ***/
+/*** LPub3D modification 310: - halt viewer ***/
 public slots:
     void halt3DViewer(bool b);
     void enable3DActions();
@@ -352,7 +350,7 @@ protected:
 	bool mAddKeys;
 	lcTool mTool;
 	lcTransformType mTransformType;
-    /*** LPub3D modification 355: - rotate step ***/
+    /*** LPub3D modification 353: - rotate step ***/
 	lcRotateStepType mRotateStepType;
 	/*** LPub3D modification end ***/
 	bool mMoveSnapEnabled;
@@ -364,7 +362,7 @@ protected:
 	bool mLockY;
 	bool mLockZ;
 	bool mRelativeTransform;
-    /*** LPub3D modification 367: - halt viewer ***/
+    /*** LPub3D modification 365: - halt viewer ***/
 	bool mHalt3DViewer;
 	/*** LPub3D modification end ***/
 
@@ -389,7 +387,7 @@ protected:
 	QLineEdit* mTransformZEdit;
 
 	QLabel* mStatusBarLabel;
-    /*** LPub3D modification 392: - suppress status ***/
+    /*** LPub3D modification 390: - suppress status ***/
 	QLabel* mStatusPositionLabel;
 	QLabel* mStatusSnapLabel;
 	QLabel* mStatusTimeLabel;
