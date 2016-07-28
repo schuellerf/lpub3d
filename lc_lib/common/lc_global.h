@@ -4,7 +4,7 @@
 #include <QtGlobal>
 #include <QtOpenGL>
 #include <QWidget>
-/*** LPub3D modification 6: - Includes ***/
+/*** LPub3D modification 7: - Includes ***/
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 #include <QtWidgets/QWidget>
 #include <QOpenGLWidget>
@@ -36,7 +36,7 @@ typedef qint64 lcint64;
 typedef quint64 lcuint64;
 typedef quintptr lcuintptr;
 
-/*** LPub3D modification 40: - Build ***/
+/*** LPub3D modification 39: - Build ***/
 #ifdef Q_OS_WIN
 #define snprintf _snprintf
 #define isnan _isnan
@@ -58,7 +58,7 @@ int stricmp(const char* str1, const char* str2);
 #define LC_VERSION_MINOR 83
 #define LC_VERSION_PATCH 0
 #define LC_VERSION_TEXT "0.83.0"
-/*** LPub3D modification 60: - Build ***/
+/*** LPub3D modification 61: - Build ***/
 #define LC_VERSION_BUILD "1952"
 /*** LPub3D modification end ***/
 

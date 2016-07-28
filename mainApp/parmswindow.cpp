@@ -25,16 +25,11 @@
  *
  ***************************************************************************/
 
-#include "version.h"
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
-#include <QtWidgets>
-#else
-#include <QtGui>
-#endif
 #include <QDesktopWidget>
 #include "parmshighlighter.h"
 #include "parmswindow.h"
 #include "lpub_preferences.h"
+#include "version.h"
 #include "lpub.h"
 #include "name.h"
 
