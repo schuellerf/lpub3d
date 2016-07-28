@@ -94,12 +94,10 @@ enum lcCommandId
 	LC_EDIT_ACTION_ROTATE_VIEW,
 	LC_EDIT_ACTION_ROLL,
 	LC_EDIT_ACTION_ZOOM_REGION,
-	/*** LPub3D modification 97: - Rotate Step Menu ***/
-    LC_EDIT_ACTION_ROTATESTEP,
+    LC_EDIT_ACTION_ROTATESTEP,                      	/*** LPub3D modification 97: - Rotate Step Menu ***/
     LC_EDIT_ACTION_LAST = LC_EDIT_ACTION_ROTATESTEP,
     LC_EDIT_ROTATESTEP_ABSOLUTE_ROTATION,
-    LC_EDIT_ROTATESTEP_RELATIVE_ROTATION,
-	/*** LPub3D modification end ***/
+    LC_EDIT_ROTATESTEP_RELATIVE_ROTATION,               /*** LPub3D modification end ***/
 	LC_EDIT_CANCEL,
 	LC_VIEW_PREFERENCES,
 	LC_VIEW_ZOOM_IN,
@@ -245,9 +243,7 @@ enum lcTool
 	LC_TOOL_ROTATE_VIEW,
 	LC_TOOL_ROLL,
 	LC_TOOL_ZOOM_REGION,
-	/*** LPub3D modification 248: - Rotate Step Menu ***/
-	LC_TOOL_ROTATESTEP,
-	/*** LPub3D modification end ***/
+    LC_TOOL_ROTATESTEP,     /*** LPub3D modification 246: - Rotate Step Menu ***/
 	LC_NUM_TOOLS
 };
 

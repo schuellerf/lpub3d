@@ -4010,6 +4010,9 @@ void lcModel::UpdateInterface()
 
 	gMainWindow->UpdateSelectedObjects(true);
 	gMainWindow->SetTransformType(gMainWindow->GetTransformType());
+    /*** LPub3D modification 4013: - rotate step ***/
+    gMainWindow->SetRotateStepType(gMainWindow->GetRotateStepType());
+    /*** LPub3D modification end ***/
 	gMainWindow->UpdateLockSnap();
 	gMainWindow->UpdateSnap();
 	gMainWindow->UpdateCameraMenu();

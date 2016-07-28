@@ -29,7 +29,7 @@ lcMainWindow::lcMainWindow()
 	memset(mActions, 0, sizeof(mActions));
 
 	mPreviewWidget = NULL;
-	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
+    mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 	/*** LPub3D modification 32: - rotate step ***/
   	mRotateStepType = LC_ROTATESTEP_RELATIVE_ROTATION;
 	/*** LPub3D modification end ***/
