@@ -366,6 +366,8 @@ protected:
 	bool mHalt3DViewer;
 	/*** LPub3D modification end ***/
 
+    friend class Gui;
+
 	QAction* mActionFileRecentSeparator;
 
 	QTabWidget* mModelTabWidget;
@@ -394,6 +396,8 @@ protected:
 	/*** LPub3D modification end ***/
 	QMenu* mCameraMenu;
 	QMenu* mViewpointMenu;
+
+    QWidget* mPartsContents;
 };
 
 extern class lcMainWindow* gMainWindow;

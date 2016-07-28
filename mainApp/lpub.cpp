@@ -1904,39 +1904,60 @@ void Gui::createViewerStatusBar()
 
 void Gui::showViewerStatusMessage(){
 
-    if(!modelDockWindow->isFloating())
+    if(!viewerDockWindow->isFloating())
         statusBarMsg(gMainWindow->mLCStatusBar->currentMessage());
 }
 
 void Gui::createDockWindows()
 {
-    fileEditDockWindow = new QDockWidget(trUtf8(wCharToUtf8("LDraw\u2122 File Editor")), this);
-    modelDockWindow = new QDockWidget(trUtf8(wCharToUtf8("3D Viewer - by LeoCAD\u00A9")), this);
+    fileEditDockWindow = new QDockWidget(trUtf8(wCharToUtf8("LDraw\u2122 Editor")), this);
     fileEditDockWindow->setObjectName("LDrawFileDockWindow");
-    fileEditDockWindow->setAllowedAreas(
-                Qt::TopDockWidgetArea  | Qt::BottomDockWidgetArea |
-                Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    fileEditDockWindow->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     fileEditDockWindow->setWidget(editWindow);
     addDockWidget(Qt::RightDockWidgetArea, fileEditDockWindow);
     viewMenu->addAction(fileEditDockWindow->toggleViewAction());
-//**3D
-    modelDockWindow->setObjectName("ModelDockWindow");
-    modelDockWindow->setAllowedAreas(
-                Qt::TopDockWidgetArea  | Qt::BottomDockWidgetArea |
-                Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    modelDockWindow->setWidget(gMainWindow);
-    addDockWidget(Qt::RightDockWidgetArea, modelDockWindow);
-    viewMenu->addAction(modelDockWindow->toggleViewAction());
-//**
-    tabifyDockWidget(modelDockWindow, fileEditDockWindow);
-    modelDockWindow->raise();
 
-    connect(modelDockWindow, SIGNAL (topLevelChanged(bool)), this, SLOT (toggleViewerStatusBar()));
+    //3D Viewer
+    viewerDockWindow = new QDockWidget(trUtf8(wCharToUtf8("3D Viewer")), this);
+    viewerDockWindow->setObjectName("viewerDockWindow");
+    viewerDockWindow->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    viewerDockWindow->setWidget(gMainWindow);
+    addDockWidget(Qt::RightDockWidgetArea, viewerDockWindow);
+    viewMenu->addAction(viewerDockWindow->toggleViewAction());
+
+    tabifyDockWidget(fileEditDockWindow, viewerDockWindow);
+    //timeline
+    gMainWindow->mTimelineToolBar->setObjectName("TimelineToolbar");
+    gMainWindow->mTimelineToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    gMainWindow->mTimelineToolBar->setAcceptDrops(true);
+    addDockWidget(Qt::RightDockWidgetArea, gMainWindow->mTimelineToolBar);
+    viewMenu->addAction(gMainWindow->mTimelineToolBar->toggleViewAction());
+
+    tabifyDockWidget(viewerDockWindow, gMainWindow->mTimelineToolBar);
+    //Parts
+    gMainWindow->mPartsToolBar->setObjectName("PartsToolbar");
+    gMainWindow->mPartsToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    gMainWindow->mPartsToolBar->setWidget(gMainWindow->mPartsContents);
+    addDockWidget(Qt::RightDockWidgetArea, gMainWindow->mPartsToolBar);
+    viewMenu->addAction(gMainWindow->mPartsToolBar->toggleViewAction());
+
+    tabifyDockWidget(gMainWindow->mPropertiesToolBar, gMainWindow->mPartsToolBar);
+    //Properties
+    gMainWindow->mPropertiesToolBar->setObjectName("PropertiesToolbar");
+    gMainWindow->mPropertiesToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    addDockWidget(Qt::RightDockWidgetArea, gMainWindow->mPropertiesToolBar);
+    viewMenu->addAction(gMainWindow->mPropertiesToolBar->toggleViewAction());
+
+    tabifyDockWidget(gMainWindow->mPartsToolBar, gMainWindow->mPropertiesToolBar);
+
+    viewerDockWindow->raise();
+
+    connect(viewerDockWindow, SIGNAL (topLevelChanged(bool)), this, SLOT (toggleViewerStatusBar()));
 }
 
 void Gui::toggleViewerStatusBar(){
 
-    if(modelDockWindow->isFloating())
+    if(viewerDockWindow->isFloating())
         gMainWindow->statusBar()->show();
     else
         gMainWindow->statusBar()->hide();

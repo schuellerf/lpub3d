@@ -640,14 +640,14 @@ void lcMainWindow::CreateToolBars()
 	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_ADD_KEYS]);
 	// TODO: add missing menu items
 
-	mPartsToolBar = new QDockWidget(tr("Parts"), this);
-	mPartsToolBar->setObjectName("PartsToolbar");
-	mPartsToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-	QWidget* PartsContents = new QWidget();
-	QGridLayout* PartsLayout = new QGridLayout(PartsContents);
+    mPartsToolBar = new QDockWidget(tr("Parts"), this);
+    //mPartsToolBar->setObjectName("PartsToolbar");
+    //mPartsToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    mPartsContents = new QWidget();
+    QGridLayout* PartsLayout = new QGridLayout(mPartsContents);
 	PartsLayout->setSpacing(6);
 	PartsLayout->setContentsMargins(6, 6, 6, 6);
-	QSplitter* PartsSplitter = new QSplitter(Qt::Vertical, PartsContents);
+    QSplitter* PartsSplitter = new QSplitter(Qt::Vertical, mPartsContents);
 
 	QFrame* PreviewFrame = new QFrame(PartsSplitter);
 	PreviewFrame->setFrameShape(QFrame::StyledPanel);
@@ -698,39 +698,39 @@ void lcMainWindow::CreateToolBars()
 
 	PartsLayout->addWidget(PartsSplitter, 0, 0, 1, 1);
 
-	mPartsToolBar->setWidget(PartsContents);
-	addDockWidget(Qt::RightDockWidgetArea, mPartsToolBar);
+    //mPartsToolBar->setWidget(mPartsContents);
+    //addDockWidget(Qt::RightDockWidgetArea, mPartsToolBar);
 
-	mPropertiesToolBar = new QDockWidget(tr("Properties"), this);
-	mPropertiesToolBar->setObjectName("PropertiesToolbar");
-	mPropertiesToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    mPropertiesToolBar = new QDockWidget(tr("Properties"), this);
+    //mPropertiesToolBar->setObjectName("PropertiesToolbar");
+    //mPropertiesToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 
 	mPropertiesWidget = new lcQPropertiesTree(mPropertiesToolBar);
 
-	mPropertiesToolBar->setWidget(mPropertiesWidget);
-	addDockWidget(Qt::RightDockWidgetArea, mPropertiesToolBar);
+    mPropertiesToolBar->setWidget(mPropertiesWidget);
+    //addDockWidget(Qt::RightDockWidgetArea, mPropertiesToolBar);
 
-	mTimelineToolBar = new QDockWidget(tr("Timeline"), this);
-	mTimelineToolBar->setObjectName("TimelineToolbar");
-	mTimelineToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-	mTimelineToolBar->setAcceptDrops(true);
+    mTimelineToolBar = new QDockWidget(tr("Timeline"), this);
+    //mTimelineToolBar->setObjectName("TimelineToolbar");
+    //mTimelineToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    //mTimelineToolBar->setAcceptDrops(true);
 
 	mTimelineWidget = new lcTimelineWidget(mTimelineToolBar);
 
-	mTimelineToolBar->setWidget(mTimelineWidget);
-	addDockWidget(Qt::RightDockWidgetArea, mTimelineToolBar);
+    mTimelineToolBar->setWidget(mTimelineWidget);
+    //addDockWidget(Qt::RightDockWidgetArea, mTimelineToolBar);
 
-	tabifyDockWidget(mPartsToolBar, mPropertiesToolBar);
-	tabifyDockWidget(mPropertiesToolBar, mTimelineToolBar);
-	mPartsToolBar->raise();
+    //tabifyDockWidget(mPartsToolBar, mPropertiesToolBar);
+    //tabifyDockWidget(mPropertiesToolBar, mTimelineToolBar);
+    //mPartsToolBar->raise();
 
 	/*** LPub3D modification 737: - toolbar management ***/
 	//toolbars
 	mTimeToolBar->setVisible(false);
-	mPartsToolBar->setVisible(false);
-	mPropertiesToolBar->setVisible(false);
-	mStandardToolBar->setVisible(false);
-	mTimelineToolBar->setVisible(false);
+    //mPartsToolBar->setVisible(false);
+    //mPropertiesToolBar->setVisible(false);
+    mStandardToolBar->setVisible(false);
+    //mTimelineToolBar->setVisible(false);
 	
 	//toolbar actions
 	mToolsToolBar->removeAction(mActions[LC_EDIT_ACTION_INSERT]);
@@ -805,7 +805,7 @@ void lcMainWindow::closeEvent(QCloseEvent *event)
 {
 	if (SaveProjectIfModified())
 	{
-		event->accept();
+        event->accept();
 	}
 	else
 		event->ignore();

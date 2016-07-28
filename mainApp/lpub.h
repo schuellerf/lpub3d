@@ -947,11 +947,11 @@ private:
   void createViewerStatusBar();
   void createDockWindows();
   void readSettings();
-  void writeSettings();
+  void writeSettings(); 
 
   QDockWidget       *fileEditDockWindow; 
 //** 3D
-  QDockWidget       *modelDockWindow;
+  QDockWidget       *viewerDockWindow;
 //**
 
   QMenu    *fileMenu;
