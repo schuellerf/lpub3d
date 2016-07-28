@@ -1,11 +1,12 @@
 #ifndef _LC_QGLWIDGET_H_
 #define _LC_QGLWIDGET_H_
-
+/*** LPub3D modification 3: - includes ***/
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 #include <QOpenGLWidget>
 #else
 #include <QGLWidget>
 #endif
+/*** LPub3D modification end ***/
 
 class lcGLWidget;
 

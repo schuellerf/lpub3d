@@ -1,3 +1,4 @@
+/*** LPub3D modification 1: - includes ***/
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 #include <QtWidgets>
 #else
@@ -5,6 +6,7 @@
 #endif
 #include "lc_global.h"
 #include "lc_qcolorlist.h"
+/*** LPub3D modification end ***/
 
 lcQColorList::lcQColorList(QWidget *parent)
 	: QWidget(parent)

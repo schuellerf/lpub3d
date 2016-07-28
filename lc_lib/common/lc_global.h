@@ -3,13 +3,12 @@
 
 #include <QtGlobal>
 #include <QtOpenGL>
+#include <QWidget>
 /*** LPub3D modification 6: - Includes ***/
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 #include <QtWidgets/QWidget>
-#include <QtWidgets>
 #include <QOpenGLWidget>
 #else
-#include <QWidget>
 #include <QtGui>
 #include <QGLWidget>
 #endif

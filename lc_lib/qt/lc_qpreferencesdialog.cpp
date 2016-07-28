@@ -72,7 +72,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 	new lcQTreeWidgetColumnStretcher(ui->mouseTree, 0);
 	MouseTreeItemChanged(NULL);
 
-    /*** LPub3D modification 01 - preferences dialog ***/
+    /*** LPub3D modification 75: - preferences dialog ***/
     ui->authorName->setDisabled(true);
     ui->projectsFolder->setDisabled(true);
     ui->projectsFolderBrowse->setDisabled(true);
@@ -89,7 +89,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget *parent, void *data) :
 
     ui->tabWidget->removeTab(2);            //hide tabCategories
     ui->tabWidget->removeTab(2);            //hide tabKeyboard
-    /*** LPub3D modification 01 ***/
+    /*** LPub3D modification end ***/
 
 }
 

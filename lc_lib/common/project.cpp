@@ -1370,7 +1370,7 @@ void Project::ExportPOVRay()
 	Options.LGEOPath = lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH);
 	Options.Render = lcGetProfileInt(LC_PROFILE_POVRAY_RENDER);
 
-	/*** LPub3D modification 144: - set POV-Ray export filename ***/
+    /*** LPub3D modification 1373: - set POV-Ray export filename ***/
     if (!mFileName.isEmpty())
     {
         Options.FileName = mFileName;

@@ -1433,7 +1433,7 @@ QString gToolNames[LC_NUM_TOOLS] =
 	"Orbit",         // LC_TOOL_ROTATE_VIEW
 	"Roll",          // LC_TOOL_ROLL
 	"ZoomRegion",    // LC_TOOL_ZOOM_REGION
-	"RotateStep"	 // LC_TOOL_ROTATESTEP /*** LPub3D modification 1436: - Rotate Step Menu ***/
+    "RotateStep"	 // LC_TOOL_ROTATESTEP      /*** LPub3D modification 1436: - Rotate Step Menu ***/
 };
 
 LC_CASSERT(sizeof(gToolNames) / sizeof(gToolNames[0]) == LC_NUM_TOOLS);

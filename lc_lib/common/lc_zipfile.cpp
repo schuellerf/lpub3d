@@ -3,12 +3,13 @@
 #include "lc_file.h"
 #include "lc_math.h"
 #include <time.h>
+/*** LPub3D modification 6: - includes ***/
 #ifdef _MSC_VER
 #include <QtZlib/zlib.h>
 #else
 #include <zlib.h>
 #endif
-
+/*** LPub3D modification end ***/
 
 #if MAX_MEM_LEVEL >= 8
 #  define DEF_MEM_LEVEL 8

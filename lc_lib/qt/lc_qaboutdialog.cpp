@@ -10,10 +10,10 @@ lcQAboutDialog::lcQAboutDialog(QWidget *parent) :
 	ui(new Ui::lcQAboutDialog)
 {
 	ui->setupUi(this);
-
+    /*** LPub3D modification 14: - vesion build ***/
     ui->version->setText(tr("LeoCAD Version %1 - Rev %2").arg(QString::fromLatin1(LC_VERSION_TEXT))
                                                          .arg(QString::fromLatin1(LC_VERSION_BUILD)));
-
+    /*** LPub3D modification end ***/
 	gMainWindow->mPreviewWidget->MakeCurrent();
 
 	GLint Red, Green, Blue, Alpha, Depth, Stencil;
