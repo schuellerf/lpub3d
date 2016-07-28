@@ -235,6 +235,8 @@ lc_lib/resources/time_last.png -text
 lc_lib/resources/time_next.png -text
 lc_lib/resources/time_previous.png -text
 lc_lib/resources/time_stop.png -text
+lc_lib/resources/view_menu.png -text
+lc_lib/resources/view_menu16.png -text
 lc_lib/resources/view_split_horizontal.png -text
 lc_lib/resources/view_split_vertical.png -text
 lc_lib/resources/view_zoomextents.png -text

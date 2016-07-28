@@ -138,6 +138,7 @@
         <file alias="file_open_16.png">../lc_lib/resources/file_open_16.png</file>
         <file alias="file_print_16.png">../lc_lib/resources/file_print_16.png</file>
         <file alias="file_print_preview_16.png">../lc_lib/resources/file_print_preview_16.png</file>
+        <file alias="view_menu16.png">../lc_lib/resources/view_menu16.png</file>
         <file alias="file_save_16.png">../lc_lib/resources/file_save_16.png</file>
         <file alias="action_camera.png">../lc_lib/resources/action_camera.png</file>
         <file alias="action_delete.png">../lc_lib/resources/action_delete.png</file>
@@ -210,6 +211,7 @@
         <file alias="time_previous.png">../lc_lib/resources/time_previous.png</file>
         <file alias="time_stop.png">../lc_lib/resources/time_stop.png</file>
         <file alias="view_split_horizontal.png">../lc_lib/resources/view_split_horizontal.png</file>
+        <file alias="view_menu.png">../lc_lib/resources/view_menu.png</file>
         <file alias="view_split_vertical.png">../lc_lib/resources/view_split_vertical.png</file>
         <file alias="view_zoomextents.png">../lc_lib/resources/view_zoomextents.png</file>
         <file alias="edit_rotatestep_absolute_rotation.png">../lc_lib/resources/edit_rotatestep_absolute_rotation.png</file>

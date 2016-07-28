@@ -1307,6 +1307,11 @@ bool Gui::aboutDialog()
     return Dialog.exec() == QDialog::Accepted;
 }
 
+bool Gui::aboutViewerDialog()
+{
+    return gMainWindow->DoDialog(LC_DIALOG_ABOUT, NULL);
+}
+
 void Gui::refreshLDrawUnoffParts(){
 
     // Create an instance of update ldraw archive
@@ -1658,9 +1663,13 @@ void Gui::createActions()
 
     // Help
 
-    aboutAct = new QAction(QIcon(":/resources/LPub32.png"),tr("&About"), this);
+    aboutAct = new QAction(QIcon(":/resources/LPub64.png"),tr("&About %1...").arg(VER_PRODUCTNAME_STR), this);
     aboutAct->setStatusTip(tr("Show the application's About box"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutDialog()));
+
+    aboutViewerAct = new QAction(QIcon(":/resources/icon64.png"),trUtf8(wCharToUtf8("&About 3D Viewer - by LeoCAD\u00A9...")), this);
+    aboutViewerAct->setStatusTip(tr("Show the application's About box"));
+    connect(aboutViewerAct, SIGNAL(triggered()), this, SLOT(aboutViewerDialog()));
 
     // Begin Jaco's code
 
@@ -1841,6 +1850,8 @@ void Gui::createMenus()
     helpMenu = menuBar()->addMenu(tr("&Help"));
 
     helpMenu->addAction(aboutAct);
+
+    helpMenu->addAction(aboutViewerAct);
 
     // Begin Jaco's code
 

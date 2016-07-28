@@ -490,8 +490,10 @@ void lcMainWindow::CreateMenus()
 	//menus
 	menuBar()->removeAction(FileMenu->menuAction());
 	menuBar()->removeAction(EditMenu->menuAction());
+    menuBar()->removeAction(ViewMenu->menuAction());
 	menuBar()->removeAction(PieceMenu->menuAction());
 	menuBar()->removeAction(ModelMenu->menuAction());
+    menuBar()->removeAction(HelpMenu->menuAction());
 	ViewMenu->removeAction(StepMenu->menuAction());
 	//menu actions ***/
 	ToolBarsMenu->removeAction(mStandardToolBar->toggleViewAction());

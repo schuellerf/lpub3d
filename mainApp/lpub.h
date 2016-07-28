@@ -844,6 +844,7 @@ private slots:
     void openRecentFile();
     void updateCheck();
     bool aboutDialog();
+    bool aboutViewerDialog();
 
     bool printToPdfDialog();
     bool exportAsPngDialog();
@@ -1051,6 +1052,7 @@ private:
   // help
 
   QAction  *aboutAct;
+  QAction  *aboutViewerAct;
 
   // Begin Jaco's code
 
