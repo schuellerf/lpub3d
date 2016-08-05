@@ -62,22 +62,24 @@ void lcGLWidget::SetCursor(LC_CURSOR_TYPE CursorType)
 		{  0,  0, "" },		/*** LPub3D modification 62: - rotate step ***/
 	};
 
-	QGLWidget* widget = (QGLWidget*)mWidget;
+    QGLWidget* Widget = (QGLWidget*)mWidget;
 	/*** LPub3D modification 66: - rotate step ***/	
     //if (CursorType != LC_CURSOR_DEFAULT && CursorType < LC_CURSOR_COUNT)
     if (CursorType != LC_CURSOR_DEFAULT && CursorType < LC_CURSOR_COUNT - 1)
 	/*** LPub3D modification end ***/		
 	{
 		const lcCursorInfo& Cursor = Cursors[CursorType];
-		widget->setCursor(QCursor(QPixmap(Cursor.Name), Cursor.x, Cursor.y));
+        Widget->setCursor(QCursor(QPixmap(Cursor.Name), Cursor.x, Cursor.y));
 		mCursorType = CursorType;
 	}
 	else
 	{
-		widget->unsetCursor();
+        Widget->unsetCursor();
 		mCursorType = LC_CURSOR_DEFAULT;
 	}
 }
+
+
 
 lcQGLWidget::lcQGLWidget(QWidget *parent, lcQGLWidget *share, lcGLWidget *owner, bool view)
 	: QGLWidget(parent, share)
@@ -371,3 +373,367 @@ void lcQGLWidget::dropEvent(QDropEvent *event)
 
 	event->accept();
 }
+
+// ----------------- lcQGLWidgetProperties ------------------- //
+
+/*** LPub3D modification 82: - rotate step ***/
+void lcGLWidgetProperties::MakeCurrent()
+{
+    QGLWidget* Widget = (QGLWidget*)mWidget;
+
+    Widget->makeCurrent();
+}
+
+void lcGLWidgetProperties::Redraw()
+{
+    lcQGLWidgetProperties* Widget = (lcQGLWidgetProperties*)mWidget;
+
+    Widget->mUpdateTimer.start(0);
+}
+
+void lcGLWidgetProperties::SetCursor(LC_CURSOR_TYPE CursorType)
+{
+    if (mCursorType == CursorType)
+        return;
+
+    struct lcCursorInfo
+    {
+        int x, y;
+        const char* Name;
+    };
+
+    const lcCursorInfo Cursors[LC_CURSOR_COUNT] =
+    {
+        {  0,  0, "" },                                   // LC_CURSOR_DEFAULT
+        {  8,  3, ":/resources/cursor_insert" },          // LC_CURSOR_BRICK
+        { 15, 15, ":/resources/cursor_light" },           // LC_CURSOR_LIGHT
+        {  7, 10, ":/resources/cursor_spotlight" },       // LC_CURSOR_SPOTLIGHT
+        { 15,  9, ":/resources/cursor_camera" },          // LC_CURSOR_CAMERA
+        {  0,  2, ":/resources/cursor_select" },          // LC_CURSOR_SELECT
+        {  0,  2, ":/resources/cursor_select_multiple" }, // LC_CURSOR_SELECT_GROUP
+        { 15, 15, ":/resources/cursor_move" },            // LC_CURSOR_MOVE
+        { 15, 15, ":/resources/cursor_rotate" },          // LC_CURSOR_ROTATE
+        { 15, 15, ":/resources/cursor_rotatex" },         // LC_CURSOR_ROTATEX
+        { 15, 15, ":/resources/cursor_rotatey" },         // LC_CURSOR_ROTATEY
+        {  0, 10, ":/resources/cursor_delete" },          // LC_CURSOR_DELETE
+        { 14, 14, ":/resources/cursor_paint" },           // LC_CURSOR_PAINT
+        { 15, 15, ":/resources/cursor_zoom" },            // LC_CURSOR_ZOOM
+        {  9,  9, ":/resources/cursor_zoom_region" },     // LC_CURSOR_ZOOM_REGION
+        { 15, 15, ":/resources/cursor_pan" },             // LC_CURSOR_PAN
+        { 15, 15, ":/resources/cursor_roll" },            // LC_CURSOR_ROLL
+        { 15, 15, ":/resources/cursor_rotate_view" },     // LC_CURSOR_ROTATE_VIEW
+        {  0,  0, "" },		/*** LPub3D modification 62: - rotate step ***/
+    };
+
+    QGLWidget* Widget = (QGLWidget*)mWidget;
+    /*** LPub3D modification 66: - rotate step ***/
+    //if (CursorType != LC_CURSOR_DEFAULT && CursorType < LC_CURSOR_COUNT)
+    if (CursorType != LC_CURSOR_DEFAULT && CursorType < LC_CURSOR_COUNT - 1)
+    /*** LPub3D modification end ***/
+    {
+        const lcCursorInfo& Cursor = Cursors[CursorType];
+        Widget->setCursor(QCursor(QPixmap(Cursor.Name), Cursor.x, Cursor.y));
+        mCursorType = CursorType;
+    }
+    else
+    {
+        Widget->unsetCursor();
+        mCursorType = LC_CURSOR_DEFAULT;
+    }
+}
+
+
+
+lcQGLWidgetProperties::lcQGLWidgetProperties(QWidget *parent, lcQGLWidgetProperties *share, lcGLWidgetProperties *owner, bool view)
+    : QGLWidget(parent, share)
+{
+    mWheelAccumulator = 0;
+    widgetProperties = owner;
+    widgetProperties->mWidget = this;
+
+    mUpdateTimer.setSingleShot(true);
+    connect(&mUpdateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
+
+    widgetProperties->MakeCurrent();
+
+    // TODO: Find a better place for the grid texture and font
+    gTexFont.Load();
+    if (!gWidgetCount)
+    {
+        lcInitializeGLExtensions(context());
+        lcContext::CreateResources();
+        View::CreateResources(widgetProperties->mContext);
+
+        gPlaceholderMesh = new lcMesh;
+        gPlaceholderMesh->CreateBox();
+    }
+    gWidgetCount++;
+    widgetProperties->OnInitialUpdate();
+
+    preferredSize = QSize(0, 0);
+    setMouseTracking(true);
+
+    isView = view;
+    if (isView)
+    {
+        setFocusPolicy(Qt::StrongFocus);
+        setAcceptDrops(true);
+    }
+}
+
+lcQGLWidgetProperties::~lcQGLWidgetProperties()
+{
+    gWidgetCount--;
+    gTexFont.Release();
+    makeCurrent();
+    if (!gWidgetCount)
+    {
+        View::DestroyResources(widgetProperties->mContext);
+        lcContext::DestroyResources();
+
+        delete gPlaceholderMesh;
+        gPlaceholderMesh = NULL;
+    }
+
+    delete widgetProperties;
+}
+
+QSize lcQGLWidgetProperties::sizeHint() const
+{
+    if (preferredSize.isEmpty())
+        return QGLWidget::sizeHint();
+    else
+        return preferredSize;
+}
+
+void lcQGLWidgetProperties::initializeGL()
+{
+    glEnable(GL_POLYGON_OFFSET_FILL);
+    glPolygonOffset(0.5f, 0.1f);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glDepthMask(GL_TRUE);
+}
+
+void lcQGLWidgetProperties::resizeGL(int width, int height)
+{
+    widgetProperties->mWidth = width;
+    widgetProperties->mHeight = height;
+}
+
+void lcQGLWidgetProperties::paintGL()
+{
+    widgetProperties->OnDraw();
+}
+
+void lcQGLWidgetProperties::keyPressEvent(QKeyEvent *event)
+{
+    if (isView && event->key() == Qt::Key_Control)
+    {
+        widgetProperties->mInputState.Modifiers = event->modifiers();
+        widgetProperties->OnUpdateCursor();
+    }
+
+    QGLWidget::keyPressEvent(event);
+}
+
+void lcQGLWidgetProperties::keyReleaseEvent(QKeyEvent *event)
+{
+    if (isView && event->key() == Qt::Key_Control)
+    {
+        widgetProperties->mInputState.Modifiers = event->modifiers();
+        widgetProperties->OnUpdateCursor();
+    }
+
+    QGLWidget::keyReleaseEvent(event);
+}
+
+void lcQGLWidgetProperties::mousePressEvent(QMouseEvent *event)
+{
+    float scale = deviceScale();
+
+    widgetProperties->mInputState.x = event->x() * scale;
+    widgetProperties->mInputState.y = widgetProperties->mHeight - event->y() * scale - 1;
+    widgetProperties->mInputState.Modifiers = event->modifiers();
+
+    switch (event->button())
+    {
+    case Qt::LeftButton:
+        widgetProperties->OnLeftButtonDown();
+        break;
+
+    case Qt::MidButton:
+        widgetProperties->OnMiddleButtonDown();
+        break;
+
+    case Qt::RightButton:
+        widgetProperties->OnRightButtonDown();
+        break;
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    case Qt::BackButton:
+        widgetProperties->OnBackButtonDown();
+        break;
+
+    case Qt::ForwardButton:
+        widgetProperties->OnForwardButtonDown();
+        break;
+#endif
+
+    default:
+        break;
+    }
+}
+
+void lcQGLWidgetProperties::mouseReleaseEvent(QMouseEvent *event)
+{
+    float scale = deviceScale();
+
+    widgetProperties->mInputState.x = event->x() * scale;
+    widgetProperties->mInputState.y = widgetProperties->mHeight - event->y() * scale - 1;
+    widgetProperties->mInputState.Modifiers = event->modifiers();
+
+    switch (event->button())
+    {
+    case Qt::LeftButton:
+        widgetProperties->OnLeftButtonUp();
+        break;
+
+    case Qt::MidButton:
+        widgetProperties->OnMiddleButtonUp();
+        break;
+
+    case Qt::RightButton:
+        widgetProperties->OnRightButtonUp();
+        break;
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    case Qt::BackButton:
+        widgetProperties->OnBackButtonUp();
+        break;
+
+    case Qt::ForwardButton:
+        widgetProperties->OnForwardButtonUp();
+        break;
+#endif
+
+    default:
+        break;
+    }
+}
+
+void lcQGLWidgetProperties::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    float scale = deviceScale();
+
+    widgetProperties->mInputState.x = event->x() * scale;
+    widgetProperties->mInputState.y = widgetProperties->mHeight - event->y() * scale - 1;
+    widgetProperties->mInputState.Modifiers = event->modifiers();
+
+    switch (event->button())
+    {
+    case Qt::LeftButton:
+        widgetProperties->OnLeftButtonDoubleClick();
+        break;
+    default:
+        break;
+    }
+}
+
+void lcQGLWidgetProperties::mouseMoveEvent(QMouseEvent *event)
+{
+    float scale = deviceScale();
+
+    widgetProperties->mInputState.x = event->x() * scale;
+    widgetProperties->mInputState.y = widgetProperties->mHeight - event->y() * scale - 1;
+    widgetProperties->mInputState.Modifiers = event->modifiers();
+
+    widgetProperties->OnMouseMove();
+}
+
+void lcQGLWidgetProperties::wheelEvent(QWheelEvent *event)
+{
+    if ((event->orientation() & Qt::Vertical) == 0)
+    {
+        event->ignore();
+        return;
+    }
+
+    float scale = deviceScale();
+
+    widgetProperties->mInputState.x = event->x() * scale;
+    widgetProperties->mInputState.y = widgetProperties->mHeight - event->y() * scale - 1;
+    widgetProperties->mInputState.Modifiers = event->modifiers();
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
+    mWheelAccumulator += event->angleDelta().y() / 8;
+#else
+    mWheelAccumulator += event->delta() / 8;
+#endif
+    int numSteps = mWheelAccumulator / 15;
+
+    if (numSteps)
+    {
+        widgetProperties->OnMouseWheel(numSteps);
+        mWheelAccumulator -= numSteps * 15;
+    }
+
+    event->accept();
+}
+
+void lcQGLWidgetProperties::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (isView && event->mimeData()->hasFormat("application/vnd.leocad-part"))
+    {
+        event->acceptProposedAction();
+
+        QByteArray pieceData = event->mimeData()->data("application/vnd.leocad-part");
+        QDataStream dataStream(&pieceData, QIODevice::ReadOnly);
+        QString id;
+
+        dataStream >> id;
+
+        ((View*)widgetProperties)->BeginPieceDrag();
+    }
+    else
+        event->ignore();
+}
+
+void lcQGLWidgetProperties::dragLeaveEvent(QDragLeaveEvent *event)
+{
+    if (!isView)
+        return;
+
+    ((View*)widgetProperties)->EndPieceDrag(false);
+
+    event->accept();
+}
+
+void lcQGLWidgetProperties::dragMoveEvent(QDragMoveEvent *event)
+{
+    if (!isView || !event->mimeData()->hasFormat("application/vnd.leocad-part"))
+        return;
+
+    float scale = deviceScale();
+
+    widgetProperties->mInputState.x = event->pos().x() * scale;
+    widgetProperties->mInputState.y = widgetProperties->mHeight - event->pos().y() * scale - 1;
+    widgetProperties->mInputState.Modifiers = event->keyboardModifiers();
+
+    widgetProperties->OnMouseMove();
+
+    event->accept();
+}
+
+void lcQGLWidgetProperties::dropEvent(QDropEvent *event)
+{
+    if (!isView || !event->mimeData()->hasFormat("application/vnd.leocad-part"))
+        return;
+
+    ((View*)widgetProperties)->EndPieceDrag(true);
+    setFocus(Qt::MouseFocusReason);
+
+    event->accept();
+}
+/*** LPub3D modification end ***/

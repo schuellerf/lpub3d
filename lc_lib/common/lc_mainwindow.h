@@ -12,7 +12,11 @@
 
 class View;
 class PiecePreview;
+class PiecePropertiesPreview;
 class lcQGLWidget;
+/*** LPub3D modification 9: - includes and logging ***/
+class lcQGLWidgetProperties;
+/*** LPub3D modification end ***/
 class lcQPartsTree;
 class lcQColorList;
 class lcQPropertiesTree;
@@ -299,6 +303,9 @@ public:
 
 	QString mRecentFiles[LC_MAX_RECENT_FILES];
 	PiecePreview* mPreviewWidget;
+    /*** LPub3D modification 302: - rotate step ***/
+    PiecePropertiesPreview* mPropertiesPreviewWidget; //foo
+    /*** LPub3D modification end ***/
 	int mColorIndex;
 	lcSearchOptions mSearchOptions;
 	QAction* mActions[LC_NUM_COMMANDS];
@@ -379,6 +386,9 @@ protected:
 	QDockWidget* mTimelineToolBar;
 
 	lcQGLWidget* mPiecePreviewWidget;
+    /*** LPub3D modification 385: - suppress status ***/
+    lcQGLWidgetProperties* mPiecePropertiesPreviewWidget; //foo
+    /*** LPub3D modification end ***/
 	lcQPartsTree* mPartsTree;
 	QLineEdit* mPartSearchEdit;
 	lcQColorList* mColorList;
@@ -398,6 +408,9 @@ protected:
 	QMenu* mViewpointMenu;
 
     QWidget* mPartsContents;
+    /*** LPub3D modification 385: - suppress status ***/
+    QWidget* mPropertiesContents;
+    /*** LPub3D modification end ***/
 };
 
 extern class lcMainWindow* gMainWindow;
