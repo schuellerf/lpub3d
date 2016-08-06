@@ -332,6 +332,8 @@ protected:
 	void CreateToolBars();
 	void CreateStatusBar();
 	void SplitView(Qt::Orientation Orientation);
+	void ShowUpdatesDialog();
+	void ShowAboutDialog();
 	void ShowPrintDialog();
 
 	lcModelTabWidget* GetTabWidgetForModel(lcModel* Model) const
@@ -396,8 +398,9 @@ protected:
 	/*** LPub3D modification end ***/
 	QMenu* mCameraMenu;
 	QMenu* mViewpointMenu;
-
+    /*** LPub3D modification 399: - move tab to Gui ***/
     QWidget* mPartsContents;
+	/*** LPub3D modification end ***/
 };
 
 extern class lcMainWindow* gMainWindow;

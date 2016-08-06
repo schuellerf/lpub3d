@@ -15,7 +15,11 @@
 #include "view.h"
 #include "preview.h"
 #include "minifig.h"
+#include "lc_qarraydialog.h"
+#include "lc_qselectdialog.h"
+#include "lc_qminifigdialog.h"
 #include "lc_qgroupdialog.h"
+#include "lc_qeditgroupsdialog.h"
 #include "lc_qutils.h"
 
 /*** LPub3D modification 21: - includes ***/
@@ -1630,29 +1634,32 @@ void lcModel::RemoveFocusPieceFromGroup()
 
 void lcModel::ShowEditGroupsDialog()
 {
-	lcEditGroupsDialogOptions Options;
+	QMap<lcPiece*, lcGroup*> PieceParents;
+	QMap<lcGroup*, lcGroup*> GroupParents;
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
-		Options.PieceParents[Piece] = Piece->GetGroup();
+		PieceParents[Piece] = Piece->GetGroup();
 	}
 
 	for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
 	{
 		lcGroup* Group = mGroups[GroupIdx];
-		Options.GroupParents[Group] = Group->mGroup;
+		GroupParents[Group] = Group->mGroup;
 	}
 
-	if (!gMainWindow->DoDialog(LC_DIALOG_EDIT_GROUPS, &Options))
+	lcQEditGroupsDialog Dialog(gMainWindow, PieceParents, GroupParents);
+
+	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
-	bool Modified = Options.NewGroups.isEmpty();
+	bool Modified = Dialog.mNewGroups.isEmpty();
 
 	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
-		lcGroup* ParentGroup = Options.PieceParents.value(Piece);
+		lcGroup* ParentGroup = Dialog.mPieceParents.value(Piece);
 
 		if (ParentGroup != Piece->GetGroup())
 		{
@@ -1664,7 +1671,7 @@ void lcModel::ShowEditGroupsDialog()
 	for (int GroupIdx = 0; GroupIdx < mGroups.GetSize(); GroupIdx++)
 	{
 		lcGroup* Group = mGroups[GroupIdx];
-		lcGroup* ParentGroup = Options.GroupParents.value(Group);
+		lcGroup* ParentGroup = Dialog.mGroupParents.value(Group);
 
 		if (ParentGroup != Group->mGroup)
 		{
@@ -2106,7 +2113,7 @@ void lcModel::ShowSelectedPiecesLater()
 	gMainWindow->UpdateAllViews();
 }
 
-void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, lcStep> >& PieceSteps)
+void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps)
 {
 	if (PieceSteps.size() != mPieces.GetSize())
 		return;
@@ -3879,11 +3886,12 @@ void lcModel::ShowSelectByNameDialog()
 		return;
 	}
 
-	lcSelectDialogOptions Options;
-	if (!gMainWindow->DoDialog(LC_DIALOG_SELECT_BY_NAME, &Options))
+	lcQSelectDialog Dialog(gMainWindow);
+
+	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
-	SetSelectionAndFocus(Options.Objects, NULL, 0);
+	SetSelectionAndFocus(Dialog.mObjects, NULL, 0);
 }
 
 void lcModel::ShowArrayDialog()
@@ -3896,17 +3904,12 @@ void lcModel::ShowArrayDialog()
 		return;
 	}
 	
-	lcArrayDialogOptions Options;
+	lcQArrayDialog Dialog(gMainWindow);
 
-	memset(&Options, 0, sizeof(Options));
-	Options.Counts[0] = 10;
-	Options.Counts[1] = 1;
-	Options.Counts[2] = 1;
-
-	if (!gMainWindow->DoDialog(LC_DIALOG_PIECE_ARRAY, &Options))
+	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
-	if (Options.Counts[0] * Options.Counts[1] * Options.Counts[2] < 2)
+	if (Dialog.mCounts[0] * Dialog.mCounts[1] * Dialog.mCounts[2] < 2)
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Array only has 1 element or less, no pieces added."));
 		return;
@@ -3914,17 +3917,17 @@ void lcModel::ShowArrayDialog()
 
 	lcArray<lcObject*> NewPieces;
 
-	for (int Step1 = 0; Step1 < Options.Counts[0]; Step1++)
+	for (int Step1 = 0; Step1 < Dialog.mCounts[0]; Step1++)
 	{
-		for (int Step2 = 0; Step2 < Options.Counts[1]; Step2++)
+		for (int Step2 = 0; Step2 < Dialog.mCounts[1]; Step2++)
 		{
-			for (int Step3 = (Step1 == 0 && Step2 == 0) ? 1 : 0; Step3 < Options.Counts[2]; Step3++)
+			for (int Step3 = (Step1 == 0 && Step2 == 0) ? 1 : 0; Step3 < Dialog.mCounts[2]; Step3++)
 			{
 				lcMatrix44 ModelWorld;
 				lcVector3 Position;
 
-				lcVector3 RotationAngles = Options.Rotations[0] * Step1 + Options.Rotations[1] * Step2 + Options.Rotations[2] * Step3;
-				lcVector3 Offset = Options.Offsets[0] * Step1 + Options.Offsets[1] * Step2 + Options.Offsets[2] * Step3;
+				lcVector3 RotationAngles = Dialog.mRotations[0] * Step1 + Dialog.mRotations[1] * Step2 + Dialog.mRotations[2] * Step3;
+				lcVector3 Offset = Dialog.mOffsets[0] * Step1 + Dialog.mOffsets[1] * Step2 + Dialog.mOffsets[2] * Step3;
 
 				for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 				{
@@ -3968,25 +3971,26 @@ void lcModel::ShowArrayDialog()
 
 void lcModel::ShowMinifigDialog()
 {
-	lcMinifig* Minifig = new lcMinifig();
+	lcQMinifigDialog Dialog(gMainWindow);
 
-	if (!gMainWindow->DoDialog(LC_DIALOG_MINIFIG, &Minifig))
+	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
 	gMainWindow->mPreviewWidget->MakeCurrent();
 
 	lcGroup* Group = AddGroup(tr("Minifig #"), NULL);
 	lcArray<lcObject*> Pieces(LC_MFW_NUMITEMS);
+	lcMinifig& Minifig = Dialog.mMinifigWidget->mMinifig;
 
 	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
 	{
-		if (Minifig->Parts[PartIdx] == NULL)
+		if (Minifig.Parts[PartIdx] == NULL)
 			continue;
 
-		lcPiece* Piece = new lcPiece(Minifig->Parts[PartIdx]);
+		lcPiece* Piece = new lcPiece(Minifig.Parts[PartIdx]);
 
-		Piece->Initialize(Minifig->Matrices[PartIdx], mCurrentStep);
-		Piece->SetColorIndex(Minifig->Colors[PartIdx]);
+		Piece->Initialize(Minifig.Matrices[PartIdx], mCurrentStep);
+		Piece->SetColorIndex(Minifig.Colors[PartIdx]);
 		Piece->SetGroup(Group);
 		AddPiece(Piece);
 		Piece->UpdatePosition(mCurrentStep);

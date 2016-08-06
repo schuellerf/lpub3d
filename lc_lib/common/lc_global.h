@@ -59,7 +59,7 @@ int stricmp(const char* str1, const char* str2);
 #define LC_VERSION_PATCH 0
 #define LC_VERSION_TEXT "0.83.0"
 /*** LPub3D modification 61: - Build ***/
-#define LC_VERSION_BUILD "1952"
+#define LC_VERSION_BUILD "1953"
 /*** LPub3D modification end ***/
 
 

@@ -8,6 +8,8 @@
 #include "lc_qcolorlist.h"
 #include "lc_qpropertiestree.h"
 #include "lc_qutils.h"
+#include "lc_qupdatedialog.h"
+#include "lc_qaboutdialog.h"
 #include "lc_profile.h"
 #include "preview.h"
 #include "view.h"
@@ -29,7 +31,8 @@ lcMainWindow::lcMainWindow()
 	memset(mActions, 0, sizeof(mActions));
 
 	mPreviewWidget = NULL;
-    mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
+	mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
+
 	/*** LPub3D modification 32: - rotate step ***/
   	mRotateStepType = LC_ROTATESTEP_RELATIVE_ROTATION;
 	/*** LPub3D modification end ***/
@@ -92,7 +95,7 @@ void lcMainWindow::CreateWidgets()
 	connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(ClipboardChanged()));
 	ClipboardChanged();
 
-    PiecePreview* Preview = (PiecePreview*)mPiecePreviewWidget->widget;
+	PiecePreview* Preview = (PiecePreview*)mPiecePreviewWidget->widget;
 	mPreviewWidget = Preview;
 	mPreviewWidget->SetDefaultPiece();
 
@@ -642,10 +645,11 @@ void lcMainWindow::CreateToolBars()
 	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_ADD_KEYS]);
 	// TODO: add missing menu items
 
-    mPartsToolBar = new QDockWidget(tr("Parts"), this);
+	mPartsToolBar = new QDockWidget(tr("Parts"), this);
     //mPartsToolBar->setObjectName("PartsToolbar");
     //mPartsToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     mPartsContents = new QWidget();
+
     QGridLayout* PartsLayout = new QGridLayout(mPartsContents);
 	PartsLayout->setSpacing(6);
 	PartsLayout->setContentsMargins(6, 6, 6, 6);
@@ -703,23 +707,23 @@ void lcMainWindow::CreateToolBars()
     //mPartsToolBar->setWidget(mPartsContents);
     //addDockWidget(Qt::RightDockWidgetArea, mPartsToolBar);
 
-    mPropertiesToolBar = new QDockWidget(tr("Properties"), this);
+	mPropertiesToolBar = new QDockWidget(tr("Properties"), this);
     //mPropertiesToolBar->setObjectName("PropertiesToolbar");
     //mPropertiesToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 
 	mPropertiesWidget = new lcQPropertiesTree(mPropertiesToolBar);
 
-    mPropertiesToolBar->setWidget(mPropertiesWidget);
+	mPropertiesToolBar->setWidget(mPropertiesWidget);
     //addDockWidget(Qt::RightDockWidgetArea, mPropertiesToolBar);
 
-    mTimelineToolBar = new QDockWidget(tr("Timeline"), this);
+	mTimelineToolBar = new QDockWidget(tr("Timeline"), this);
     //mTimelineToolBar->setObjectName("TimelineToolbar");
     //mTimelineToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     //mTimelineToolBar->setAcceptDrops(true);
 
 	mTimelineWidget = new lcTimelineWidget(mTimelineToolBar);
 
-    mTimelineToolBar->setWidget(mTimelineWidget);
+	mTimelineToolBar->setWidget(mTimelineWidget);
     //addDockWidget(Qt::RightDockWidgetArea, mTimelineToolBar);
 
     //tabifyDockWidget(mPartsToolBar, mPropertiesToolBar);
@@ -1194,6 +1198,18 @@ void lcMainWindow::Print(QPrinter* Printer)
 	Context->EndRenderToTexture();
 }
 
+void lcMainWindow::ShowUpdatesDialog()
+{
+	lcQUpdateDialog Dialog(this, false);
+	Dialog.exec();
+}
+
+void lcMainWindow::ShowAboutDialog()
+{
+	lcQAboutDialog Dialog(this);
+	Dialog.exec();
+}
+
 void lcMainWindow::ShowPrintDialog()
 {
 	lcModel* Model = lcGetActiveModel();
@@ -1212,38 +1228,18 @@ void lcMainWindow::ShowPrintDialog()
 }
 
 // todo: call dialogs directly
-#include "lc_qimagedialog.h"
 #include "lc_qhtmldialog.h"
-#include "lc_qpovraydialog.h"
 #include "lc_qpropertiesdialog.h"
 #include "lc_qfinddialog.h"
-#include "lc_qselectdialog.h"
-#include "lc_qminifigdialog.h"
-#include "lc_qarraydialog.h"
-#include "lc_qeditgroupsdialog.h"
 #include "lc_qpreferencesdialog.h"
-#include "lc_qupdatedialog.h"
-#include "lc_qaboutdialog.h"
 
 bool lcMainWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 {
 	switch (Type)
 	{
-	case LC_DIALOG_SAVE_IMAGE:
-		{
-			lcQImageDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
 	case LC_DIALOG_EXPORT_HTML:
 		{
 			lcQHTMLDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
-	case LC_DIALOG_EXPORT_POVRAY:
-		{
-			lcQPOVRayDialog Dialog(this, Data);
 			return Dialog.exec() == QDialog::Accepted;
 		} break;
 
@@ -1259,45 +1255,9 @@ bool lcMainWindow::DoDialog(LC_DIALOG_TYPE Type, void* Data)
 			return Dialog.exec() == QDialog::Accepted;
 		} break;
 
-	case LC_DIALOG_SELECT_BY_NAME:
-		{
-			lcQSelectDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
-	case LC_DIALOG_MINIFIG:
-		{
-			lcQMinifigDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
-	case LC_DIALOG_PIECE_ARRAY:
-		{
-			lcQArrayDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
-	case LC_DIALOG_EDIT_GROUPS:
-		{
-			lcQEditGroupsDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
 	case LC_DIALOG_PREFERENCES:
 		{
 			lcQPreferencesDialog Dialog(this, Data);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
-	case LC_DIALOG_ABOUT:
-		{
-			lcQAboutDialog Dialog(this);
-			return Dialog.exec() == QDialog::Accepted;
-		} break;
-
-	case LC_DIALOG_CHECK_UPDATES:
-		{
-			lcQUpdateDialog Dialog(this, Data);
 			return Dialog.exec() == QDialog::Accepted;
 		} break;
 	}
@@ -1527,9 +1487,9 @@ lcVector3 lcMainWindow::GetTransformAmount()
 {
 	lcVector3 Transform;
 
-	Transform.x = mTransformXEdit->text().toFloat();
-	Transform.y = mTransformYEdit->text().toFloat();
-	Transform.z = mTransformZEdit->text().toFloat();
+	Transform.x = lcParseValueLocalized(mTransformXEdit->text());
+	Transform.y = lcParseValueLocalized(mTransformYEdit->text());
+	Transform.z = lcParseValueLocalized(mTransformZEdit->text());
 
 	return Transform;
 }
@@ -1784,10 +1744,7 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 	}
 	else if (Selection.GetSize() > 0)
 	{
-		if (Selection.GetSize() == 1)
-			Message = tr("1 Object selected");
-		else
-			Message = tr("%1 Objects selected").arg(QString::number(Selection.GetSize()));
+		Message = tr("%n Object(s) selected", "", Selection.GetSize());
 
 		if (Focus && Focus->IsPiece())
 		{
@@ -1831,7 +1788,7 @@ void lcMainWindow::UpdateCurrentStep()
 	lcModel* Model = lcGetActiveModel();
 	lcStep CurrentStep = Model->GetCurrentStep();
 	lcStep LastStep = Model->GetLastStep();
-	
+
 	mActions[LC_VIEW_TIME_FIRST]->setEnabled(CurrentStep != 1);
 	mActions[LC_VIEW_TIME_PREVIOUS]->setEnabled(CurrentStep > 1);
 	mActions[LC_VIEW_TIME_NEXT]->setEnabled(CurrentStep < LC_STEP_MAX);
@@ -2685,11 +2642,12 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_HELP_UPDATES:
-		DoDialog(LC_DIALOG_CHECK_UPDATES, NULL);
+		ShowUpdatesDialog();
 		break;
 
 	case LC_HELP_ABOUT:
-		DoDialog(LC_DIALOG_ABOUT, NULL);
+		ShowAboutDialog();
+		break;
 
 	case LC_VIEW_TIME_ADD_KEYS:
 		SetAddKeys(!GetAddKeys());

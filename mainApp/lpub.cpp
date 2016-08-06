@@ -1309,7 +1309,8 @@ bool Gui::aboutDialog()
 
 bool Gui::aboutViewerDialog()
 {
-    return gMainWindow->DoDialog(LC_DIALOG_ABOUT, NULL);
+    gMainWindow->ShowAboutDialog();
+    return true;
 }
 
 void Gui::refreshLDrawUnoffParts(){

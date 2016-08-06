@@ -21,6 +21,30 @@ QString lcFormatValue(float Value)
 	return String;
 }
 
+QString lcFormatValueLocalized(float Value)
+{
+	QLocale Locale = QLocale::system();
+	Locale.setNumberOptions(QLocale::OmitGroupSeparator);
+	QChar DecimalPoint = Locale.decimalPoint();
+	QString String = Locale.toString(Value, 'f', 6);
+
+	if (String.indexOf(DecimalPoint) != -1)
+	{
+		while (String.endsWith('0'))
+			String.chop(1);
+
+		if (String.endsWith(DecimalPoint))
+			String.chop(1);
+	}
+
+	return String;
+}
+
+float lcParseValueLocalized(const QString& Value)
+{
+	return QLocale::system().toFloat(Value);
+}
+
 // Resize all columns to content except for one stretching column. (taken from QT creator)
 lcQTreeWidgetColumnStretcher::lcQTreeWidgetColumnStretcher(QTreeWidget *treeWidget, int columnToStretch)
 	: QObject(treeWidget->header()), m_columnToStretch(columnToStretch)
