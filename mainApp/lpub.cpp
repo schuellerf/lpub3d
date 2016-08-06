@@ -1956,7 +1956,6 @@ void Gui::createDockWindows()
     //Properties
     gMainWindow->mPropertiesToolBar->setObjectName("PropertiesToolbar");
     gMainWindow->mPropertiesToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    gMainWindow->mPropertiesToolBar->setWidget(gMainWindow->mPropertiesContents);
     addDockWidget(Qt::RightDockWidgetArea, gMainWindow->mPropertiesToolBar);
     viewMenu->addAction(gMainWindow->mPropertiesToolBar->toggleViewAction());
 
@@ -1965,8 +1964,6 @@ void Gui::createDockWindows()
     viewerDockWindow->raise();
 
     connect(viewerDockWindow, SIGNAL (topLevelChanged(bool)), this, SLOT (toggleViewerStatusBar()));
-//    connect(gMainWindow->mTimelineToolBar, SIGNAL (topLevelChanged(bool)), this, SLOT (toggleViewerStatusBar()));
-//    connect(gMainWindow->mPartsToolBar, SIGNAL (topLevelChanged(bool)), this, SLOT (toggleViewerStatusBar()));
 }
 
 void Gui::toggleViewerStatusBar(){

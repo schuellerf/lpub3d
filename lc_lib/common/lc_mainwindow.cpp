@@ -29,9 +29,6 @@ lcMainWindow::lcMainWindow()
 	memset(mActions, 0, sizeof(mActions));
 
 	mPreviewWidget = NULL;
-    /*** LPub3D modification 32: - rotate step ***/
-    mPropertiesPreviewWidget = NULL; //foo
-    /*** LPub3D modification end ***/
     mTransformType = LC_TRANSFORM_RELATIVE_TRANSLATION;
 	/*** LPub3D modification 32: - rotate step ***/
   	mRotateStepType = LC_ROTATESTEP_RELATIVE_ROTATION;
@@ -95,15 +92,9 @@ void lcMainWindow::CreateWidgets()
 	connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(ClipboardChanged()));
 	ClipboardChanged();
 
-	PiecePreview* Preview = (PiecePreview*)mPiecePreviewWidget->widget;
+    PiecePreview* Preview = (PiecePreview*)mPiecePreviewWidget->widget;
 	mPreviewWidget = Preview;
-    mPreviewWidget->SetDefaultPiece();
-
-    /*** LPub3D modification 99: - property parts ***/
-    PiecePropertiesPreview* PropertiesPreview = (PiecePropertiesPreview*)mPiecePropertiesPreviewWidget->widgetProperties; //foo
-    mPropertiesPreviewWidget = PropertiesPreview;   //foo
-    mPropertiesPreviewWidget->SetDefaultPiece();  //foo
-    /*** LPub3D modification end ***/
+	mPreviewWidget->SetDefaultPiece();
 
 	/*** LPub3D modification 99: - disable 3D actions ***/
 	//Disable menu actions until model loaded
@@ -505,10 +496,10 @@ void lcMainWindow::CreateMenus()
     menuBar()->removeAction(HelpMenu->menuAction());
 	ViewMenu->removeAction(StepMenu->menuAction());
 	//menu actions ***/
-    ToolBarsMenu->removeAction(mStandardToolBar->toggleViewAction());
-    ToolBarsMenu->removeAction(mPartsToolBar->toggleViewAction());
-    ToolBarsMenu->removeAction(mPropertiesToolBar->toggleViewAction());
-    ToolBarsMenu->removeAction(mTimelineToolBar->toggleViewAction());
+	ToolBarsMenu->removeAction(mStandardToolBar->toggleViewAction());
+	ToolBarsMenu->removeAction(mPartsToolBar->toggleViewAction());
+	ToolBarsMenu->removeAction(mPropertiesToolBar->toggleViewAction());
+	ToolBarsMenu->removeAction(mTimelineToolBar->toggleViewAction());
 	ToolBarsMenu->removeAction(mTimeToolBar->toggleViewAction());
 	ViewMenu->removeAction(mActions[LC_VIEW_FULLSCREEN]);
 	HelpMenu->removeAction(mActions[LC_HELP_HOMEPAGE]);
@@ -651,14 +642,10 @@ void lcMainWindow::CreateToolBars()
 	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_ADD_KEYS]);
 	// TODO: add missing menu items
 
-
-
-    // Parts TAB
     mPartsToolBar = new QDockWidget(tr("Parts"), this);
     //mPartsToolBar->setObjectName("PartsToolbar");
     //mPartsToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     mPartsContents = new QWidget();
-
     QGridLayout* PartsLayout = new QGridLayout(mPartsContents);
 	PartsLayout->setSpacing(6);
 	PartsLayout->setContentsMargins(6, 6, 6, 6);
@@ -679,33 +666,30 @@ void lcMainWindow::CreateToolBars()
 		format.setSamples(AASamples);
 		QGLFormat::setDefaultFormat(format);
 	}
-    // Parts-Piece Preview
-//    mPiecePreviewWidget = new lcQGLWidget(PreviewFrame, NULL, new PiecePreview(), false);
-//    mPiecePreviewWidget->preferredSize = QSize(200, 100);
-//    PreviewLayout->addWidget(mPiecePreviewWidget, 0, 0, 1, 1);
-    mPiecePropertiesPreviewWidget = new lcQGLWidgetProperties(PreviewFrame, NULL, new PiecePropertiesPreview(), false);
-    mPiecePropertiesPreviewWidget->preferredSize = QSize(200, 100);
-    PreviewLayout->addWidget(mPiecePropertiesPreviewWidget, 0, 0, 1, 1);
+
+	mPiecePreviewWidget = new lcQGLWidget(PreviewFrame, NULL, new PiecePreview(), false);
+	mPiecePreviewWidget->preferredSize = QSize(200, 100);
+	PreviewLayout->addWidget(mPiecePreviewWidget, 0, 0, 1, 1);
 
 	QSizePolicy treePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	treePolicy.setVerticalStretch(1);
-    // Parts-Parts Tree
+
 	mPartsTree = new lcQPartsTree(PartsSplitter);
 	mPartsTree->setSizePolicy(treePolicy);
 	connect(mPartsTree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(PartsTreeItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
-    // Parts-Search
+
 	mPartSearchEdit = new QLineEdit(PartsSplitter);
 	connect(mPartSearchEdit, SIGNAL(returnPressed()), this, SLOT(PartSearchReturn()));
 	connect(mPartSearchEdit, SIGNAL(textChanged(QString)), this, SLOT(PartSearchChanged(QString)));
-    // Parts-Search Completer
+
 	QCompleter* Completer = new QCompleter(this);
 	Completer->setModel(new lcQPartsListModel(Completer));
 	Completer->setCaseSensitivity(Qt::CaseInsensitive);
 	mPartSearchEdit->setCompleter(Completer);
-    //Parts-Colour
+
 	QFrame* ColorFrame = new QFrame(PartsSplitter);
 	ColorFrame->setFrameShape(QFrame::StyledPanel);
-    ColorFrame->setFrameShadow(QFrame::Sunken);
+	ColorFrame->setFrameShadow(QFrame::Sunken);
 
 	QGridLayout* ColorLayout = new QGridLayout(ColorFrame);
 	ColorLayout->setContentsMargins(0, 0, 0, 0);
@@ -716,49 +700,17 @@ void lcMainWindow::CreateToolBars()
 
 	PartsLayout->addWidget(PartsSplitter, 0, 0, 1, 1);
 
-    // Properties TAB
+    //mPartsToolBar->setWidget(mPartsContents);
+    //addDockWidget(Qt::RightDockWidgetArea, mPartsToolBar);
+
     mPropertiesToolBar = new QDockWidget(tr("Properties"), this);
     //mPropertiesToolBar->setObjectName("PropertiesToolbar");
     //mPropertiesToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    mPropertiesContents = new QWidget();
 
-    QGridLayout* PropertiesDockLayout = new QGridLayout(mPropertiesContents);
-    PropertiesDockLayout->setSpacing(6);
-    PropertiesDockLayout->setContentsMargins(6, 6, 6, 6);
-    QSplitter* PropertiesSplitter = new QSplitter(Qt::Vertical, mPropertiesContents);
+	mPropertiesWidget = new lcQPropertiesTree(mPropertiesToolBar);
 
-    QFrame* PropertiesPreviewFrame = new QFrame(PropertiesSplitter);
-    PropertiesPreviewFrame->setFrameShape(QFrame::StyledPanel);
-    PropertiesPreviewFrame->setFrameShadow(QFrame::Sunken);
-
-    QGridLayout* PropertiesPreviewLayout = new QGridLayout(PropertiesPreviewFrame);
-    PropertiesPreviewLayout->setContentsMargins(0, 0, 0, 0);
-    // Properties-Piece Preview
-//    mPiecePropertiesPreviewWidget = new lcQGLWidgetProperties(PropertiesPreviewFrame, NULL, new PiecePropertiesPreview(), false);
-//    mPiecePropertiesPreviewWidget->preferredSize = QSize(200, 100);
-//    PropertiesPreviewLayout->addWidget(mPiecePropertiesPreviewWidget, 0, 0, 1, 1);
-    mPiecePreviewWidget = new lcQGLWidget(PropertiesPreviewFrame, NULL, new PiecePreview(), false);
-    mPiecePreviewWidget->preferredSize = QSize(200, 100);
-    PropertiesPreviewLayout->addWidget(mPiecePreviewWidget, 0, 0, 1, 1);
-
-    QFrame* PropertiesFrame = new QFrame(PropertiesSplitter);
-    PropertiesFrame->setFrameShape(QFrame::StyledPanel);
-    PropertiesFrame->setFrameShadow(QFrame::Sunken);
-    // Properties-Properties Widget
-    QGridLayout* PropertiesLayout = new QGridLayout(PropertiesFrame);
-    PropertiesLayout->setContentsMargins(0, 0, 0, 0);
-
-    mPropertiesWidget = new lcQPropertiesTree(PropertiesSplitter);
-    PropertiesLayout->addWidget(mPropertiesWidget);
-    // -- //connect(mColorList, SIGNAL(colorChanged(int)), this, SLOT(ColorChanged(int))); // connect viewer to properties as needed
-
-    PropertiesDockLayout->addWidget(PropertiesSplitter, 0, 0, 1, 1);
-
-    //mPropertiesToolBar->setWidget(mPropertiesContents);
+    mPropertiesToolBar->setWidget(mPropertiesWidget);
     //addDockWidget(Qt::RightDockWidgetArea, mPropertiesToolBar);
-
-    //Properties TAB END
-    //Properties Tab goes here
 
     mTimelineToolBar = new QDockWidget(tr("Timeline"), this);
     //mTimelineToolBar->setObjectName("TimelineToolbar");
@@ -773,7 +725,6 @@ void lcMainWindow::CreateToolBars()
     //tabifyDockWidget(mPartsToolBar, mPropertiesToolBar);
     //tabifyDockWidget(mPropertiesToolBar, mTimelineToolBar);
     //mPartsToolBar->raise();
-    /*** LPub3D modification end ***/
 
 	/*** LPub3D modification 737: - toolbar management ***/
 	//toolbars
@@ -875,15 +826,15 @@ QMenu* lcMainWindow::createPopupMenu()
 	Menu->addAction(mTimeToolBar->toggleViewAction());
 
 	/*** LPub3D modification 846: - popup toolbar management ***/
-    Menu->removeAction(mStandardToolBar->toggleViewAction());
-    Menu->removeAction(mPartsToolBar->toggleViewAction());
-    Menu->removeAction(mPropertiesToolBar->toggleViewAction());
-    Menu->removeAction(mTimelineToolBar->toggleViewAction());
-    Menu->removeAction(mPartsToolBar->toggleViewAction());
-    Menu->removeAction(mTimeToolBar->toggleViewAction());
+	Menu->removeAction(mStandardToolBar->toggleViewAction());
+	Menu->removeAction(mPartsToolBar->toggleViewAction());
+	Menu->removeAction(mPropertiesToolBar->toggleViewAction());
+	Menu->removeAction(mTimelineToolBar->toggleViewAction());
+	Menu->removeAction(mPartsToolBar->toggleViewAction());
+	Menu->removeAction(mTimeToolBar->toggleViewAction());
 	/*** LPub3D modification end ***/
 
-    return Menu;
+	return Menu;
 }
 
 void lcMainWindow::ModelTabClosed(int Index)
@@ -2045,7 +1996,6 @@ void lcMainWindow::UpdateModels()
 	PieceInfo* CurPiece = mPreviewWidget->GetCurrentPiece();
 	if (CurPiece->GetModel() == CurrentModel)
 		mPreviewWidget->SetDefaultPiece();
-
 }
 
 void lcMainWindow::UpdateCategories()
