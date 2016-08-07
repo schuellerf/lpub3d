@@ -33,7 +33,7 @@
 
 lcPiecesLibrary::lcPiecesLibrary()
 {
-
+    /*** LPub3D modification 36: - portable cache ***/
     if (QDir(Preferences::lpub3dPath + "/extras").exists()) { // we have a portable distribution
         mCachePath = Preferences::lpub3dPath + "/cache";
     } else {
@@ -44,6 +44,7 @@ lcPiecesLibrary::lcPiecesLibrary()
         mCachePath  = QDesktopServices::storageLocation(QDesktopServices::CacheLocation);
 #endif
     }
+    /*** LPub3D modification end ***/
 
 	QDir Dir;
 	Dir.mkpath(mCachePath);
