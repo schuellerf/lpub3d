@@ -11,6 +11,11 @@
 #include "pieceinf.h"
 #include "lc_library.h"
 #include "lc_qutils.h"
+/*** LPub3D modification 14: - set property colour ***/
+#include "lc_mainwindow.h"
+#include "preview.h"
+/*** LPub3D modification end ***/
+
 
 // Draw an icon indicating opened/closing branches
 static QIcon drawIndicatorIcon(const QPalette &palette, QStyle *style)
@@ -692,12 +697,18 @@ void lcQPropertiesTree::slotSetValue(int Value)
 
 			QPushButton *editor = (QPushButton*)m_delegate->editor();
 			updateColorEditor(editor, Value);
+            /*** LPub3D modification 695: - set property colour ***/
+            gMainWindow->SetColorIndex(Value);
+            /*** LPub3D modification end ***/
 		}
 		else if (Item == partID)
 		{
 			QComboBox *editor = (QComboBox*)sender();
-
-			Model->SetSelectedPiecesPieceInfo((PieceInfo*)editor->itemData(Value).value<void*>());
+            /*** LPub3D modification 695: - set property colour ***/
+            PieceInfo* Info = (PieceInfo*)editor->itemData(Value).value<void*>();
+            Model->SetSelectedPiecesPieceInfo(Info);
+            gMainWindow->mPreviewWidget->SetCurrentPiece(Info);
+            /*** LPub3D modification end ***/
 		}
 	}
 }
@@ -922,6 +933,11 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 
 	partID->setText(1, Info ? Info->m_strDescription : QString());
 	partID->setData(0, PropertyValueRole, qVariantFromValue((void*)Info));
+
+    /*** LPub3D modification 899: - timeline part display ***/
+    gMainWindow->mPreviewWidget->SetCurrentPiece(Info);
+    gMainWindow->SetColorIndex(ColorIndex);
+    /*** LPub3D modification end ***/
 }
 
 void lcQPropertiesTree::SetCamera(lcObject* Focus)
