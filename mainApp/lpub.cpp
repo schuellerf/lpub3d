@@ -25,6 +25,7 @@
 #include <QCloseEvent>
 #include <QUndoStack>
 #include <QTextStream>
+#include <JlCompress.h>
 #include "QPushButton"
 #include "QHBoxLayout"
 #include "QVBoxLayout"
@@ -492,7 +493,8 @@ void Gui::displayFile(
   LDrawFile     *ldrawFile, 
   const QString &modelName)
 {
-//  if (force || modelName != curSubFile) {
+    displayFileSig(ldrawFile, modelName);
+    curSubFile = modelName;
     int currentIndex = 0;
     for (int i = 0; i < mpdCombo->count(); i++) {
       if (mpdCombo->itemText(i) == modelName) {
@@ -501,9 +503,6 @@ void Gui::displayFile(
       }
     }
     mpdCombo->setCurrentIndex(currentIndex);
-    curSubFile = modelName;
-    displayFileSig(ldrawFile, modelName);
-//  }
 }
 
 void Gui::displayParmsFile(
@@ -625,7 +624,6 @@ void Gui::mpdComboChanged(int index)
           displayPage();
           return;
         } else {
-
           // TODO add status bar message
           Where topOfSteps(newSubFile,0);
           curSubFile = newSubFile;
@@ -927,31 +925,33 @@ void Gui::preferences()
 {
   bool useLDViewSCall= renderer->useLDViewSCall();
 
-  if (Preferences::getPreferences()) {
+    if (Preferences::getPreferences()) {
 
-      Meta meta;
-      page.meta = meta;
+        Meta meta;
+        page.meta = meta;
 
-      Step::refreshCsi = true;
+        Step::refreshCsi = true;
 
-      if (!getCurFile().isEmpty()){
+        QString currentRenderer = Render::getRenderer();
+        Render::setRenderer(Preferences::preferredRenderer);
+        bool rendererChanged = Render::getRenderer() != currentRenderer;
+        bool fadeStepColorChanged = Preferences::fadeStepColorChanged && !Preferences::fadeStepSettingChanged;
+        bool useLDViewSCallChanged = useLDViewSCall != renderer->useLDViewSCall();
 
-          QString currentRenderer = Render::getRenderer();
-          Render::setRenderer(Preferences::preferredRenderer);
-          bool rendererChanged = Render::getRenderer() != currentRenderer;
-          bool fadeStepColorChanged = Preferences::fadeStepColorChanged && !Preferences::fadeStepSettingChanged;
-          bool useLDViewSCallChanged = useLDViewSCall != renderer->useLDViewSCall();
-
-          if (rendererChanged && Preferences::preferredRenderer == "LDGLite") {
-              partWorkerLdgLiteSearchDirs.populateLdgLiteSearchDirs();
+        if (rendererChanged && Preferences::preferredRenderer == "LDGLite") {
+            partWorkerLdgLiteSearchDirs.populateLdgLiteSearchDirs();
+        }
+        if (Preferences::fadeStepSettingChanged){
+            processFadePartsArchive();
+        }
+        if (!getCurFile().isEmpty()) {
+            if (Preferences::fadeStepSettingChanged){
+                clearImageModelCaches();
             }
-
-          if (Preferences::fadeStepSettingChanged){
-              clearImageModelCaches();
-            } else if (rendererChanged ||
-                       fadeStepColorChanged ||
-                       useLDViewSCallChanged){
-              clearAndRedrawPage();
+            if (rendererChanged ||
+                     fadeStepColorChanged ||
+                     useLDViewSCallChanged){
+                clearAndRedrawPage();
             }
         }
     }
@@ -1240,6 +1240,30 @@ void Gui::processFadeColourParts()
     }
 }
 
+void Gui::processFadePartsArchive()
+{
+  bool doFadeStep = (page.meta.LPub.fadeStep.fadeStep.value() || Preferences::enableFadeStep);
+
+  if (doFadeStep) {
+
+      QThread *partThread  = new QThread();
+      partWorkerFadeColour = new PartWorker();
+      partWorkerFadeColour->moveToThread(partThread);
+
+      connect(partThread,           SIGNAL(started()),                partWorkerFadeColour, SLOT(processFadePartsArchive()));
+      connect(partThread,           SIGNAL(finished()),                         partThread, SLOT(deleteLater()));
+      connect(partWorkerFadeColour, SIGNAL(fadeColourFinishedSig()),            partThread, SLOT(quit()));
+      connect(partWorkerFadeColour, SIGNAL(fadeColourFinishedSig()),  partWorkerFadeColour, SLOT(deleteLater()));
+      connect(partWorkerFadeColour, SIGNAL(requestFinishSig()),                 partThread, SLOT(quit()));
+      connect(partWorkerFadeColour, SIGNAL(requestFinishSig()),       partWorkerFadeColour, SLOT(deleteLater()));
+      connect(this,                 SIGNAL(requestEndThreadNowSig()), partWorkerFadeColour, SLOT(requestEndThreadNow()));
+
+      connect(partWorkerFadeColour, SIGNAL(messageSig(bool,QString)),                 this, SLOT(statusMessage(bool,QString)));
+
+      partThread->start();
+    }
+}
+
 // left side progress bar
 void Gui::progressBarInit(){
     progressBar->setMaximumHeight(15);
@@ -1315,17 +1339,51 @@ bool Gui::aboutViewerDialog()
 
 void Gui::refreshLDrawUnoffParts(){
 
-    // Create an instance of update ldraw archive
+    // Download unofficial archive
+    emit messageSig(true,"Refresh LDraw Unofficial Library archive...");
+    UpdateCheck *libraryDownload;
+    QEventLoop *wait = new QEventLoop();
+    QString archivePath = tr("%1/%2").arg(Preferences::lpubDataPath, "libraries");
     libraryDownload = new UpdateCheck(this, (void*)LDrawUnofficialLibraryDownload);
-    libraryDownload->requestDownload(libraryDownload->getDEFS_URL(), tr("%1/%2").arg(Preferences::lpubDataPath, "libraries"));
+    wait->connect(libraryDownload, SIGNAL(downloadFinished(QString,QString)), wait, SLOT(quit()));
+    libraryDownload->requestDownload(libraryDownload->getDEFS_URL(), archivePath);
+    wait->exec();
 
+    // Extract archive
+    QString archive = tr("%1/%2").arg(archivePath).arg(FILE_LPUB3D_UNOFFICIAL_ARCHIVE);
+    QString destination = tr("%1/unofficial").arg(Preferences::ldrawPath);
+    QStringList result = JlCompress::extractDir(archive,destination);
+    if (result.isEmpty()){
+        emit messageSig(false,tr("Failed to extract %1 to %2").arg(archive).arg(destination));
+    } else {
+        QString message = tr("%1 Unofficial Library files extracted to %2").arg(result.size()).arg(destination);
+        emit messageSig(true,message);
+    }
 }
 
 void Gui::refreshLDrawOfficialParts(){
 
-    // Create an instance of update ldraw archive
+    // Download official archive
+    emit messageSig(true,"Refresh LDraw Official Library archive...");
+    UpdateCheck *libraryDownload;
+    QEventLoop *wait = new QEventLoop();
+    QString archivePath = tr("%1/%2").arg(Preferences::lpubDataPath, "libraries");
     libraryDownload = new UpdateCheck(this, (void*)LDrawOfficialLibraryDownload);
-    libraryDownload->requestDownload(libraryDownload->getDEFS_URL(), tr("%1/%2").arg(Preferences::lpubDataPath, "libraries"));
+    wait->connect(libraryDownload, SIGNAL(downloadFinished(QString,QString)), wait, SLOT(quit()));
+    libraryDownload->requestDownload(libraryDownload->getDEFS_URL(), archivePath);
+    wait->exec();
+
+    // Extract archive
+    QString archive = tr("%1/%2").arg(archivePath).arg(VER_LDRAW_OFFICIAL_ARCHIVE);
+    QString destination = Preferences::ldrawPath;
+    destination = destination.remove(destination.size() - 6,6);
+    QStringList result = JlCompress::extractDir(archive,destination);
+    if (result.isEmpty()){
+        emit messageSig(false,tr("Failed to extract %1 to %2/ldraw").arg(archive).arg(destination));
+    } else {
+        QString message = tr("%1 Official Library files extracted to %2/ldraw").arg(result.size()).arg(destination);
+        emit messageSig(true,message);
+    }
 
 }
 
@@ -1910,6 +1968,7 @@ void Gui::statusBarMsg(QString msg)
 
 void Gui::createViewerStatusBar()
 {
+
   statusBar()->showMessage(tr("Ready"));
   connect(gMainWindow->mLCStatusBar, SIGNAL(messageChanged(QString)), this, SLOT(showViewerStatusMessage()));
 }

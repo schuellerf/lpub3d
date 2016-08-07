@@ -273,12 +273,11 @@ int Gui::drawPage(LGraphicsView  *view,
   Rc gprc = OkRc;
   Rc rc;
 
-//  statusBar()->showMessage("Processing " + current.modelName);
-  emit messageSig(true, "Processing " + current.modelName);
-
   page.coverPage = false;
 
   QStringList calloutParts;
+
+  emit messageSig(true, "Processing draw page for " + current.modelName);
 
   /*
    * do until end of page
@@ -452,8 +451,6 @@ int Gui::drawPage(LGraphicsView  *view,
                   QStringList csiParts2;
 
                   QHash<QString, QStringList> calloutBfx;
-
-                  emit messageSig(true, "Processing draw page...");
 
                   int rc;
                   rc = drawPage(
@@ -924,8 +921,7 @@ int Gui::drawPage(LGraphicsView  *view,
                           return rc;
                         }
 
-//                      qDebug() << Render::getRenderer()
-                      logTrace() << "\n" << Render::getRenderer()
+                      logTrace() << Render::getRenderer()
                                  << "CSI single call render took"
                                  << timer.elapsed() << "milliseconds"
                                  << "to render " << ldrStepFiles.size()
@@ -1104,8 +1100,7 @@ int Gui::drawPage(LGraphicsView  *view,
                               return rc;
                             }
 
-//                          qDebug() << Render::getRenderer()
-                          logTrace() << "\n" << Render::getRenderer()
+                          logTrace() << Render::getRenderer()
                                      << "CSI single call render took"
                                      << timer.elapsed() << "milliseconds"
                                      << "to render " << ldrStepFiles.size()
@@ -1222,6 +1217,8 @@ int Gui::findPage(
 
   RotStepMeta saveRotStep = meta.rotStep;
 
+  emit messageSig(true, "Processing find page for " + current.modelName);
+
   for ( ;
         current.lineNumber < numLines;
         current.lineNumber++) {
@@ -1285,8 +1282,6 @@ int Gui::findPage(
                       // since rotsteps don't affect submodels
                       RotStepMeta saveRotStep2 = meta.rotStep;
                       meta.rotStep.clear();
-
-                      emit messageSig(true, "Processing find page...");
 
                       findPage(view,scene,pageNum,line,current2,isMirrored,meta,printing);
                       saveStepPageNum = stepPageNum;
@@ -1353,8 +1348,6 @@ int Gui::findPage(
 
                       QStringList pliParts;
 
-                      emit messageSig(true, "Processing draw page...");
-
                       (void) drawPage(view,
                                       scene,
                                       &page,
@@ -1411,8 +1404,6 @@ int Gui::findPage(
                           page.meta.rotStep = saveRotStep;
                           page.meta.rotStep = meta.rotStep;
                           QStringList pliParts;
-
-                          emit messageSig(true, "Processing draw page...");
 
                           (void) drawPage(view,
                                           scene,
@@ -1550,8 +1541,6 @@ int Gui::findPage(
 
           page.meta = saveMeta;
           QStringList pliParts;
-
-          emit messageSig(true, "Processing draw page...");
 
           (void) drawPage(view,
                           scene,
@@ -1976,7 +1965,7 @@ void Gui::drawPage(
   Meta    meta;
   firstStepPageNum = -1;
   lastStepPageNum = -1;
-  emit messageSig(true, "Processing find page...");
+
   findPage(view,scene,maxPages,empty,current,false,meta,printing);
   topOfPages.append(current);
   maxPages--;
@@ -2232,7 +2221,7 @@ QStringList Gui::fadeSubFile(const QStringList &contents, const QString &color)
               if (argv[1] != edgeColor){
                   argv[1] = fadeColor;}
               // process static colored parts
-              QString fileNameStr = argv[argv.size()-1];
+              QString fileNameStr = argv[argv.size()-1].toLower();
               if (FadeStepColorParts::isStaticColorPart(fileNameStr)){
                   fileNameStr = QDir::toNativeSeparators(fileNameStr.replace(".dat","-fade.dat"));
                 }
@@ -2294,7 +2283,7 @@ QStringList Gui::fadeStep(const QStringList &csiParts, const int &stepNum,  Wher
                   if (argv[1] != edgeColor){
                       argv[1] = fadeColor;}
                   // process color parts naming
-                  QString fileNameStr = argv[argv.size()-1];
+                  QString fileNameStr = argv[argv.size()-1].toLower();
 
                   emit messageSig(true, "Do fadeStep for " + fileNameStr);
 
