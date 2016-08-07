@@ -6,7 +6,7 @@ class lcTimelineWidget : public QTreeWidget
 	Q_OBJECT
 
 public:
-	lcTimelineWidget(QWidget* Parent);
+    lcTimelineWidget(QWidget* Parent);
 	virtual ~lcTimelineWidget();
 
 	void Update(bool Clear, bool UpdateItems);

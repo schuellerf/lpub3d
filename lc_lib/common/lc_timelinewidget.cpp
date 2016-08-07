@@ -307,8 +307,9 @@ void lcTimelineWidget::ItemSelectionChanged()
 
 	lcPiece* CurrentPiece = NULL;
 	QTreeWidgetItem* CurrentItem = currentItem();
-	if (CurrentItem && CurrentItem->isSelected())
+    if (CurrentItem && CurrentItem->isSelected()) {
 		CurrentPiece = (lcPiece*)CurrentItem->data(0, Qt::UserRole).value<uintptr_t>();
+    }
 
 	bool Blocked = blockSignals(true);
 	mIgnoreUpdates = true;
@@ -324,7 +325,7 @@ void lcTimelineWidget::dropEvent(QDropEvent* Event)
 {
 	QTreeWidget::dropEvent(Event);
 
-	QList<QPair<lcPiece*, lcStep> > PieceSteps;
+    QList<QPair<lcPiece*, lcStep> > PieceSteps;
 
 	for (int TopLevelItemIdx = 0; TopLevelItemIdx < topLevelItemCount(); TopLevelItemIdx++)
 	{
@@ -333,9 +334,9 @@ void lcTimelineWidget::dropEvent(QDropEvent* Event)
 		for (int PieceItemIdx = 0; PieceItemIdx < StepItem->childCount(); PieceItemIdx++)
 		{
 			QTreeWidgetItem* PieceItem = StepItem->child(PieceItemIdx);
-			lcPiece* Piece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
+            lcPiece* Piece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
 
-			PieceSteps.append(QPair<lcPiece*, lcStep>(Piece, TopLevelItemIdx + 1));
+            PieceSteps.append(QPair<lcPiece*, lcStep>(Piece, TopLevelItemIdx + 1));
 		}
 	}
 

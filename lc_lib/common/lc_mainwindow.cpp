@@ -721,7 +721,10 @@ void lcMainWindow::CreateToolBars()
     //mTimelineToolBar->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     //mTimelineToolBar->setAcceptDrops(true);
 
-	mTimelineWidget = new lcTimelineWidget(mTimelineToolBar);
+    mTimelineWidget = new lcTimelineWidget(mTimelineToolBar);
+    /*** LPub3D modification 725: - timeline part display ***/
+    connect(mTimelineWidget, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(TimelineWidgetItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
+    /*** LPub3D modification end ***/
 
 	mTimelineToolBar->setWidget(mTimelineWidget);
     //addDockWidget(Qt::RightDockWidgetArea, mTimelineToolBar);
@@ -892,6 +895,23 @@ void lcMainWindow::PartsTreeItemChanged(QTreeWidgetItem* Current, QTreeWidgetIte
 	if (Info)
 		mPreviewWidget->SetCurrentPiece(Info);
 }
+
+/*** LPub3D modification 899: - timeline part display ***/
+void lcMainWindow::TimelineWidgetItemChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous)
+{
+    Q_UNUSED(Previous);
+
+    if (!Current)
+        return;
+
+    lcPiece* Piece = (lcPiece*)Current->data(0, Qt::UserRole).value<uintptr_t>();
+
+    if (Piece->mPieceInfo) {
+        mPreviewWidget->SetCurrentPiece(Piece->mPieceInfo);
+        SetColorIndex(Piece->mColorIndex);
+    }
+}
+/*** LPub3D modification end ***/
 
 void lcMainWindow::ColorChanged(int ColorIndex)
 {

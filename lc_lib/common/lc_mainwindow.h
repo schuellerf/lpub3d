@@ -318,6 +318,9 @@ protected slots:
 	void ClipboardChanged();
 	void ActionTriggered();
 	void PartsTreeItemChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);
+    /*** LPub3D modification 321: - timeline part display ***/
+    void TimelineWidgetItemChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);
+    /*** LPub3D modification end ***/
 	void ColorChanged(int ColorIndex);
 	void PartSearchReturn();
 	void PartSearchChanged(const QString& Text);
