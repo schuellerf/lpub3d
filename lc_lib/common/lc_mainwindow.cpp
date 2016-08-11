@@ -892,8 +892,14 @@ void lcMainWindow::PartsTreeItemChanged(QTreeWidgetItem* Current, QTreeWidgetIte
 
 	PieceInfo* Info = (PieceInfo*)Current->data(0, lcQPartsTree::PieceInfoRole).value<void*>();
 
-	if (Info)
+    /*** LPub3D modification 895: - replace mStatusBarLabel ***/
+    if (Info) {
 		mPreviewWidget->SetCurrentPiece(Info);
+        QString Message;
+        Message = tr("%1 (ID: %2)").arg(Info->m_strDescription, Info->m_strName);
+        statusBar()->showMessage(Message);
+    }
+    /*** LPub3D modification end ***/
 }
 
 /*** LPub3D modification 899: - timeline part display ***/
@@ -951,8 +957,14 @@ void lcMainWindow::PartSearchChanged(const QString& Text)
 		}
 	}
 
-	if (BestMatch)
+    /*** LPub3D modification 954: - replace mStatusBarLabel ***/
+    if (BestMatch) {
 		mPartsTree->setCurrentPart(BestMatch);
+        QString Message;
+        Message = tr("%1 (ID: %2)").arg(BestMatch->m_strDescription, BestMatch->m_strName);
+        statusBar()->showMessage(Message);
+    }
+    /*** LPub3D modification end ***/
 }
 
 void lcMainWindow::Print(QPrinter* Printer)
