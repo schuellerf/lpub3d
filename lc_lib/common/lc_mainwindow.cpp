@@ -37,7 +37,7 @@ lcMainWindow::lcMainWindow()
   	mRotateStepType = LC_ROTATESTEP_RELATIVE_ROTATION;
 	/*** LPub3D modification end ***/
 
-	mColorIndex = lcGetColorIndex(4);
+    mColorIndex = lcGetColorIndex(71); //Light Bluish Grey
 	mTool = LC_TOOL_SELECT;
 	mAddKeys = false;
 	mMoveSnapEnabled = true;
@@ -906,7 +906,7 @@ void lcMainWindow::TimelineWidgetItemChanged(QTreeWidgetItem* Current, QTreeWidg
 
     lcPiece* Piece = (lcPiece*)Current->data(0, Qt::UserRole).value<uintptr_t>();
 
-    if (Piece->mPieceInfo) {
+    if (Piece && Piece->mPieceInfo) {
         mPreviewWidget->SetCurrentPiece(Piece->mPieceInfo);
         SetColorIndex(Piece->mColorIndex);
     }

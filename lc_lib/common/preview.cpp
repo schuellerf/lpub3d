@@ -98,7 +98,7 @@ void PiecePreview::SetCurrentPiece(PieceInfo *pInfo)
 void PiecePreview::SetDefaultPiece()
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	PieceInfo* Info = Library->FindPiece("3005", NULL, false);
+    PieceInfo* Info = Library->FindPiece("4019", NULL, false); //Technic Gear 16 Tooth
 
 	if (!Info)
 		Info = Library->mPieces[0];

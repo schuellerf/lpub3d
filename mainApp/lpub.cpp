@@ -1151,7 +1151,7 @@ bool Gui::InitializeApp(int argc, char *argv[], const char* LibraryInstallPath, 
   bool initialized = g_App->Initialize(argc, argv, LibraryInstallPath, LDrawPath);
   if (initialized){
 
-      gMainWindow->SetColorIndex(lcGetColorIndex(4));
+      gMainWindow->SetColorIndex(lcGetColorIndex(71)); //Light Bluish Grey
       gMainWindow->UpdateRecentFiles();
 
       createViewerStatusBar();
