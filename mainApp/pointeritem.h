@@ -45,8 +45,10 @@ public:
     QGraphicsItem       *parent,
     QGraphicsView       *view);
 
+  virtual ~CalloutPointerItem();
+
 public:
-  enum SelectedPoint { Tip, Base, NumGrabbers };
+  enum SelectedPoint { Tip, Base, MidBase, MidTip, NumGrabbers };
 
 private:
   QGraphicsView        *view;
@@ -58,9 +60,10 @@ private:
   bool                  positionChanged;
   QGraphicsLineItem    *shaft;
   QGraphicsPolygonItem *head;
+  QList<QGraphicsLineItem *> shaftSegments;
   
-  QPointF  points[NumGrabbers];  // the points on the inside polygon
-  Grabber *grabbers[NumGrabbers];
+  Grabber              *grabbers[NumGrabbers];
+  QPointF               points[NumGrabbers];  // the max points on the inside polygon
   
   virtual void placeGrabbers();
   virtual void resize(QPointF);
@@ -116,7 +119,10 @@ private:
 
   /* When we drag the CSI or the pointer's callout, we
    * need recalculate the Location portion of the pointer
-   * meta, but the offset remains unchanged */
+   * meta, but the offset remains unchanged.
+   * When we have more than one segment we calculate
+   * from the Tip to the segment point and from the
+   * Tip to the base when we have one segment (default) */
 
   void calculatePointerMetaLoc();
 
@@ -128,14 +134,27 @@ private:
   void addPointerMeta();
 
   /* When we drag the callout or CSI, we need to recalculate
-   * the pointer . */
+   * the pointer.
+   * When we have more than one segment we calculate
+   * from the CSI to the segment point and from the
+   * CSI to the base when we have one segment (default) */
 
   void drawPointerPoly();
   bool autoLocFromLoc(QPoint loc);
 
+  /* Add shaft segment and control point grabber */
+  void addShaftSegment();
+
+  /* Remove shaft segment and control point grabber */
+  void removeShaftSegment();
+
+  int segments(){return shaftSegments.size();}
+
+
 protected:
   void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
   void mousePressEvent(QGraphicsSceneMouseEvent *event);
+//  QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 };
 
 #endif

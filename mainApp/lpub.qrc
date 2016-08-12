@@ -6,6 +6,7 @@
         <file alias="addassembledimage.png">images/addassembledimage.png</file>
         <file alias="addbom.png">images/addbom.png</file>
         <file alias="addnext.png">images/addnext.png</file>
+        <file alias="addsegment.png">images/addsegment.png</file>
         <file alias="addprevious.png">images/addprevious.png</file>
         <file alias="addpicture.png">images/addpicture.png</file>
         <file alias="addtext.png">images/addtext.png</file>
@@ -99,6 +100,7 @@
         <file alias="refreshoffarchive.png">images/refreshoffarchive.png</file>
         <file alias="refreshunoffarchive.png">images/refreshunoffarchive.png</file>
         <file alias="remove.png">images/remove.png</file>
+        <file alias="removesegment.png">images/removesegment.png</file>
         <file alias="removelpubformat.png">images/removelpubformat.png</file>
         <file alias="renderersetup.png">images/renderersetup.png</file>
         <file alias="resetcache.png">images/resetcache.png</file>

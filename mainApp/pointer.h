@@ -47,7 +47,7 @@ class Pointer {
     {
       here       = _here;
       pointerMeta = attrib.pointer;
-    };
+    }
 
     virtual ~Pointer()
     {

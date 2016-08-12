@@ -77,7 +77,6 @@ CalloutPointerItem::CalloutPointerItem(
   view          = _view;
   callout       = co;
   pointer       = *_pointer;
-  QString color;
 
   PointerData pointerData = pointer.pointerMeta.value();
   BorderData  border = meta->LPub.callout.border.valuePixels();
@@ -144,11 +143,14 @@ CalloutPointerItem::CalloutPointerItem(
   pen.setWidth(borderThickness);
   pen.setCapStyle(Qt::RoundCap);
 
+  // initial shaft segment
   shaft = new QGraphicsLineItem(linef,this);
   shaft->setPen(pen);
   shaft->setZValue(-5);
   shaft->setFlag(QGraphicsItem::ItemIsSelectable,false);
-  shaft->setToolTip("Arrow shaft");
+  shaft->setToolTip("Arrow shaft segment");
+  // add
+  shaftSegments.append(shaft);
   addToGroup(shaft);
   
   QPolygonF poly;
@@ -168,140 +170,302 @@ CalloutPointerItem::CalloutPointerItem(
   setFlag(QGraphicsItem::ItemIsFocusable,true);
 }
 
+CalloutPointerItem::~CalloutPointerItem(){
+    shaftSegments.clear();
+}
+
 void CalloutPointerItem::drawPointerPoly()
 {
-  QLineF linef = QLineF(points[Base],points[Tip]);
 
-  removeFromGroup(shaft);
-  shaft->setLine(linef);
-  addToGroup(shaft);
-  
-  QPolygonF poly;
-  
-  poly << QPointF(-2*grabSize(), 0);
-  poly << QPointF(-2*grabSize(),grabSize()/2);
-  poly << QPointF(grabSize()/2,0);
-  poly << QPointF(-2*grabSize(),-grabSize()/2);
-  poly << QPointF(-2*grabSize(),0);
-  
-  removeFromGroup(head);
-  head->setPolygon(poly);
-  
-  qreal x = points[Tip].x()-points[Base].x();
-  qreal y = points[Tip].y()-points[Base].y();
-  qreal h = sqrt(x*x+y*y);
-  qreal angle = 180*acos(x/h);
+  for (int i = 0; i < segments(); i++) {
 
-  qreal pi = 22.0/7;
-
-  if (x == 0) {
-    if (y < 0) {
-      angle = 270.0;
-    } else {
-      angle = 90.0;
-    }
-  } else if (y == 0) {
-    if (x < 0) {
-      angle = 180.0;
-    } else {
-      angle = 0.0;
-    }
-  } else {
-    volatile qreal h = sqrt(x*x+y*y);
-    if (x > 0) {
-      if (y > 0) {
-        angle = 180-180*acos(-x/h)/pi;
-      } else {
-        angle = 180+180*acos(-x/h)/pi;
+      QLineF linef;
+      switch (segments()) {
+      case 1:
+      {
+          linef = QLineF(points[Base],points[Tip]);
+          removeFromGroup(shaftSegments[i]);
+          QGraphicsLineItem    *shaft = shaftSegments[i];
+          shaft->setLine(linef);
+          addToGroup(shaft);
       }
-    } else {
-      if (y > 0) {
-        angle = 180*acos(x/h)/pi;
-      } else {
-        angle = -180*acos(x/h)/pi;
+          break;
+      case 2:
+      {
+          if (i == 0) {
+              linef = QLineF(points[Base],points[MidBase]);
+              removeFromGroup(shaftSegments[i]);
+              QGraphicsLineItem    *shaft = shaftSegments[i];
+              shaft->setLine(linef);
+              addToGroup(shaft);
+          } else {
+              linef = QLineF(points[MidBase],points[Tip]);
+              removeFromGroup(shaftSegments[i]);
+              QGraphicsLineItem    *shaft = shaftSegments[i];
+              shaft->setLine(linef);
+              addToGroup(shaft);
+          }
       }
-    }
+          break;
+      case 3:
+      {
+          if (i == 0) {
+              linef = QLineF(points[Base],points[MidBase]);
+              removeFromGroup(shaftSegments[i]);
+              QGraphicsLineItem    *shaft = shaftSegments[i];
+              shaft->setLine(linef);
+              addToGroup(shaft);
+          } else if (i == 1){
+              linef = QLineF(points[MidBase],points[MidTip]);
+              removeFromGroup(shaftSegments[i]);
+              QGraphicsLineItem    *shaft = shaftSegments[i];
+              shaft->setLine(linef);
+              addToGroup(shaft);
+          } else {
+              linef = QLineF(points[MidTip],points[Tip]);
+              removeFromGroup(shaftSegments[i]);
+              QGraphicsLineItem    *shaft = shaftSegments[i];
+              shaft->setLine(linef);
+              addToGroup(shaft);
+          }
+      }
+          break;
+      default:
+          break;
+      }
+
+      //* orig code *//
+      //linef = QLineF(points[Base],points[Tip]);
+
+      if (shaftSegments.last()){
+          // head
+          QPolygonF poly;
+
+          poly << QPointF(-2*grabSize(), 0);
+          poly << QPointF(-2*grabSize(),grabSize()/2);
+          poly << QPointF(grabSize()/2,0);
+          poly << QPointF(-2*grabSize(),-grabSize()/2);
+          poly << QPointF(-2*grabSize(),0);
+
+          removeFromGroup(head);
+          head->setPolygon(poly);
+
+          //* orig code *//
+//          qreal x = points[Tip].x()-points[Base].x();
+//          qreal y = points[Tip].y()-points[Base].y();
+          qreal x;
+          qreal y;
+          switch (segments()) {
+          case 1:
+              x = points[Tip].x()-points[Base].x();
+              y = points[Tip].y()-points[Base].y();
+              break;
+          case 2:
+              x = points[Tip].x()-points[MidBase].x();
+              y = points[Tip].y()-points[MidBase].y();
+              break;
+          case 3:
+              x = points[Tip].x()-points[MidTip].x();
+              y = points[Tip].y()-points[MidTip].y();
+              break;
+          default:
+              break;
+          }
+
+          qreal h = sqrt(x*x+y*y);
+          qreal angle = 180*acos(x/h);
+
+          qreal pi = 22.0/7;
+
+          if (x == 0) {
+            if (y < 0) {
+              angle = 270.0;
+            } else {
+              angle = 90.0;
+            }
+          } else if (y == 0) {
+            if (x < 0) {
+              angle = 180.0;
+            } else {
+              angle = 0.0;
+            }
+          } else {
+            volatile qreal h = sqrt(x*x+y*y);
+            if (x > 0) {
+              if (y > 0) {
+                angle = 180-180*acos(-x/h)/pi;
+              } else {
+                angle = 180+180*acos(-x/h)/pi;
+              }
+            } else {
+              if (y > 0) {
+                angle = 180*acos(x/h)/pi;
+              } else {
+                angle = -180*acos(x/h)/pi;
+              }
+            }
+          }
+
+          head->resetTransform();
+          head->setRotation(rotation() + angle);
+          head->setPos(points[Tip]);
+          addToGroup(head);
+      }
   }
-  
-  head->resetTransform();
-  head->setRotation(rotation() + angle);
-  head->setPos(points[Tip]);
-  addToGroup(head);
 
   view->updateSceneRect(sceneBoundingRect());
 }
 
+void CalloutPointerItem::addShaftSegment(){
+
+    // number of shafts indicated
+    QGraphicsLineItem *shaftOrig;
+    QLineF             linefOrig;
+    QPointF            centerPos;
+
+    switch (segments()) {
+    case 1:
+    {
+        // get split target segment - first shaft
+        linefOrig = QLineF(points[Base],points[Tip]);
+        shaftOrig = shaftSegments[0];
+        shaftOrig->setLine(linefOrig);
+        centerPos = shaftOrig->boundingRect().center();
+        points[MidBase] = centerPos;
+    }
+        break;
+    case 2:
+    {
+        // get split target segment - second shaft
+        linefOrig = QLineF(points[MidBase],points[Tip]);
+        shaftOrig = shaftSegments[1];
+        shaftOrig->setLine(linefOrig);
+        centerPos = shaftOrig->boundingRect().center();
+        points[MidTip] = centerPos;
+    }
+        break;
+    default:
+        break;
+    }
+
+    //QColor qColor = LDrawColor::color(border.color);
+    QColor qColor(borderColor);
+
+    QPen pen(qColor);
+    pen.setWidth(borderThickness);
+    pen.setCapStyle(Qt::RoundCap);
+
+    // initial shaft segment
+    QLineF linef;
+    shaft = new QGraphicsLineItem(linef,this);
+    shaft->setPen(pen);
+    shaft->setZValue(-5);
+    shaft->setFlag(QGraphicsItem::ItemIsSelectable,false);
+    shaft->setToolTip("Arrow shaft segment");
+    // add
+    shaftSegments.append(shaft);
+    addToGroup(shaft);
+
+    for (int i = 0; i < NumGrabbers; i++) {
+      grabbers[i] = NULL;
+    }
+
+    drawPointerPoly();
+    setFlag(QGraphicsItem::ItemIsFocusable,true);
+
+    placeGrabbers();
+}
+
+void CalloutPointerItem::removeShaftSegment(){
+
+    int LastSegment = segments()-1;
+    removeFromGroup(shaftSegments[LastSegment]);
+    shaftSegments.removeLast();
+
+    for (int i = 0; i < NumGrabbers; i++) {
+      grabbers[i] = NULL;
+    }
+
+    drawPointerPoly();
+    setFlag(QGraphicsItem::ItemIsFocusable,true);
+
+    placeGrabbers();
+}
+
 /*
  * Given the location of the Tip (as dragged around by the user)
- * calculate a reasonable placement and Loc for points[Base]
+ * calculate a reasonable placement and Loc for points[Base/Mid]
  */
 
 bool CalloutPointerItem::autoLocFromTip()
 {
-  int width = callout->size[XX];
-  int height = callout->size[YY];
-  int left = 0;
-  int right = width;
-  int top = 0;
-  int bottom = height;
+    if (segments() < 2) {
 
-  QPoint intersect;
-  int tx,ty;
+        int width = callout->size[XX];
+        int height = callout->size[YY];
+        int left = 0;
+        int right = width;
+        int top = 0;
+        int bottom = height;
 
-  tx = points[Tip].x();
-  ty = points[Tip].y();
+        QPoint intersect;
+        int tx,ty;
 
-  /* Figure out which corner */
-  BorderData borderData = callout->background->border.valuePixels();
-  int radius = (int) borderData.radius;
+        tx = points[Tip].x();
+        ty = points[Tip].y();
 
-  if (ty >= top+radius && ty <= bottom-radius) {
-    if (tx < left) {
-      intersect = QPoint(left,ty);
-      points[Tip].setY(ty);
-      placement = Left;
-    } else if (tx > right) {
-      intersect = QPoint(right,ty);
-      points[Tip].setY(ty);
-      placement = Right;
-    } else {
-      // inside
-      placement = Center;
+        /* Figure out which corner */
+        BorderData borderData = callout->background->border.valuePixels();
+        int radius = (int) borderData.radius;
+
+        if (ty >= top+radius && ty <= bottom-radius) {
+            if (tx < left) {
+                intersect = QPoint(left,ty);
+                points[Tip].setY(ty);
+                placement = Left;
+            } else if (tx > right) {
+                intersect = QPoint(right,ty);
+                points[Tip].setY(ty);
+                placement = Right;
+            } else {
+                // inside
+                placement = Center;
+            }
+        } else if (tx >= left+radius && tx <= right-radius) {
+            if (ty < top) {
+                intersect = QPoint(tx,top);
+                points[Tip].setX(tx);
+                placement = Top;
+            } else if (ty > bottom) {
+                intersect = QPoint(tx,bottom);
+                points[Tip].setX(tx);
+                placement = Bottom;
+            } else {
+                // inside
+                placement = Center;
+            }
+        } else if (tx < radius) {  // left?
+            if (ty < radius) {
+                intersect = QPoint(left+radius,top+radius);
+                placement = TopLeft;
+            } else {
+                intersect = QPoint(radius,height-radius);
+                placement = BottomLeft;
+            }
+        } else { // right!
+            if (ty < radius) {
+                intersect = QPoint(width-radius,radius);
+                placement = TopRight;
+            } else {
+                intersect = QPoint(width-radius,height-radius);
+                placement = BottomRight;
+            }
+        }
+
+        points[Base] = intersect;
     }
-  } else if (tx >= left+radius && tx <= right-radius) {
-    if (ty < top) {
-      intersect = QPoint(tx,top);
-      points[Tip].setX(tx);
-      placement = Top;
-    } else if (ty > bottom) {
-      intersect = QPoint(tx,bottom);
-      points[Tip].setX(tx);
-      placement = Bottom;
-    } else {
-      // inside
-      placement = Center;
-    }
-  } else if (tx < radius) {  // left?
-    if (ty < radius) {
-      intersect = QPoint(left+radius,top+radius);
-      placement = TopLeft;
-    } else {
-      intersect = QPoint(radius,height-radius);
-      placement = BottomLeft;
-    }
-  } else { // right!
-    if (ty < radius) {
-      intersect = QPoint(width-radius,radius);
-      placement = TopRight;
-    } else {
-      intersect = QPoint(width-radius,height-radius);
-      placement = BottomRight;
-    }
-  }
 
-  points[Base] = intersect;
-
-  return true;
+    return true;
 }
 
 /*
@@ -320,9 +484,14 @@ bool CalloutPointerItem::autoLocFromLoc(
   QPoint intersect;
   PlacementEnc tplacement;
 
-  QPoint tip(points[Tip].x() + 0.5, points[Tip].y() + 0.5);
+  QPoint point;
+  if(segments() == 1){
+      point = QPoint(points[Tip].x() + 0.5, points[Tip].y() + 0.5);
+  } else {
+      point = QPoint(points[MidBase].x() + 0.5, points[MidBase].y() + 0.5);
+  }
 
-  if (rectLineIntersect(tip,
+  if (rectLineIntersect(point,
                         loc,
                         rect,
                         borderThickness,
@@ -337,14 +506,31 @@ bool CalloutPointerItem::autoLocFromLoc(
 
 void CalloutPointerItem::placeGrabbers()
 {
+  int numGrabbers;
+  switch (segments()) {
+  case 1:
+      numGrabbers = NumGrabbers-2;
+      break;
+  case 2:
+      numGrabbers = NumGrabbers-1;
+      break;
+  case 3:
+      numGrabbers = NumGrabbers;
+      break;
+  default:
+      break;
+  }
+
   if (grabbers[0] == NULL) {
-    for (int i = 0; i < NumGrabbers; i++) {
+    for (int i = 0; i < numGrabbers; i++) {
       grabbers[i] = new Grabber(i,this,myParentItem());
     }
   }
-  for (int i = 0; i < NumGrabbers; i++) {
+
+  for (int i = 0; i < numGrabbers; i++) {
     grabbers[i]->setPos(points[i].x() - grabSize()/2, points[i].y()-grabSize()/2);
   }
+
 }
       /*
        *     c1 c2  c1 c2
@@ -396,22 +582,18 @@ void CalloutPointerItem::mousePressEvent  (QGraphicsSceneMouseEvent * /* unused 
 
 void CalloutPointerItem::resize(QPointF grabbed)
 {
-  grabbed -= scenePos();
-  
-  QPoint intersect;
+    grabbed -= scenePos();
 
-  bool changed = false;
+    bool changed = false;
 
-  QRect rect(0,0,callout->size[XX],callout->size[YY]);
-
-  switch (selectedGrabber) {
+    switch (selectedGrabber) {
     /*
      * Loc must track along an edge.  If you draw a line from tip to the mouse
      * cursor, the line intersects with the edge of the callout one or two places.
      * The single intersection is at corners, and the dual intersection is not
      * on corners.  In the case of dual intersection, the one that is closest
      * to tip is the one used.
-     * 
+     *
      * If the tip to mouse line does not intersect with the callout, do nothing.
      * If the top to mouse line only intersects with corner, then force corner
      * placement.
@@ -422,29 +604,55 @@ void CalloutPointerItem::resize(QPointF grabbed)
      */
 
     case Base:
-      {
+    {
         QPoint loc(grabbed.x(),grabbed.y());
-      
+
         if (autoLocFromLoc(loc)) {
-          changed = true;
+            changed = true;
         }
-      }
-    break;
+    }
+        break;
     case Tip:
-      points[Tip] = grabbed;
-      if (autoLocFromTip()) {
+        points[Tip] = grabbed;
+        if (autoLocFromTip()) {
+            changed = true;
+        }
+        break;
+    case MidBase:
+        points[MidBase] = grabbed;
         changed = true;
-      }
-    break;
+        break;
+    case MidTip:
+        points[MidTip] = grabbed;
+        changed = true;
+        break;
     default:
-    break;
-  }
+        break;
+    }
   if (changed) {
     drawPointerPoly();
     positionChanged = true;
   }
-  grabbers[Base]->setPos(points[Base].x() - grabSize()/2, points[Base].y() - grabSize()/2);
-  grabbers[Tip ]->setPos(points[Tip ].x() - grabSize()/2, points[Tip ].y() - grabSize()/2);
+  //TODO Investigte dirty grabbers
+  switch (segments()) {
+  case 1:
+      grabbers[Base    ]->setPos(points[Base    ].x() - grabSize()/2, points[Base    ].y() - grabSize()/2);
+      grabbers[Tip     ]->setPos(points[Tip     ].x() - grabSize()/2, points[Tip     ].y() - grabSize()/2);
+      break;
+  case 2:
+      grabbers[Base    ]->setPos(points[Base    ].x() - grabSize()/2, points[Base    ].y() - grabSize()/2);
+      grabbers[MidBase ]->setPos(points[MidBase ].x() - grabSize()/2, points[MidBase ].y() - grabSize()/2);
+      grabbers[Tip     ]->setPos(points[Tip     ].x() - grabSize()/2, points[Tip     ].y() - grabSize()/2);
+      break;
+  case 3:
+      grabbers[Base    ]->setPos(points[Base    ].x() - grabSize()/2, points[Base    ].y() - grabSize()/2);
+      grabbers[MidBase ]->setPos(points[MidBase ].x() - grabSize()/2, points[MidBase ].y() - grabSize()/2);
+      grabbers[MidTip  ]->setPos(points[MidTip  ].x() - grabSize()/2, points[MidTip  ].y() - grabSize()/2);
+      grabbers[Tip     ]->setPos(points[Tip     ].x() - grabSize()/2, points[Tip     ].y() - grabSize()/2);
+      break;
+  default:
+      break;
+  }
 }
 
 void CalloutPointerItem::change()
@@ -495,7 +703,8 @@ void CalloutPointerItem::defaultPointer()
   calculatePointerMeta();
   addPointerMeta();
 }
- 
+
+//TODO account for more than 1 segment
 void CalloutPointerItem::calculatePointerMetaLoc()
 {
   float loc = 0;
@@ -528,6 +737,7 @@ void CalloutPointerItem::calculatePointerMetaLoc()
     pointerData.y);
 }
 
+//TODO account for more than one meta
 void CalloutPointerItem::calculatePointerMeta()
 {
   calculatePointerMetaLoc();
@@ -602,9 +812,34 @@ void CalloutPointerItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
   removeAction->setWhatsThis(            "Delete this Arrow:\n"
                                          "Deletes this arrow from the callout");
 
+  QAction *addSegmentAction = NULL;
+  if (segments() <= 3) {
+      addSegmentAction = menu.addAction("Add Arrow Segment");
+      addSegmentAction->setIcon(QIcon(":/resources/addsegment.png"));
+      addSegmentAction->setWhatsThis(        "Add arrow segment:\n"
+                                             "Introduce a new arrow shaft segment.");
+  }
+
+  QAction *removeSegmentAction = NULL;
+  if (segments() > 1) {
+      removeSegmentAction = menu.addAction("Remove Arrow Segment");
+      removeSegmentAction->setIcon(QIcon(":/resources/removesegment.png"));
+      removeSegmentAction->setWhatsThis(     "Remvoe arrow segment:\n"
+                                             "Remove arrow shaft segment.");
+  }
+
   QAction *selectedAction   = menu.exec(event->screenPos());
+
+  if ( ! selectedAction ) {
+      return;
+    }
+
   if (selectedAction == removeAction) {
     deletePointer(pointer.here);
+  } else if (selectedAction == addSegmentAction){
+    addShaftSegment();
+  } else if (selectedAction == removeSegmentAction){
+    removeShaftSegment();
   }
 }
 
