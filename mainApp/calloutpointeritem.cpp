@@ -41,7 +41,7 @@
 #include <QPolygonF>
 #include <QGraphicsSceneContextMenuEvent>
 #include <math.h>
-#include "pointeritem.h"
+#include "calloutpointeritem.h"
 #include "metaitem.h"
 #include "callout.h"
 #include "calloutbackgrounditem.h"

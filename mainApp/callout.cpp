@@ -36,7 +36,7 @@
 #include "callout.h"
 #include "calloutbackgrounditem.h"
 #include "pointer.h"
-#include "pointeritem.h"
+#include "calloutpointeritem.h"
 #include "numberitem.h"
 #include "ranges.h"
 #include "range.h"

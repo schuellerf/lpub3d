@@ -23,8 +23,8 @@
  *
  ***************************************************************************/
 
-#ifndef POINTERITEMH
-#define POINTERITEMH
+#ifndef CALLOUTPOINTERITEMH
+#define CALLOUTPOINTERITEMH
 
 #include "pointer.h"
 #include "metaitem.h"

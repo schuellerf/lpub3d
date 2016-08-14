@@ -186,6 +186,7 @@ HEADERS += \
     build.h \
     callout.h \
     calloutbackgrounditem.h \
+    calloutpointeritem.h \
     color.h \
     commands.h \
     commonmenus.h \
@@ -246,9 +247,7 @@ HEADERS += \
     sizeandorientationdialog.h \
     splashscreen.h \
     threadWorkers.h \
-    version.h \
-    calloutpointeritem.h
-
+    version.h
 
 SOURCES += \
     aboutdialog.cpp \
@@ -262,6 +261,7 @@ SOURCES += \
     callout.cpp \
     calloutbackgrounditem.cpp \
     calloutglobals.cpp \
+    calloutpointeritem.cpp \
     color.cpp \
     commands.cpp \
     commonmenus.cpp \
@@ -326,8 +326,7 @@ SOURCES += \
     threadWorkers.cpp \
     traverse.cpp \
     updatecheck.cpp \
-    undoredo.cpp \
-    calloutpointeritem.cpp
+    undoredo.cpp
 
 FORMS += \
     preferences.ui \
