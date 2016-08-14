@@ -226,7 +226,6 @@ HEADERS += \
     plisortdialog.h \
     plisubstituteparts.h \
     pointer.h \
-    pointeritem.h \
     preferencesdialog.h \
     range.h \
     range_element.h \
@@ -247,7 +246,8 @@ HEADERS += \
     sizeandorientationdialog.h \
     splashscreen.h \
     threadWorkers.h \
-    version.h
+    version.h \
+    calloutpointeritem.h
 
 
 SOURCES += \
@@ -304,7 +304,6 @@ SOURCES += \
     pliglobals.cpp \
     plisortdialog.cpp \
     plisubstituteparts.cpp \
-    pointeritem.cpp \
     preferencesdialog.cpp \
     printpdf.cpp \
     projectglobals.cpp \
@@ -327,7 +326,8 @@ SOURCES += \
     threadWorkers.cpp \
     traverse.cpp \
     updatecheck.cpp \
-    undoredo.cpp
+    undoredo.cpp \
+    calloutpointeritem.cpp
 
 FORMS += \
     preferences.ui \

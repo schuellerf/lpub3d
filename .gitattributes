@@ -289,6 +289,8 @@ mainApp/callout.h -text
 mainApp/calloutbackgrounditem.cpp -text
 mainApp/calloutbackgrounditem.h -text
 mainApp/calloutglobals.cpp -text
+mainApp/calloutpointeritem.cpp -text
+mainApp/calloutpointeritem.h -text
 mainApp/color.cpp -text
 mainApp/color.h -text
 mainApp/commands.cpp -text
@@ -505,8 +507,6 @@ mainApp/plisortdialog.h -text
 mainApp/plisubstituteparts.cpp -text
 mainApp/plisubstituteparts.h -text
 mainApp/pointer.h -text
-mainApp/pointeritem.cpp -text
-mainApp/pointeritem.h -text
 mainApp/preferences.ui -text
 mainApp/preferencesdialog.cpp -text
 mainApp/preferencesdialog.h -text
