@@ -1165,10 +1165,17 @@ QString BorderMeta::text()
 PointerMeta::PointerMeta() : LeafMeta()
 {
   _value[0].placement = TopLeft;
-  _value[0].loc       = 0;
-  _value[0].x         = 0.5;
-  _value[0].y         = 0.5;
+  _value[0].loc       = 0;      // BasePoint
+  _value[0].x1        = 0.5;    // TipX
+  _value[0].y1        = 0.5;    // TipY
+  _value[0].x2        = 0.5;    // BaseX
+  _value[0].y2        = 0.5;    // BaseY
+  _value[0].x3        = 0.5;    // MidBaseX
+  _value[0].y3        = 0.5;    // MidBaseY
+  _value[0].x4        = 0.5;    // MidTipX
+  _value[0].y4        = 0.5;    // MidTipY
   _value[0].base      = 0.125;
+  _value[0].segments  = 1;
 }
 
 /*
@@ -1179,36 +1186,70 @@ PointerMeta::PointerMeta() : LeafMeta()
 
 Rc PointerMeta::parse(QStringList &argv, int index,Where &here)
 {
-  float _loc = 0, _x = 0, _y = 0, _base = -1;
+  float _loc = 0, _x1 = 0, _y1 = 0, _base = -1, _segments = 1;
+  float           _x2 = 0, _y2 = 0;
+  float           _x3 = 0, _y3 = 0;
+  float           _x4 = 0, _y4 = 0;
   int   n_tokens = argv.size() - index;
-  QString foo1 = argv[index];
-  QString foo2 = argv[index+1];
   bool    fail = true;
 
   if (argv.size() - index > 0) {
       QRegExp rx("^(TOP_LEFT|TOP_RIGHT|BOTTOM_LEFT|BOTTOM_RIGHT)$");
+      // old single-segment patterns
       if (argv[index].contains(rx) && n_tokens == 4) {
           _loc = 0;
           bool ok[3];
-          _x    = argv[index+1].toFloat(&ok[0]);
-          _y    = argv[index+2].toFloat(&ok[1]);
+          _x1    = argv[index+1].toFloat(&ok[0]);
+          _y1    = argv[index+2].toFloat(&ok[1]);
           _base = argv[index+3].toFloat(&ok[2]);
           fail  = ! (ok[0] && ok[1] && ok[2]);
         }
       if (argv[index].contains(rx) && n_tokens == 3) {
           _loc = 0;
           bool ok[2];
-          _x    = argv[index+1].toFloat(&ok[0]);
-          _y    = argv[index+2].toFloat(&ok[1]);
+          _x1    = argv[index+1].toFloat(&ok[0]);
+          _y1    = argv[index+2].toFloat(&ok[1]);
           fail  = ! (ok[0] && ok[1]);
+        }
+      // new multi-segment patterns (+ 7 tokens: x2,y2,x3,y3,x4,y4,segments)
+      if (argv[index].contains(rx) && n_tokens == 11) {
+          _loc = 0;
+          bool ok[10];
+          _x1       = argv[index+1].toFloat(&ok[0]);
+          _y1       = argv[index+2].toFloat(&ok[1]);
+          _x2       = argv[index+3].toFloat(&ok[2]);
+          _y2       = argv[index+4].toFloat(&ok[3]);
+          _x3       = argv[index+5].toFloat(&ok[4]);
+          _y3       = argv[index+6].toFloat(&ok[5]);
+          _x4       = argv[index+7].toFloat(&ok[6]);
+          _y4       = argv[index+8].toFloat(&ok[7]);
+          _base     = argv[index+9].toFloat(&ok[8]);
+          _segments = argv[index+10].toInt(&ok[9]);
+          fail      = ! (ok[0] && ok[1] && ok[2] && ok[3] && ok[4] &&
+                         ok[5] && ok[6] && ok[7] && ok[8] && ok[9]);
+        }
+      if (argv[index].contains(rx) && n_tokens == 10) {
+          _loc = 0;
+          bool ok[9];
+          _x1       = argv[index+1].toFloat(&ok[0]);
+          _y1       = argv[index+2].toFloat(&ok[1]);
+          _x2       = argv[index+3].toFloat(&ok[2]);
+          _y2       = argv[index+4].toFloat(&ok[3]);
+          _x3       = argv[index+5].toFloat(&ok[4]);
+          _y3       = argv[index+6].toFloat(&ok[5]);
+          _x4       = argv[index+7].toFloat(&ok[6]);
+          _y4       = argv[index+8].toFloat(&ok[7]);
+          _segments = argv[index+9].toInt(&ok[8]);
+          fail      = ! (ok[0] && ok[1] && ok[2] && ok[3] && ok[4] &&
+                         ok[5] && ok[6] && ok[7] && ok[8]);
         }
       rx.setPattern("^(TOP|BOTTOM|LEFT|RIGHT|CENTER)$");
       if (argv[index].contains(rx) && n_tokens == 5) {
           _loc = 0;
           bool ok[4];
           _loc  = argv[index+1].toFloat(&ok[0]);
-          _x    = argv[index+2].toFloat(&ok[1]);
-          _y    = argv[index+3].toFloat(&ok[2]);
+          _x1    = argv[index+2].toFloat(&ok[1]);
+          _y1    = argv[index+3].toFloat(&ok[2]);
           _base = argv[index+4].toFloat(&ok[3]);
           fail  = ! (ok[0] && ok[1] && ok[2] && ok[3]);
         }
@@ -1216,16 +1257,57 @@ Rc PointerMeta::parse(QStringList &argv, int index,Where &here)
           _loc = 0;
           bool ok[3];
           _loc  = argv[index+1].toFloat(&ok[0]);
-          _x    = argv[index+2].toFloat(&ok[1]);
-          _y    = argv[index+3].toFloat(&ok[2]);
+          _x1    = argv[index+2].toFloat(&ok[1]);
+          _y1    = argv[index+3].toFloat(&ok[2]);
           fail  = ! (ok[0] && ok[1] && ok[2]);
+        }
+      // new multi-segment patterns (+ 7 tokens: x2,y2,x3,y3,x4,y4,segments)
+      if (argv[index].contains(rx) && n_tokens == 12) {
+          _loc = 0;
+          bool ok[11];
+          _loc      = argv[index+1].toFloat(&ok[0]);
+          _x1       = argv[index+2].toFloat(&ok[1]);
+          _y1       = argv[index+3].toFloat(&ok[2]);
+          _x2       = argv[index+4].toFloat(&ok[3]);
+          _y2       = argv[index+5].toFloat(&ok[4]);
+          _x3       = argv[index+6].toFloat(&ok[5]);
+          _y3       = argv[index+7].toFloat(&ok[6]);
+          _x4       = argv[index+8].toFloat(&ok[7]);
+          _y4       = argv[index+9].toFloat(&ok[8]);
+          _base     = argv[index+10].toFloat(&ok[9]);
+          _segments = argv[index+11].toInt(&ok[10]);
+          fail      = ! (ok[0] && ok[1] && ok[2] && ok[3] && ok[4] && ok[5] &&
+                         ok[6] && ok[7] && ok[8] && ok[9] && ok[10]);
+        }
+      if (argv[index].contains(rx) && n_tokens == 11) {
+          _loc = 0;
+          bool ok[10];
+          _loc      = argv[index+1].toFloat(&ok[0]);
+          _x1       = argv[index+2].toFloat(&ok[1]);
+          _y1       = argv[index+3].toFloat(&ok[2]);
+          _x2       = argv[index+4].toFloat(&ok[3]);
+          _y2       = argv[index+5].toFloat(&ok[4]);
+          _x3       = argv[index+6].toFloat(&ok[5]);
+          _y3       = argv[index+7].toFloat(&ok[6]);
+          _x4       = argv[index+8].toFloat(&ok[7]);
+          _y4       = argv[index+9].toFloat(&ok[8]);
+          _segments = argv[index+10].toInt(&ok[9]);
+          fail      = ! (ok[0] && ok[1] && ok[2] && ok[3] && ok[4] &&
+                         ok[5] && ok[6] && ok[7] && ok[8] && ok[9]);
         }
     }
   if ( ! fail) {
       _value[pushed].placement = PlacementEnc(tokenMap[argv[index]]);
-      _value[pushed].loc       = _loc;
-      _value[pushed].x         = _x;
-      _value[pushed].y         = _y;
+      _value[pushed].loc        = _loc;
+      _value[pushed].x1         = _x1;
+      _value[pushed].y1         = _y1;
+      _value[pushed].x2         = _x2;
+      _value[pushed].y2         = _y2;
+      _value[pushed].x3         = _x3;
+      _value[pushed].y3         = _y3;
+      _value[pushed].x4         = _x4;
+      _value[pushed].y4         = _y4;
+      _value[pushed].segments   = _segments;
       if (_base > 0) {
           _value[pushed].base = _base;
         } else if (_value[pushed].base == 0) {
@@ -1253,19 +1335,33 @@ QString PointerMeta::format(bool local, bool global)
     case TopRight:
     case BottomRight:
     case BottomLeft:
-      foo = QString("%1 %2 %3 %4")
+      foo = QString("%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11")
           .arg(placementNames[_value[pushed].placement])
-          .arg(_value[pushed].x,0,'f',3)
-          .arg(_value[pushed].y,0,'f',3)
-          .arg(_value[pushed].base);
+          .arg(_value[pushed].x1,0,'f',3)
+          .arg(_value[pushed].y1,0,'f',3)
+          .arg(_value[pushed].x2,0,'f',3)
+          .arg(_value[pushed].y2,0,'f',3)
+          .arg(_value[pushed].x3,0,'f',3)
+          .arg(_value[pushed].y3,0,'f',3)
+          .arg(_value[pushed].x4,0,'f',3)
+          .arg(_value[pushed].y4,0,'f',3)
+          .arg(_value[pushed].base)
+          .arg(_value[pushed].segments);
       break;
     default:
-      foo = QString("%1 %2 %3 %4 %5")
+      foo = QString("%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11 %12")
           .arg(placementNames[_value[pushed].placement])
           .arg(_value[pushed].loc,0,'f',3)
-          .arg(_value[pushed].x,  0,'f',3)
-          .arg(_value[pushed].y,  0,'f',3)
-          .arg(_value[pushed].base);
+          .arg(_value[pushed].x1,0,'f',3)
+          .arg(_value[pushed].y1,0,'f',3)
+          .arg(_value[pushed].x2,0,'f',3)
+          .arg(_value[pushed].y2,0,'f',3)
+          .arg(_value[pushed].x3,0,'f',3)
+          .arg(_value[pushed].y3,0,'f',3)
+          .arg(_value[pushed].x4,0,'f',3)
+          .arg(_value[pushed].y4,0,'f',3)
+          .arg(_value[pushed].base)
+          .arg(_value[pushed].segments);
       break;
     }
   return LeafMeta::format(local,global,foo);
@@ -1273,8 +1369,10 @@ QString PointerMeta::format(bool local, bool global)
 
 void PointerMeta::doc(QStringList &out, QString preamble)
 {
-  out << preamble +  " (TOP_LEFT|TOP_RIGHT|BOTTOM_LEFT|BOTTOM_RIGHT) <floatX> <floatY> <intBase>";
-  out << preamble + " (TOP|BOTTOM|LEFT|RIGHT) <floatLoc> <floatX> <floatY> <intBase>";
+  out << preamble +  " (TOP_LEFT|TOP_RIGHT|BOTTOM_LEFT|BOTTOM_RIGHT) <floatX1> <floatY1>"
+                     " [<floatX2> <floatY2> <floatX3> <floatY3> <floatX4> <floatY4>] <floatBase> [intSegments]";
+  out << preamble + " (TOP|BOTTOM|LEFT|RIGHT) <floatLoc> <floatX1> <floatY1>"
+                    " [<floatX2> <floatY2> <floatX3> <floatY3> <floatX4> <floatY4>] <floatBase> [intSegments]";
 }
 
 /* ------------------ */ 

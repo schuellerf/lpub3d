@@ -195,10 +195,17 @@ class PointerData
 {
 public:
   PlacementEnc placement;
-  float loc;  // fraction of side/top/bottom of callout
-  float x;    // fraction of CSI size
-  float y;
-  float base; // in units
+  float loc;   // fraction of side/top/bottom of callout
+  float base;  // in units
+  int segments;
+  float x1;    // TipX
+  float y1;    // TipY
+  float x2;    // BaseX
+  float y2;    // BaseY
+  float x3;    // MidBaseX
+  float y3;    // MidBaseY
+  float x4;    // MidTipX
+  float y4;    // MidTipY
 };
 
 class RotStepData

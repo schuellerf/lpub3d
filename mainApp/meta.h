@@ -998,28 +998,56 @@ public:
   void setValue(
     PlacementEnc placement, 
     float loc, 
-    float base, 
-    float x, 
-    float y)
+    float base,
+    int segments,
+    float x1,
+    float y1,
+    float x2,
+    float y2,
+    float x3,
+    float y3,
+    float x4,
+    float y4)
   {
     _value[pushed].placement = placement;
     _value[pushed].loc       = loc;
     _value[pushed].base      = base/resolution();
-    _value[pushed].x         = x;
-    _value[pushed].y         = y;
+    _value[pushed].segments  = segments;
+    _value[pushed].x1        = x1;            // TipX
+    _value[pushed].y1        = y1;            // TipY
+    _value[pushed].x2        = x2;            // BaseX
+    _value[pushed].y2        = y2;            // BaseY
+    _value[pushed].x3        = x3;            // MidBaseX
+    _value[pushed].y3        = y3;            // MidBaseY
+    _value[pushed].x4        = x4;            // MidTipX
+    _value[pushed].y4        = y4;            // MidTipY
   }
   void setValueUnit(
     PlacementEnc placement, 
     float loc, 
-    float base, 
-    float x, 
-    float y)
+    float base,
+    int segments,
+    float x1,
+    float y1,
+    float x2,
+    float y2,
+    float x3,
+    float y3,
+    float x4,
+    float y4)
   {
     _value[pushed].placement = placement;
     _value[pushed].loc       = loc;
     _value[pushed].base      = base;
-    _value[pushed].x         = x;
-    _value[pushed].y         = y;
+    _value[pushed].segments  = segments;
+    _value[pushed].x1        = x1;
+    _value[pushed].y1        = y1;
+    _value[pushed].x2        = x2;
+    _value[pushed].y2        = y2;
+    _value[pushed].x3        = x3;
+    _value[pushed].y3        = y3;
+    _value[pushed].x4        = x4;
+    _value[pushed].y4        = y4;
   }
   PointerMeta();
   PointerMeta(const PointerMeta &rhs) : LeafMeta(rhs)

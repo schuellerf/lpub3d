@@ -49,6 +49,7 @@ public:
 
 public:
   enum SelectedPoint { Tip, Base, MidBase, MidTip, NumGrabbers };
+  enum ShaftSegments { OneSegment = 1, TwoSegments, ThreeSegments};
 
 private:
   QGraphicsView        *view;
@@ -117,6 +118,16 @@ private:
 
   bool autoLocFromTip();
 
+  /* Drag the MidBase point of the pointer, and calculate a good
+   * location for the pointer to connect to the callout. */
+
+  bool autoLocFromMidBase();
+
+  /* Drag the MidTip point of the pointer, and calculate a good
+   * location for the MidBase segment to follow. */
+
+  bool autoMidBaseFromMidTip();
+
   /* When we drag the CSI or the pointer's callout, we
    * need recalculate the Location portion of the pointer
    * meta, but the offset remains unchanged.
@@ -140,7 +151,7 @@ private:
    * CSI to the base when we have one segment (default) */
 
   void drawPointerPoly();
-  bool autoLocFromLoc(QPoint loc);
+  bool autoLocFromBase(QPoint loc);
 
   /* Add shaft segment and control point grabber */
   void addShaftSegment();
@@ -154,7 +165,6 @@ private:
 protected:
   void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
   void mousePressEvent(QGraphicsSceneMouseEvent *event);
-//  QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 };
 
 #endif
