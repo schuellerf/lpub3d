@@ -313,7 +313,7 @@ public:
 	void RotateSelectedPieces(const lcVector3& Angles, bool Relative, bool AlternateButtonDrag, bool Update, bool Checkpoint);
 	void ScaleSelectedPieces(const float Scale, bool Update, bool Checkpoint);
 	void TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform);
-	/*** LPub3D modification 316: - rotate step ***/
+    /*** LPub3D modification 316: - rotate step ***/
 	void RotateStepSelectedObjects(lcRotateStepType RotateStepType, const lcVector3& RotateStep);
 	void ParseExsitingRotStepLine(QTextStream& LineStream);
 	/*** LPub3D modification end ***/

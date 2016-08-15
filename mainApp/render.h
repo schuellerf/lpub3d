@@ -65,17 +65,6 @@ public:
                                      RotStepMeta &rotStep,
                                      QStringList &parts,
                                      bool  defaultRot = true);
-  int                    render3DCsi(const QString &,
-                                    const QString &,
-                                    const QStringList &,
-                                    Meta &,
-                                    bool cisExists,
-                                    bool outOfDate);
-  int                    render3DCsiSubModels(QStringList &,
-                                             QStringList &,
-                                             QString &fadeColor,
-                                             bool doFadeStep = false);
-  int                    load3DCsiImage(QString &);
 
 protected:
   virtual float          cameraDistance(Meta &meta, float) = 0;

@@ -213,9 +213,10 @@ int Step::createCsi(
     }
 
   // generate CSI file as appropriate
+  int rc;
+  QString csiFile;
   if ( ! csiExist || csiOutOfDate ) {
 
-      int rc;
       if (renderer->useLDViewSCall()) {
 
           // populate ldr file name
@@ -225,9 +226,8 @@ int Step::createCsi(
           // generate and assign the CSI ldr file and rotate its parts
           rc = renderer->rotateParts(addLine,meta.rotStep, csiParts, ldrName);
           if (rc != 0) {
-              QMessageBox::critical(NULL,QMessageBox::tr(VER_PRODUCTNAME_STR),
-                                    QMessageBox::tr("Creation and rotation of CSI ldr file failed for:\n%1.")
-                                    .arg(ldrName));
+              emit gui->statusMessage(false,QMessageBox::tr("Creation and rotation of CSI ldr file failed for:\n%1.")
+                                      .arg(ldrName));
               return rc;
             }
 
@@ -239,11 +239,11 @@ int Step::createCsi(
           // render the partially assembled model if single step and not called out
           rc = renderer->renderCsi(addLine,csiParts, pngName, meta);
           if (rc != 0) {
-              QMessageBox::critical(NULL,QMessageBox::tr(VER_PRODUCTNAME_STR),
-                                    QMessageBox::tr("Render CSI part failed for:\n%1.")
+              emit gui->statusMessage(false,QMessageBox::tr("Render CSI part failed for:\n%1.")
                                     .arg(pngName));
               return rc;
             }
+           csiFile = QDir::currentPath() + "/" + Paths::tmpDir + "/csi.ldr";
 
 //          qDebug() << Render::getRenderer()
           logTrace() << "\n" << Render::getRenderer()
@@ -253,7 +253,15 @@ int Step::createCsi(
                      << (multiStep ? "step group" : "single step") << sn
                      << "on page " << gui->stepPageNum << ".";
         }
-    }
+
+  } else if (! renderer->useLDViewSCall()) {
+      csiFile = QDir::currentPath() + "/" + Paths::tmpDir + "/csi.ldr";
+      if ((rc = renderer->rotateParts(addLine,meta.rotStep, csiParts, csiFile)) < 0) {
+          emit gui->statusMessage(false,QMessageBox::tr("Creation and rotation of CSI ldr file failed for:\n%1.")
+                                  .arg(csiFile));
+          return rc;
+      }
+  }
 
   // If not using LDView SCall, populate pixmap
   if (! renderer->useLDViewSCall()) {
@@ -264,38 +272,36 @@ int Step::createCsi(
 
   if (! gMainWindow->GetHalt3DViewer()) {
 
-      int ln = top.lineNumber;                      // we need this to facilitate placing the ROTSTEP meta later on
-      QString file3DNamekey = QString("%1_%2_%3%4") // File Name Format = csiName_sn_ln.ldr
-          .arg(csiName())                           // csi model name
-          .arg(sn)                                  // step number
-          .arg(ln)                                  // line number
-          .arg(".ldr");                             // extension
+      int ln = top.lineNumber;   // we need this to facilitate placing the ROTSTEP meta later on
 
-      csi3DName = QDir::currentPath() + "/" + Paths::viewerDir + "/" + file3DNamekey;
-      QFile csi3D(csi3DName);
-      int rc;
-      rc = renderer->render3DCsi(file3DNamekey, addLine, csiParts, meta, csi3D.exists(), csiOutOfDate);
-      if (rc != 0) {
-          QMessageBox::critical(NULL,QMessageBox::tr(VER_PRODUCTNAME_STR),
-                                QMessageBox::tr("Render 3D CSI failed for:\n%1.")
-                                .arg(file3DNamekey));
-          return rc;
-        }
-    }
+      // populate ldr file name
+      if (renderer->useLDViewSCall()) {
+          if (ldrName.isEmpty()) {
+              ldrName = QDir::currentPath() + "/" +
+                      Paths::tmpDir + "/" + key + ".ldr";
+
+              QFile ldrFile(ldrName);
+              if (! ldrFile.exists()) {
+                  emit gui->statusMessage(false,QMessageBox::tr("Ldr file does not exist:\n%1.")
+                                          .arg(ldrName));
+                  return -1;
+              }
+          }
+          csi3DName = QString("%1_%2").arg(ln).arg(ldrName);
+      } else {
+          csi3DName = QString("%1_%2").arg(ln).arg(csiFile);
+      }
+
+      if (! gMainWindow->OpenProject(csi3DName)) {
+          emit gui->statusMessage(false,QMessageBox::tr("Could not load 3D Viewer project with file :\n%1.")
+                                  .arg(csi3DName));
+          return -1;
+      }
+  }
 
   return 0;
 }
 
-int Step::Load3DCsi(QString &csi3DName)
-{
-  if (! gMainWindow->GetHalt3DViewer()) {
-      return renderer->load3DCsiImage(csi3DName);
-    } else {
-      qDebug() << "3DViewer halted - rendering not allowed.";
-      return -1;
-    }
-  return 0;
-}
 
 /*
  * LPub is able to pack steps together into multi-step pages or callouts.

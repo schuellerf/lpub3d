@@ -409,7 +409,6 @@ enum ExportType { EXPORT_PDF, EXPORT_PNG, EXPORT_JPG, EXPORT_BMP };
 
 void clearPliCache();
 void clearCsiCache();
-void clearCsi3dCache();
 void clearAndRedrawPage();
 
 class Gui : public QMainWindow
@@ -678,7 +677,6 @@ public slots:
 
   void clearPLICache();
   void clearCSICache();
-  void clearCSI3DCache();
   void clearImageModelCaches();
   void clearFadeCache();
   bool removeDir(int &count,const QString &dirName);
@@ -1025,7 +1023,6 @@ private:
 
   QAction  *clearPLICacheAct;
   QAction  *clearCSICacheAct;
-  QAction  *clearCSI3DCacheAct;
   QAction  *clearFadeCacheAct;
 
   QAction  *refreshLDrawUnoffPartsAct;

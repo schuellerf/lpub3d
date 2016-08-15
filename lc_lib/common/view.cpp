@@ -363,7 +363,7 @@ void View::ShowContextMenu() const
 	/*** LPub3D modification - end ***/
 	
 	/*** LPub3D modification 365: - tools popupMenu ***/
-	//TODO Modify to use explicitly defined menu items
+    // TODO Modify to use explicitly defined menu items
 	QMenu *tools = new QMenu("Tools");
     popup->addMenu(tools);
 	for (int actionIdx = LC_EDIT_ACTION_FIRST; actionIdx <= LC_EDIT_ACTION_LAST; actionIdx++)
