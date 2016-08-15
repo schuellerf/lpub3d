@@ -153,7 +153,7 @@ AboutDialog::AboutDialog(QWidget *parent, void *data) :
 #ifdef Q_OS_MAC
     osPlatform = QSysInfo::currentCpuArchitecture();
 #endif
-    //TODO add Linus check
+    // TODO add Linus check
 
     QString OsInfoFormat = tr("<table style=""width:100%"">"
                               "<tr>"
@@ -305,7 +305,7 @@ QString AboutDialog::osName()
   }
   #endif
 #endif
- //TODO add Linux Check
+ // TODO add Linux Check
 }
 
 OsType AboutDialog::checkOS()
