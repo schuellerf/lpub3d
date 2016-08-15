@@ -307,11 +307,7 @@ public:
     QStatusBar* mLCStatusBar;
     /*** LPub3D modification end ***/
 
-    /*** LPub3D modification 310: - rotstep ***/
-    QString mRotateStepLineNumber;
-    /*** LPub3D modification end ***/
-
-/*** LPub3D modification 314: - halt viewer ***/
+/*** LPub3D modification 310: - halt viewer ***/
 public slots:
     void halt3DViewer(bool b);
     void enable3DActions();
@@ -405,9 +401,9 @@ protected:
 	/*** LPub3D modification end ***/
 	QMenu* mCameraMenu;
 	QMenu* mViewpointMenu;
-    /*** LPub3D modification 404: - move tab to Gui ***/
+    /*** LPub3D modification 399: - move tab to Gui ***/
     QWidget* mPartsContents;
-    /*** LPub3D modification end ***/
+	/*** LPub3D modification end ***/
 };
 
 extern class lcMainWindow* gMainWindow;

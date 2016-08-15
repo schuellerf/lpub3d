@@ -1,4 +1,4 @@
-
+ 
 /****************************************************************************
 **
 ** Copyright (C) 2007-2009 Kevin Clague. All rights reserved.
@@ -350,9 +350,23 @@ void CsiItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
   //placeGrabbers();
   position = pos();
   gui->showLine(step->topOfStep());
-  if (! gMainWindow->OpenProject(step->csi3DName)) {
-     emit gui->statusMessage(false,QMessageBox::tr("Could not load 3D Viewer with file :\n%1.")
-                            .arg(step->csiName()));
+  int  rc = step->Load3DCsi(step->csi3DName);
+
+  if (rc == -1){
+      qDebug() << "\nCreating CsiItem 3D-render file: " << step->csi3DName;
+      QStringList fileFilters;
+      fileFilters << QString("%1_%2_*.ldr")
+                     .arg(step->csiName())
+                     .arg(step->stepNumber.number);
+      QFileInfo renderFileInfo(step->csi3DName);
+      QDir dir(renderFileInfo.absolutePath());
+      QStringList dirs = dir.entryList(fileFilters);
+      if (dirs.size() > 0) {
+        dir.rename(dirs.at(0), renderFileInfo.fileName());
+        rc = step->Load3DCsi(step->csi3DName);
+        if (rc != 0)
+          qDebug() << "\nCsiItem 3D-render failed to load: " << step->csi3DName;
+      }
   }
 }
 

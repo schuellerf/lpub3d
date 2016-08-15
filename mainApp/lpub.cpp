@@ -87,6 +87,11 @@ void clearCsiCache()
   gui->clearCSICache();
 }
 
+void clearCsi3dCache()
+{
+    gui->clearCSI3DCache();
+}
+
 void clearAndRedrawPage()
 {
     gui->clearAndRedrawPage();
@@ -639,6 +644,7 @@ void Gui::clearImageModelCaches()
 
        clearPLICache();
        clearCSICache();
+       clearCSI3DCache();
 
        //reload current model file
        openFile(curFile);
@@ -657,6 +663,7 @@ void Gui::clearAndRedrawPage()
 
        clearPLICache();
        clearCSICache();
+       clearCSI3DCache();
        displayPage();
 
        QObject *obj = sender();
@@ -754,6 +761,58 @@ void Gui::clearCSICache()
       }
 
     statusBarMsg(QString("Assembly content cache cleaned. %1 items removed.").arg(count));
+}
+
+void Gui::clearCSI3DCache()
+{
+    if (getCurFile().isEmpty()) {
+        statusBarMsg("A model must be open to clean its 3D cache - no action taken.");
+        return;
+    }
+
+    QString tmpDirName = QDir::currentPath() + "/" + Paths::tmpDir;
+    QDir tmpDir(tmpDirName);
+
+    tmpDir.setFilter(QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+
+    QFileInfoList list = tmpDir.entryInfoList();
+    int count1 = 0;
+    for (int i = 0; i < list.size(); i++) {
+        QFileInfo fileInfo = list.at(i);
+        QFile     file(tmpDirName + "/" + fileInfo.fileName());
+        if (!file.remove()) {
+            QMessageBox::critical(NULL,
+                                  tr("LPub3D"),
+                                  tr("Unable to remeove %1")
+                                  .arg(tmpDirName + "/" + fileInfo.fileName()));
+            count1--;
+          } else
+          count1++;
+      }
+
+    ldrawFile.tempCacheCleared();
+
+    QString viewDirName = QDir::currentPath() + "/" + Paths::viewerDir;
+    QDir viewDir(viewDirName);
+
+    viewDir.setFilter(QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+
+    QFileInfoList viewDirList = viewDir.entryInfoList();
+    int count2 = 0;
+    for (int i = 0; i < viewDirList.size(); i++) {
+        QFileInfo fileInfo = viewDirList.at(i);
+        QFile     file(viewDirName + "/" + fileInfo.fileName());
+        if (!file.remove()) {
+            QMessageBox::critical(NULL,
+                                  tr("LPub3D"),
+                                  tr("Unable to remeove %1")
+                                  .arg(viewDirName + "/" + fileInfo.fileName()));
+            count2--;
+          } else
+          count2++;
+    }
+
+    statusBarMsg(QString("3D Viewer content cache cleaned. %1 temp and %2 viewer items removed.").arg(count1).arg(count2));
 }
 
 bool Gui::removeDir(int &count, const QString & dirName)
@@ -1571,6 +1630,10 @@ void Gui::createActions()
     clearCSICacheAct->setStatusTip(tr("Reset the assembly image cache"));
     connect(clearCSICacheAct, SIGNAL(triggered()), this, SLOT(clearCSICache()));
 
+    clearCSI3DCacheAct = new QAction(QIcon(":/resources/clearcsi3dcache.png"),tr("Reset 3D Viewer Model Cache"), this);
+    clearCSI3DCacheAct->setStatusTip(tr("Reset the 3D viewer image cache"));
+    connect(clearCSI3DCacheAct, SIGNAL(triggered()), this, SLOT(clearCSI3DCache()));
+
     clearImageModelCacheAct = new QAction(QIcon(":/resources/clearimagemodelcache.png"),tr("Reset Image and 3D Model Caches"), this);
     clearImageModelCacheAct->setStatusTip(tr("Reset all image and model caches"));
     connect(clearImageModelCacheAct, SIGNAL(triggered()), this, SLOT(clearImageModelCaches()));
@@ -1815,6 +1878,7 @@ void Gui::createMenus()
     cacheMenu->addAction(clearImageModelCacheAct);
     cacheMenu->addAction(clearPLICacheAct);
     cacheMenu->addAction(clearCSICacheAct);
+    cacheMenu->addAction(clearCSI3DCacheAct);
     cacheMenu->addAction(clearFadeCacheAct);
     cacheMenu->setDisabled(true);
 

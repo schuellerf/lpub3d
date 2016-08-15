@@ -101,6 +101,8 @@ class Step : public AbstractRangeElement
            QPixmap            *pixmap,
            Meta               &meta);
 
+    int Load3DCsi(QString &csi3DName);
+
     int  sizeit(int  rows[],
                 int  cols[],
                 int  rowsMargin[][2],
