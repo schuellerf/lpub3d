@@ -2520,12 +2520,8 @@ void lcModel::RotateStepSelectedObjects(lcRotateStepType RotateStepType, const l
         break;
     }
 
-    QString modelNameParts  = mProperties.mName;                    // Model Name Format = csiName_sn_ln.ldr
-            modelNameParts  = modelNameParts.section("_",-1,-1);    // First split to get 'ln.ldr'
-    QString lineNumber      = modelNameParts.section(".",0,-2);     // Second split to get 'ln'
-
     QString rotationValue("%1 %2 %3 %4 %5");
-    rotationValue = rotationValue.arg(lineNumber,
+    rotationValue = rotationValue.arg(gMainWindow->mRotateStepLineNumber,
                   QString::number(rotateStep[0], 'f', 2),
                   QString::number(rotateStep[1], 'f', 2),
                   QString::number(rotateStep[2], 'f', 2),

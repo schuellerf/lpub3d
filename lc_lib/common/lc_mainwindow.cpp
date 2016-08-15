@@ -2045,7 +2045,9 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 	if (!SaveProjectIfModified())
 		return false;
 
-	QString LoadFileName = FileName;
+    /*** LPub3D modification 2048: - rotstep ***/
+    QString LoadFileName = FileName.split("_").last();    // input file format ln_csiName.ldr
+    /*** LPub3D modification end ***/
 
 	if (LoadFileName.isEmpty())
 	{
@@ -2064,6 +2066,10 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 
 	if (NewProject->Load(LoadFileName))
 	{
+        /*** LPub3D modification 2069: - rotstep ***/
+        mRotateStepLineNumber = FileName.split("_").first();
+        logDebug() << "Rotstep Line Number from Step: " << mRotateStepLineNumber;
+        /*** LPub3D modification end ***/
 		g_App->SetProject(NewProject);
 		AddRecentFile(LoadFileName);
 		UpdateAllViews();
