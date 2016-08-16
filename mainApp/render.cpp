@@ -58,7 +58,7 @@ Render *renderer;
 
 LDGLite ldglite;
 LDView  ldview;
-L3P l3p;
+POVRay povray;
 
 
 //#define LduDistance 5729.57
@@ -77,43 +77,6 @@ int rendererTimeout(){
         return Preferences::rendererTimeout*60*1000;
 }
 
-QString fixupDirname(const QString &dirNameIn) {
-#ifdef __APPLE__
-	return dirNameIn;
-#else
-	long     length = 0;
-    TCHAR*   buffer = NULL;
-//  30/11/2014 Generating "invalid conversion from const ushort to const wchar" compile error:
-//  LPCWSTR dirNameWin = dirNameIn.utf16();
-    LPCWSTR dirNameWin = (const wchar_t*)dirNameIn.utf16();
-
-// First obtain the size needed by passing NULL and 0.
-
-    length = GetShortPathName(dirNameWin, NULL, 0);
-    if (length == 0){
-		qDebug() << "Couldn't get length of short path name, trying long path name\n";
-		return dirNameIn;
-	}
-// Dynamically allocate the correct size 
-// (terminating null char was included in length)
-
-    buffer = new TCHAR[length];
-
-// Now simply call again using same long path.
-
-    length = GetShortPathName(dirNameWin, buffer, length);
-    if (length == 0){
-		qDebug() << "Couldn't get short path name, trying long path name\n";
-		return dirNameIn;
-	}
-
-	QString dirNameOut = QString::fromWCharArray(buffer);
-    
-    delete [] buffer;
-	return dirNameOut;
-#endif
-}
-
 QString const Render::getRenderer()
 {
   if (renderer == &ldglite) {
@@ -121,7 +84,7 @@ QString const Render::getRenderer()
   } else if (renderer == &ldview){
     return "LDView";
   } else {
-	  return "L3P";
+      return "POVRay";
   }
 }
 
@@ -132,7 +95,7 @@ void Render::setRenderer(QString const &name)
   } else if (name == "LDView") {
     renderer = &ldview;
   } else {
-	  renderer = &l3p;
+      renderer = &povray;
   }
 }
 
@@ -275,17 +238,22 @@ float stdCameraDistance(Meta &meta, float scale) {
 
 /***************************************************************************
  *
- * L3P renderer
+ * POVRay renderer
  *
  **************************************************************************/
-float L3P::cameraDistance(Meta &meta, float scale){
-	return stdCameraDistance(meta, scale);
+float POVRay::cameraDistance(Meta &meta, float scale){
+
+    if (Preferences::ldviewPOVRayFileGenerator)
+        return stdCameraDistance(meta, scale)*0.455;
+    else
+        return stdCameraDistance(meta, scale);
 }
 
-int L3P::renderCsi(const QString     &addLine,
-		   const QStringList &csiParts,
-		   const QString     &pngName,
-		   Meta        &meta){
+int POVRay::renderCsi(
+          const QString     &addLine,
+          const QStringList &csiParts,
+          const QString     &pngName,
+          Meta              &meta){
 	
 	
 	/* Create the CSI DAT file */
@@ -297,65 +265,120 @@ int L3P::renderCsi(const QString     &addLine,
 		return rc;
 	}
 	
-	/* determine camera distance */
 	QStringList arguments;
-	bool hasLGEO = Preferences::lgeoPath != "";
-	
-	int cd = cameraDistance(meta, meta.LPub.assem.modelScale.value());
+    QStringList list;
+    bool hasLGEO = Preferences::lgeoPath != "";
+
 	int width = meta.LPub.page.size.valuePixels(0);
 	int height = meta.LPub.page.size.valuePixels(1);
-	float ar = width/(float)height;
-	
-	QString cg = QString("-cg0.0,0.0,%1").arg(cd);
-	QString car = QString("-car%1").arg(ar);
-	QString ldd = QString("-ldd%1").arg(fixupDirname(QDir::toNativeSeparators(Preferences::ldrawPath)));
-	arguments << CA;
-	arguments << cg;
-	arguments << "-ld";
-	if(hasLGEO){
-		QString lgd = QString("-lgd%1").arg(fixupDirname(QDir::toNativeSeparators(Preferences::lgeoPath)));
-		arguments << "-lgeo";
-		arguments << lgd;
-	}
-	arguments << car;
-	arguments << "-o";
-	arguments << ldd;
-	QStringList list;
-	list = meta.LPub.assem.l3pParms.value().split("\\s+");
-	for (int i = 0; i < list.size(); i++) {
-		if (list[i] != "" && list[i] != " ") {
-			arguments << list[i];
-		}
-	}
-	
-	arguments << fixupDirname(QDir::toNativeSeparators(ldrName));
-	arguments << fixupDirname(QDir::toNativeSeparators(povName));
-	
-	emit gui->messageSig(true, "Execute command: L3P render CSI.");
 
-	QProcess l3p;
-	QStringList env = QProcess::systemEnvironment();
-	l3p.setEnvironment(env);
-	l3p.setWorkingDirectory(QDir::currentPath() +"/"+Paths::tmpDir);
-	l3p.setStandardErrorFile(QDir::currentPath() + "/stderr");
-	l3p.setStandardOutputFile(QDir::currentPath() + "/stdout");
-	qDebug() << qPrintable(Preferences::l3pExe + " " + arguments.join(" ")) << "\n";
-	l3p.start(Preferences::l3pExe,arguments);
-    if ( ! l3p.waitForFinished(rendererTimeout())) {
-		if (l3p.exitCode() != 0) {
-			QByteArray status = l3p.readAll();
-			QString str;
-			str.append(status);
-			QMessageBox::warning(NULL,
-				 QMessageBox::tr(VER_PRODUCTNAME_STR),
-					QMessageBox::tr("L3P failed with code %1\n%2").arg(l3p.exitCode()) .arg(str));
-			return -1;
-		}
-	}
-	
+    if (Preferences::ldviewPOVRayFileGenerator) {
+        // LDView pov file generator
+
+        /* determine camera distance */
+        int cd = cameraDistance(meta,meta.LPub.assem.modelScale.value())*1700/1000;
+        //qDebug() << "LDView (Native) Camera Distance: " <<
+
+        QString cg = QString("-cg0.0,0.0,%1") .arg(cd);
+
+        QString w  = QString("-SaveWidth=%1") .arg(width);
+        QString h  = QString("-SaveHeight=%1") .arg(height);
+        QString s  = QString("-ExportFile=%1") .arg(povName);
+
+        arguments << CA;
+        arguments << cg;
+        arguments << "-PovExporter/Floor=0";
+        arguments << "-ShowHighlightLines=1";
+        arguments << "-ConditionalHighlights=1";
+        arguments << "-SaveZoomToFit=0";
+        arguments << "-SubduedLighting=1";
+        arguments << "-UseSpecular=0";
+        arguments << "-LightVector=0,1,1";
+        arguments << "-SaveActualSize=0";
+        arguments << w;
+        arguments << h;
+        arguments << s;
+
+        list = meta.LPub.assem.ldviewParms.value().split("\\s+");
+        for (int i = 0; i < list.size(); i++) {
+          if (list[i] != "" && list[i] != " ") {
+            arguments << list[i];
+          }
+        }
+        arguments << ldrName;
+
+        emit gui->messageSig(true, "Execute command: POVRay (LDView) render CSI.");
+
+        QProcess    ldview;
+        ldview.setEnvironment(QProcess::systemEnvironment());
+        ldview.setWorkingDirectory(QDir::currentPath()+"/"+Paths::tmpDir);
+        qDebug() << qPrintable(Preferences::ldviewExe + " " + arguments.join(" ")) << "\n";
+        ldview.start(Preferences::ldviewExe,arguments);
+        if ( ! ldview.waitForFinished(rendererTimeout())) {
+          if (ldview.exitCode() != 0 || 1) {
+            QByteArray status = ldview.readAll();
+            QString str;
+            str.append(status);
+            emit gui->messageSig(false,QMessageBox::tr("LDView POV-RAY file generation failed with exit code %1\n%2") .arg(ldview.exitCode()) .arg(str));
+            return -1;
+          }
+        }
+        // LDView end
+    } else {
+        // L3P pov file generator
+        int cd = cameraDistance(meta, meta.LPub.assem.modelScale.value());
+        float ar = width/(float)height;
+
+        QString cg = QString("-cg0.0,0.0,%1").arg(cd);
+        QString car = QString("-car%1").arg(ar);
+        QString ldd = QString("-ldd%1").arg(QDir::toNativeSeparators(Preferences::ldrawPath));
+        arguments << CA;
+        arguments << cg;
+        arguments << "-ld";
+        if(hasLGEO){
+            QString lgd = QString("-lgd%1").arg(QDir::toNativeSeparators(Preferences::lgeoPath));
+            arguments << "-lgeo";
+            arguments << lgd;
+        }
+        arguments << car;
+        arguments << "-o";
+        arguments << ldd;
+
+        list = meta.LPub.assem.l3pParms.value().split("\\s+");
+        for (int i = 0; i < list.size(); i++) {
+            if (list[i] != "" && list[i] != " ") {
+                arguments << list[i];
+            }
+        }
+
+        arguments << QDir::toNativeSeparators(ldrName);
+        arguments << QDir::toNativeSeparators(povName);
+
+        emit gui->messageSig(true, "Execute command: POVRay (L3P) render CSI.");
+
+        QProcess l3p;
+        QStringList env = QProcess::systemEnvironment();
+        l3p.setEnvironment(env);
+        l3p.setWorkingDirectory(QDir::currentPath() +"/"+Paths::tmpDir);
+        l3p.setStandardErrorFile(QDir::currentPath() + "/stderr");
+        l3p.setStandardOutputFile(QDir::currentPath() + "/stdout");
+        qDebug() << qPrintable(Preferences::l3pExe + " " + arguments.join(" ")) << "\n";
+        l3p.start(Preferences::l3pExe,arguments);
+        if ( ! l3p.waitForFinished(rendererTimeout())) {
+            if (l3p.exitCode() != 0) {
+                QByteArray status = l3p.readAll();
+                QString str;
+                str.append(status);
+                emit gui->messageSig(false,QMessageBox::tr("L3P POV-RAY file generation failed with code %1\n%2").arg(l3p.exitCode()) .arg(str));
+                return -1;
+            }
+        }
+        // L3P end
+    }
+
 	QStringList povArguments;
-	QString O =QString("+O%1").arg(fixupDirname(QDir::toNativeSeparators(pngName)));
-	QString I = QString("+I%1").arg(fixupDirname(QDir::toNativeSeparators(povName)));
+    QString O = QString("+O%1").arg(QDir::toNativeSeparators(pngName));
+    QString I = QString("+I%1").arg(QDir::toNativeSeparators(povName));
 	QString W = QString("+W%1").arg(width);
 	QString H = QString("+H%1").arg(height);
 	
@@ -365,8 +388,8 @@ int L3P::renderCsi(const QString     &addLine,
 	povArguments << H;
 	povArguments << USE_ALPHA;
 	if(hasLGEO){
-		QString lgeoLg = QString("+L%1").arg(fixupDirname(QDir::toNativeSeparators(Preferences::lgeoPath + "/lg")));
-		QString lgeoAr = QString("+L%2").arg(fixupDirname(QDir::toNativeSeparators(Preferences::lgeoPath + "/ar")));
+        QString lgeoLg = QString("+L%1").arg(QDir::toNativeSeparators(Preferences::lgeoPath + "/lg"));
+        QString lgeoAr = QString("+L%2").arg(QDir::toNativeSeparators(Preferences::lgeoPath + "/ar"));
 		povArguments << lgeoLg;
 		povArguments << lgeoAr;
 	}
@@ -374,7 +397,7 @@ int L3P::renderCsi(const QString     &addLine,
 	povArguments << "/EXIT";
 #endif
 	
-	list = meta.LPub.assem.povrayParms.value().split("\\s+");
+    list = meta.LPub.assem.povrayParms.value().split("\\s+");
 	for (int i = 0; i < list.size(); i++) {
 		if (list[i] != "" && list[i] != " ") {
 			povArguments << list[i];
@@ -396,9 +419,7 @@ int L3P::renderCsi(const QString     &addLine,
 			QByteArray status = povray.readAll();
 			QString str;
 			str.append(status);
-			QMessageBox::warning(NULL,
-				 QMessageBox::tr(VER_PRODUCTNAME_STR),
-					QMessageBox::tr("POV-RAY failed with code %1\n%2").arg(povray.exitCode()) .arg(str));
+            emit gui->messageSig(false,QMessageBox::tr("POV-RAY failed with code %1\n%2").arg(povray.exitCode()) .arg(str));
 			return -1;
 		}
 	}
@@ -409,80 +430,141 @@ int L3P::renderCsi(const QString     &addLine,
 	
 }
 
-int L3P::renderPli(const QString &ldrName,
+int POVRay::renderPli(const QString &ldrName,
 		   const QString &pngName,
 		   Meta    &meta,
 		   bool     bom){
 	
 	QString povName = ldrName +".pov";
-	
+
+    QStringList arguments;
+    QStringList list;
+    bool hasLGEO = Preferences::lgeoPath != "";
+
 	int width  = meta.LPub.page.size.valuePixels(0);
 	int height = meta.LPub.page.size.valuePixels(1);
-	float ar = width/(float)height;
-	
-	/* determine camera distance */
-	
-	PliMeta &pliMeta = bom ? meta.LPub.bom : meta.LPub.pli;
-	
-	int cd = cameraDistance(meta,pliMeta.modelScale.value());
-	
-	QString cg = QString("-cg%1,%2,%3") .arg(pliMeta.angle.value(0))
-	.arg(pliMeta.angle.value(1))
-	.arg(cd);
-	
-	QString car = QString("-car%1").arg(ar);
-	QString ldd = QString("-ldd%1").arg(fixupDirname(QDir::toNativeSeparators(Preferences::ldrawPath)));
-	QStringList arguments;
-	bool hasLGEO = Preferences::lgeoPath != "";
-	
-	arguments << CA;
-	arguments << cg;
-	arguments << "-ld";
-	if(hasLGEO){
-		QString lgd = QString("-lgd%1").arg(fixupDirname(QDir::toNativeSeparators(Preferences::lgeoPath)));
-		arguments << "-lgeo";
-		arguments << lgd;
-	}
-	arguments << car;
-	arguments << "-o";
-	arguments << ldd;
-	
-	QStringList list;
-	list = meta.LPub.assem.l3pParms.value().split("\\s+");
-	for (int i = 0; i < list.size(); i++) {
-		if (list[i] != "" && list[i] != " ") {
-			arguments << list[i];
-		}
-	}
-	
-	arguments << fixupDirname(QDir::toNativeSeparators(ldrName));
-	arguments << fixupDirname(QDir::toNativeSeparators(povName));
 
-	emit gui->messageSig(true, "Execute command: L3P render PLI.");
-	
-	QProcess    l3p;
-	QStringList env = QProcess::systemEnvironment();
-	l3p.setEnvironment(env);
-	l3p.setWorkingDirectory(QDir::currentPath());
-	l3p.setStandardErrorFile(QDir::currentPath() + "/stderr");
-	l3p.setStandardOutputFile(QDir::currentPath() + "/stdout");
-	qDebug() << qPrintable(Preferences::l3pExe + " " + arguments.join(" ")) << "\n";
-	l3p.start(Preferences::l3pExe,arguments);
-    if (! l3p.waitForFinished()) {
-		if (l3p.exitCode()) {
-			QByteArray status = l3p.readAll();
-			QString str;
-			str.append(status);
-			QMessageBox::warning(NULL,
-				 QMessageBox::tr(VER_PRODUCTNAME_STR),
-					QMessageBox::tr("L3P failed\n%1") .arg(str));
-			return -1;
-		}
-	}
-	
+    if (Preferences::ldviewPOVRayFileGenerator) {
+        // LDView pov file generator
+
+        PliMeta &pliMeta = bom ? meta.LPub.bom : meta.LPub.pli;
+
+        /* determine camera distance */
+        int cd = cameraDistance(meta,pliMeta.modelScale.value())*1700/1000;
+        //qDebug() << "LDView (Native) Camera Distance: " << cd;
+
+        QString cg = QString("-cg%1,%2,%3") .arg(pliMeta.angle.value(0))
+                .arg(pliMeta.angle.value(1))
+                .arg(cd);
+
+        QString w  = QString("-SaveWidth=%1")  .arg(width);
+        QString h  = QString("-SaveHeight=%1") .arg(height);
+        QString s  = QString("-ExportFile=%1") .arg(povName);
+
+        arguments << CA;
+        arguments << cg;
+        arguments << "-PovExporter/Floor=0";
+        arguments << "-ShowHighlightLines=1";
+        arguments << "-ConditionalHighlights=1";
+        arguments << "-SaveZoomToFit=0";
+        arguments << "-SubduedLighting=1";
+        arguments << "-UseSpecular=0";
+        arguments << "-LightVector=0,1,1";
+        arguments << "-SaveActualSize=0";
+        arguments << w;
+        arguments << h;
+        arguments << s;
+
+        list = meta.LPub.pli.ldviewParms.value().split("\\s+");
+        for (int i = 0; i < list.size(); i++) {
+            if (list[i] != "" && list[i] != " ") {
+                arguments << list[i];
+            }
+        }
+        arguments << ldrName;
+
+        emit gui->messageSig(true, "Execute command: POV-RAY (LDView) render PLI.");
+
+        QProcess    ldview;
+        ldview.setEnvironment(QProcess::systemEnvironment());
+        ldview.setWorkingDirectory(QDir::currentPath());
+        qDebug() << qPrintable(Preferences::ldviewExe + " " + arguments.join(" ")) << "\n";
+        ldview.start(Preferences::ldviewExe,arguments);
+        if ( ! ldview.waitForFinished()) {
+            if (ldview.exitCode() != 0) {
+                QByteArray status = ldview.readAll();
+                QString str;
+                str.append(status);
+                emit gui->messageSig(false,QMessageBox::tr("LDView POV-RAY file generation failed with exit code %1\n%2") .arg(ldview.exitCode()) .arg(str));
+                return -1;
+            }
+        }
+        // LDView end
+    } else {
+        // L3P pov file generator
+
+        float ar = width/(float)height;
+
+        /* determine camera distance */
+
+        PliMeta &pliMeta = bom ? meta.LPub.bom : meta.LPub.pli;
+
+        int cd = cameraDistance(meta,pliMeta.modelScale.value());
+
+        QString cg = QString("-cg%1,%2,%3") .arg(pliMeta.angle.value(0))
+                .arg(pliMeta.angle.value(1))
+                .arg(cd);
+
+        QString car = QString("-car%1").arg(ar);
+        QString ldd = QString("-ldd%1").arg(QDir::toNativeSeparators(Preferences::ldrawPath));
+
+        arguments << CA;
+        arguments << cg;
+        arguments << "-ld";
+        if(hasLGEO){
+            QString lgd = QString("-lgd%1").arg(QDir::toNativeSeparators(Preferences::lgeoPath));
+            arguments << "-lgeo";
+            arguments << lgd;
+        }
+        arguments << car;
+        arguments << "-o";
+        arguments << ldd;
+
+        QStringList list;
+        list = meta.LPub.assem.l3pParms.value().split("\\s+");
+        for (int i = 0; i < list.size(); i++) {
+            if (list[i] != "" && list[i] != " ") {
+                arguments << list[i];
+            }
+        }
+
+        arguments << QDir::toNativeSeparators(ldrName);
+        arguments << QDir::toNativeSeparators(povName);
+
+        emit gui->messageSig(true, "Execute command: POV-RAY (L3P) render PLI.");
+
+        QProcess    l3p;
+        QStringList env = QProcess::systemEnvironment();
+        l3p.setEnvironment(env);
+        l3p.setWorkingDirectory(QDir::currentPath());
+        l3p.setStandardErrorFile(QDir::currentPath() + "/stderr");
+        l3p.setStandardOutputFile(QDir::currentPath() + "/stdout");
+        qDebug() << qPrintable(Preferences::l3pExe + " " + arguments.join(" ")) << "\n";
+        l3p.start(Preferences::l3pExe,arguments);
+        if (! l3p.waitForFinished()) {
+            if (l3p.exitCode()) {
+                QByteArray status = l3p.readAll();
+                QString str;
+                str.append(status);
+                emit gui->messageSig(false,QMessageBox::tr("L3P POV-RAY file generation failed with exit code %1\n%2") .arg(l3p.exitCode()) .arg(str));
+                return -1;
+            }
+        }
+    }
+
 	QStringList povArguments;
-	QString O =QString("+O%1").arg(fixupDirname(QDir::toNativeSeparators(pngName)));
-	QString I = QString("+I%1").arg(fixupDirname(QDir::toNativeSeparators(povName)));
+    QString O = QString("+O%1").arg(QDir::toNativeSeparators(pngName));
+    QString I = QString("+I%1").arg(QDir::toNativeSeparators(povName));
 	QString W = QString("+W%1").arg(width);
 	QString H = QString("+H%1").arg(height);
 	
@@ -492,8 +574,8 @@ int L3P::renderPli(const QString &ldrName,
 	povArguments << H;
 	povArguments << USE_ALPHA;
 	if(hasLGEO){
-		QString lgeoLg = QString("+L%1").arg(fixupDirname(QDir::toNativeSeparators(Preferences::lgeoPath + "/lg")));
-		QString lgeoAr = QString("+L%2").arg(fixupDirname(QDir::toNativeSeparators(Preferences::lgeoPath + "/ar")));
+        QString lgeoLg = QString("+L%1").arg(QDir::toNativeSeparators(Preferences::lgeoPath + "/lg"));
+        QString lgeoAr = QString("+L%2").arg(QDir::toNativeSeparators(Preferences::lgeoPath + "/ar"));
 		povArguments << lgeoLg;
 		povArguments << lgeoAr;
 	}
@@ -501,14 +583,14 @@ int L3P::renderPli(const QString &ldrName,
 	povArguments << "/EXIT";
 #endif
 	
-	list = meta.LPub.assem.povrayParms.value().split("\\s+");
+    list = meta.LPub.assem.povrayParms.value().split("\\s+");
 	for (int i = 0; i < list.size(); i++) {
 		if (list[i] != "" && list[i] != " ") {
 			povArguments << list[i];
 		}
 	}
 
-	emit gui->messageSig(true, "Execute command: POV-RAY render PLI.");
+    emit gui->statusMessage(true, "Execute command: POV-RAY render PLI.");
 
 	QProcess povray;
 	QStringList povEnv = QProcess::systemEnvironment();
@@ -523,18 +605,14 @@ int L3P::renderPli(const QString &ldrName,
 			QByteArray status = povray.readAll();
 			QString str;
 			str.append(status);
-			QMessageBox::warning(NULL,
-				 QMessageBox::tr(VER_PRODUCTNAME_STR),
-					QMessageBox::tr("POV-RAY failed\n%1") .arg(str));
+            emit gui->messageSig(false,QMessageBox::tr("POV-RAY failed with code %1\n%2") .arg(povray.exitCode()) .arg(str));
 			return -1;
 		}
 	}
 	
 	clipImage(pngName);
 	
-	return 0;
-
-	
+	return 0;	
 }
 
 
@@ -630,9 +708,7 @@ int LDGLite::renderCsi(
       QByteArray status = ldglite.readAll();
       QString str;
       str.append(status);
-      QMessageBox::warning(NULL,
-                           QMessageBox::tr(VER_PRODUCTNAME_STR),
-                           QMessageBox::tr("LDGlite failed\n%1") .arg(str));
+      emit gui->messageSig(false,QMessageBox::tr("LDGlite failed\n%1") .arg(str));
       return -1;
     }
   }
@@ -709,9 +785,7 @@ int LDGLite::renderPli(
       QByteArray status = ldglite.readAll();
       QString str;
       str.append(status);
-      QMessageBox::warning(NULL,
-                           QMessageBox::tr(VER_PRODUCTNAME_STR),
-                           QMessageBox::tr("LDGlite failed\n%1") .arg(str));
+      emit gui->messageSig(false,QMessageBox::tr("LDGlite failed\n%1") .arg(str));
       return -1;
     }
   }
@@ -820,9 +894,7 @@ int LDView::renderCsi(
       QByteArray status = ldview.readAll();
       QString str;
       str.append(status);
-      QMessageBox::warning(NULL,
-                           QMessageBox::tr(VER_PRODUCTNAME_STR),
-                           QMessageBox::tr("LDView failed\n%1") .arg(str));
+      emit gui->messageSig(false,QMessageBox::tr("LDView failed\n%1") .arg(str));
       return -1;
     }
   }
@@ -897,9 +969,7 @@ int LDView::renderPli(
       QByteArray status = ldview.readAll();
       QString str;
       str.append(status);
-      QMessageBox::warning(NULL,
-                           QMessageBox::tr(VER_PRODUCTNAME_STR),
-                           QMessageBox::tr("LDView failed\n%1") .arg(str));
+      emit gui->messageSig(false,QMessageBox::tr("LDView failed\n%1") .arg(str));
       return -1;
     }
   }
@@ -961,9 +1031,7 @@ int Render::renderLDViewSCallCsi(
       QByteArray status = ldview.readAll();
       QString str;
       str.append(status);
-      QMessageBox::warning(NULL,
-                           QMessageBox::tr(VER_PRODUCTNAME_STR),
-                           QMessageBox::tr("LDView command failed\n%1") .arg(str));
+      emit gui->messageSig(false,QMessageBox::tr("LDView command failed\n%1") .arg(str));
       return -1;
     }
   }
@@ -979,9 +1047,7 @@ int Render::renderLDViewSCallCsi(
           //in case failure because file exist
           QFile pngFile(imageFilePath);
           if (! pngFile.exists()){
-              QMessageBox::warning(NULL,
-                                   QMessageBox::tr(VER_PRODUCTNAME_STR),
-                                   QMessageBox::tr("LDView CSI image file move failed for\n%1")
+              emit gui->messageSig(false,QMessageBox::tr("LDView CSI image file move failed for\n%1")
                                    .arg(imageFilePath));
               return -1;
             }
@@ -1051,9 +1117,7 @@ int Render::renderLDViewSCallPli(
           QByteArray status = ldview.readAll();
           QString str;
           str.append(status);
-          QMessageBox::warning(NULL,
-                               QMessageBox::tr(VER_PRODUCTNAME_STR),
-                               QMessageBox::tr("LDView command failed\n%1") .arg(str));
+          emit gui->messageSig(false,QMessageBox::tr("LDView command failed\n%1") .arg(str));
           return -1;
         }
     }
@@ -1069,9 +1133,7 @@ int Render::renderLDViewSCallPli(
           //in case failure because file exist
           QFile pngFile(imageFilePath);
           if (! pngFile.exists()){
-              QMessageBox::warning(NULL,
-                         QMessageBox::tr(VER_PRODUCTNAME_STR),
-                         QMessageBox::tr("LDView PLI image file move failed for\n%1")
+              emit gui->messageSig(false,QMessageBox::tr("LDView PLI image file move failed for\n%1")
                          .arg(imageFilePath));
               return -1;
             }

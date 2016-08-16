@@ -865,6 +865,7 @@ void Gui::editLdrawIniFile()
 void Gui::preferences()
 {
   bool useLDViewSCall= renderer->useLDViewSCall();
+  bool useLDViewPOVFileGenerator = Preferences::ldviewPOVRayFileGenerator;
 
     if (Preferences::getPreferences()) {
 
@@ -878,6 +879,7 @@ void Gui::preferences()
         bool rendererChanged = Render::getRenderer() != currentRenderer;
         bool fadeStepColorChanged = Preferences::fadeStepColorChanged && !Preferences::fadeStepSettingChanged;
         bool useLDViewSCallChanged = useLDViewSCall != renderer->useLDViewSCall();
+        bool povFileGeneratorChanged = useLDViewPOVFileGenerator != Preferences::ldviewPOVRayFileGenerator;
 
         if (rendererChanged && Preferences::preferredRenderer == "LDGLite") {
             partWorkerLdgLiteSearchDirs.populateLdgLiteSearchDirs();
@@ -889,9 +891,10 @@ void Gui::preferences()
             if (Preferences::fadeStepSettingChanged){
                 clearImageModelCaches();
             }
-            if (rendererChanged ||
-                     fadeStepColorChanged ||
-                     useLDViewSCallChanged){
+            if (rendererChanged       ||
+                fadeStepColorChanged  ||
+                useLDViewSCallChanged ||
+                povFileGeneratorChanged){
                 clearAndRedrawPage();
             }
         }
@@ -1571,7 +1574,7 @@ void Gui::createActions()
     clearCSICacheAct->setStatusTip(tr("Reset the assembly image cache"));
     connect(clearCSICacheAct, SIGNAL(triggered()), this, SLOT(clearCSICache()));
 
-    clearImageModelCacheAct = new QAction(QIcon(":/resources/clearimagemodelcache.png"),tr("Reset Image and 3D Model Caches"), this);
+    clearImageModelCacheAct = new QAction(QIcon(":/resources/clearimagemodelcache.png"),tr("Reset All Caches"), this);
     clearImageModelCacheAct->setStatusTip(tr("Reset all image and model caches"));
     connect(clearImageModelCacheAct, SIGNAL(triggered()), this, SLOT(clearImageModelCaches()));
 

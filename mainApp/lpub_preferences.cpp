@@ -87,6 +87,7 @@ bool    Preferences::useLDViewSingleCall        = false;
 bool    Preferences::displayAllAttributes       = false;
 bool    Preferences::generateCoverPages         = false;
 bool    Preferences::printDocumentTOC           = false;
+bool    Preferences::ldviewPOVRayFileGenerator        = false;
 //
 
 bool    Preferences::enableFadeStep             = false;
@@ -611,6 +612,7 @@ void Preferences::renderPreferences()
     /* Find POV-Ray's installation status */
 
     bool    povRayInstalled;
+    bool    l3pInstalled;
     QString const povrayPathKey("POVRayPath");
     QString const l3pPathKey("L3P");
     QString povrayPath, l3pPath;
@@ -633,19 +635,24 @@ void Preferences::renderPreferences()
         l3pPath = Settings.value(QString("%1/%2").arg(POVRAY,l3pPathKey)).toString();
         QFileInfo info(l3pPath);
         if (info.exists()) {
-            povRayInstalled &= true;
+            l3pInstalled = true;
             l3pExe = l3pPath;
         } else {
-            Settings.remove(QString("%1/%2").arg(POVRAY,l3pPathKey));
-            povRayInstalled &= false;
+             Settings.remove(QString("%1/%2").arg(POVRAY,l3pPathKey));
+            l3pInstalled = false;
         }
     } else if (l3pInfo.exists()) {
         Settings.setValue(QString("%1/%2").arg(POVRAY,l3pPathKey),l3pInfo.absoluteFilePath());
-        povRayInstalled &= true;
+        l3pInstalled = true;
         l3pExe = l3pInfo.absoluteFilePath();
     } else {
         Settings.remove(QString("%1/%2").arg(POVRAY,l3pPathKey));
-        povRayInstalled &= false;
+        l3pInstalled = false;
+    }
+
+    bool povRayRequiredsInstalled = povRayInstalled && (ldviewInstalled || l3pInstalled);
+    if (!povRayRequiredsInstalled) {
+        Settings.remove(QString("%1/%2").arg(POVRAY,povrayPathKey));
     }
 
     /* Find out if we have a valid preferred renderer */
@@ -665,7 +672,7 @@ void Preferences::renderPreferences()
                 Settings.remove(QString("%1/%2").arg(SETTINGS,preferredRendererKey));
             }
         } else if (preferredRenderer == "POV-Ray") {
-            if ( ! povRayInstalled) {
+            if ( ! povRayRequiredsInstalled) {
                 preferredRenderer.clear();
                 Settings.remove(QString("%1/%2").arg(SETTINGS,preferredRendererKey));
             }
@@ -674,8 +681,8 @@ void Preferences::renderPreferences()
 
     if (preferredRenderer == "") {
         if (ldviewInstalled && ldgliteInstalled) {
-            preferredRenderer = povRayInstalled? "POV-Ray" : "LDGLite";
-        } else if (povRayInstalled) {
+            preferredRenderer = povRayRequiredsInstalled ? "POV-Ray" : "LDGLite";
+        } else if (povRayRequiredsInstalled) {
             preferredRenderer = "POV-Ray";
         } else if (ldviewInstalled) {
             preferredRenderer = "LDView";
@@ -716,7 +723,14 @@ void Preferences::renderPreferences()
     } else {
         rendererTimeout = Settings.value(QString("%1/%2").arg(SETTINGS,"RendererTimeout")).toInt();
     }
-
+    //pov file generator preference
+    if ( ! Settings.contains(QString("%1/%2").arg(POVRAY,"POVRayFileGenerator"))) {
+        QVariant uValue(false);
+        ldviewPOVRayFileGenerator = false;
+        Settings.setValue(QString("%1/%2").arg(POVRAY,"POVRayFileGenerator"),uValue);
+    } else {
+        ldviewPOVRayFileGenerator = Settings.value(QString("%1/%2").arg(POVRAY,"POVRayFileGenerator")).toBool();
+    }
 }
 
 void Preferences::pliPreferences()
@@ -1036,6 +1050,12 @@ bool Preferences::getPreferences()
             } else {
                 Settings.setValue(QString("%1/%2").arg(SETTINGS,"PreferredRenderer"),preferredRenderer);
             }
+        }
+
+        if (ldviewPOVRayFileGenerator != dialog->povrayFileGenerator())
+        {
+            ldviewPOVRayFileGenerator = dialog->povrayFileGenerator();
+            Settings.setValue(QString("%1/%2").arg(POVRAY,"POVRayFileGenerator"),ldviewPOVRayFileGenerator);
         }
 
         if (ldSearchDirs != dialog->searchDirSettings()) {

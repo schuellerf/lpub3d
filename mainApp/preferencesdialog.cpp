@@ -106,44 +106,58 @@ PreferencesDialog::PreferencesDialog(QWidget *_parent) :
 
   ui.preferredRenderer->setMaxCount(0);
   ui.preferredRenderer->setMaxCount(3);
-	
-	QFileInfo fileInfo(Preferences::l3pExe);
-    int povRayIndex = ui.preferredRenderer->count();
-    bool povRayExists = fileInfo.exists();
-	fileInfo.setFile(Preferences::povrayExe);
-    povRayExists &= fileInfo.exists();
-    if (povRayExists) {
-        ui.preferredRenderer->addItem("POV-Ray");
-	}
-	
-  fileInfo.setFile(Preferences::ldgliteExe);
+
+  QFileInfo fileInfo(Preferences::ldgliteExe);
   int ldgliteIndex = ui.preferredRenderer->count();
   bool ldgliteExists = fileInfo.exists();
   if (ldgliteExists) {
     ui.preferredRenderer->addItem("LDGLite");
   }
-  
+
   fileInfo.setFile(Preferences::ldviewExe);
   int ldviewIndex = ui.preferredRenderer->count();
   bool ldviewExists = fileInfo.exists();
   if (ldviewExists) {
     ui.preferredRenderer->addItem("LDView");
   }
-  
+
+  fileInfo.setFile(Preferences::povrayExe);
+  int povRayIndex = ui.preferredRenderer->count();
+  bool povRayExists = fileInfo.exists();
+
+  fileInfo.setFile(Preferences::l3pExe);
+  bool l3pExists = fileInfo.exists();
+
+  bool povRayRequiredsExists = povRayExists && (ldviewExists || l3pExists);
+  if (povRayRequiredsExists) {
+      ui.preferredRenderer->addItem("POV-Ray");
+  }
+
   if (Preferences::preferredRenderer == "LDView" && ldviewExists) {
     ui.preferredRenderer->setCurrentIndex(ldviewIndex);
     ui.preferredRenderer->setEnabled(true);
   } else if (Preferences::preferredRenderer == "LDGLite" && ldgliteExists) {
     ui.preferredRenderer->setCurrentIndex(ldgliteIndex);
     ui.preferredRenderer->setEnabled(true);
-  }  else if (Preferences::preferredRenderer == "POV-Ray" && povRayExists) {
+  }  else if (Preferences::preferredRenderer == "POV-Ray" && povRayRequiredsExists) {
       ui.preferredRenderer->setCurrentIndex(povRayIndex);
 	  ui.preferredRenderer->setEnabled(true);
   } else {
     ui.preferredRenderer->setEnabled(false);
   }
 
-  if(!ldviewExists && !ldgliteExists && !povRayExists){
+  if (! povRayRequiredsExists) {
+      ui.noFileGenRadio->setChecked(true);
+      ui.povFileGeneratorBox->setEnabled(false);
+  } else {
+      ui.povFileGeneratorBox->setEnabled(true);
+      bool ldviewFileGenRadio = Preferences::ldviewPOVRayFileGenerator;
+      ui.ldviewFileGenRadio->setChecked(ldviewFileGenRadio);
+      ui.l3pFileGenRadio->setChecked(! ldviewFileGenRadio);
+      ui.noFileGenRadio->setEnabled(false);
+  }
+
+  if(!ldviewExists && !ldgliteExists && !povRayRequiredsExists){
       ui.tabWidget->setCurrentIndex(1);
       ui.RenderMessage->setText("<font color='red'>You must set a renderer.</font>");
   } else {
@@ -259,6 +273,20 @@ void PreferencesDialog::on_browseLDView_clicked()
         }
         ui.preferredRenderer->setEnabled(true);
         ui.ldviewBox->setChecked(true);
+
+        QFileInfo povRayInfo(ui.povrayPath->text());
+        bool povRayExeExist = povRayInfo.exists();
+        if (povRayExeExist) {
+            int povRayIndex = ui.preferredRenderer->findText("POV-Ray");
+            if (povRayIndex < 0) {
+                ui.preferredRenderer->addItem("POV-Ray");
+            }
+        }
+        ui.POVRayBox->setChecked(povRayExeExist);
+        ui.povFileGeneratorBox->setEnabled(povRayExeExist);
+        ui.ldviewFileGenRadio->setChecked(povRayExeExist);
+        ui.l3pFileGenRadio->setChecked(! povRayExeExist);
+        ui.noFileGenRadio->setEnabled(! povRayExeExist);
         ui.RenderMessage->setText("");
     }
 }
@@ -304,14 +332,19 @@ void PreferencesDialog::on_browseL3P_clicked()
         result = QDir::toNativeSeparators(result);
         ui.l3pPath->setText(result);
         QFileInfo povRayInfo(ui.povrayPath->text());
-        if (povRayInfo.exists()) {
+        bool povRayExeExist = povRayInfo.exists();
+        if (povRayExeExist) {
             int povRayIndex = ui.preferredRenderer->findText("POV-Ray");
             if (povRayIndex < 0) {
                 ui.preferredRenderer->addItem("POV-Ray");
             }
             ui.preferredRenderer->setEnabled(true);
         }
-        ui.POVRayBox->setChecked(povRayInfo.exists());
+        ui.POVRayBox->setChecked(povRayExeExist);
+        ui.povFileGeneratorBox->setEnabled(povRayExeExist);
+        ui.ldviewFileGenRadio->setChecked(povRayExeExist);
+        ui.l3pFileGenRadio->setChecked(! povRayExeExist);
+        ui.noFileGenRadio->setEnabled(! povRayExeExist);
         ui.RenderMessage->setText("");
     }
 }
@@ -332,14 +365,34 @@ void PreferencesDialog::on_browsePOVRAY_clicked()
         result = QDir::toNativeSeparators(result);
         ui.povrayPath->setText(result);
         QFileInfo l3pInfo(ui.l3pPath->text());
-        if (l3pInfo.exists()) {
+        bool l3pExeExist = l3pInfo.exists();
+        if (l3pExeExist) {
             int povRayIndex = ui.preferredRenderer->findText("POV-Ray");
             if (povRayIndex < 0) {
                 ui.preferredRenderer->addItem("POV-Ray");
             }
             ui.preferredRenderer->setEnabled(true);
         }
-        ui.POVRayBox->setChecked(l3pInfo.exists());
+        ui.POVRayBox->setChecked(l3pExeExist);
+        ui.povFileGeneratorBox->setEnabled(l3pExeExist);
+        ui.l3pFileGenRadio->setChecked(l3pExeExist);
+        ui.ldviewFileGenRadio->setChecked(! l3pExeExist);
+
+        QFileInfo ldviewInfo(ui.ldviewPath->text());
+        bool ldviewExeExist = ldviewInfo.exists();
+        if (ldviewExeExist) {
+            int povRayIndex = ui.preferredRenderer->findText("POV-Ray");
+            if (povRayIndex < 0) {
+                ui.preferredRenderer->addItem("POV-Ray");
+            }
+            ui.preferredRenderer->setEnabled(true);
+        }
+        bool fileGeneratorExist = l3pExeExist || ldviewExeExist;
+        ui.POVRayBox->setChecked(fileGeneratorExist);
+        ui.povFileGeneratorBox->setEnabled(l3pExeExist || ldviewExeExist);
+        ui.ldviewFileGenRadio->setChecked(ldviewExeExist);
+        ui.l3pFileGenRadio->setChecked(! ldviewExeExist);
+        ui.noFileGenRadio->setEnabled(! fileGeneratorExist);
         ui.RenderMessage->setText("");
     }
 }
@@ -448,6 +501,11 @@ QString const PreferencesDialog::preferredRenderer()
     return ui.preferredRenderer->currentText();
   }
   return "";
+}
+
+bool PreferencesDialog::povrayFileGenerator()
+{
+  return ui.ldviewFileGenRadio->isChecked();
 }
 
 QString const PreferencesDialog::fadeStepColor()

@@ -85,6 +85,7 @@ class Preferences
     static bool    showUpdateNotifications;
     static bool    enableDownloader;
     static bool    portableDistribution;
+    static bool    ldviewPOVRayFileGenerator;
     static int     checkUpdateFrequency;
     static int     pageWidth;
     static int     pageHeight;

@@ -65,6 +65,7 @@ class PreferencesDialog : public QDialog
     bool          showUpdateNotifications();
     bool          enableDownloader();
     bool          showAllNotifications();
+    bool          povrayFileGenerator();
     int           checkUpdateFrequency();
     int           rendererTimeout();
 

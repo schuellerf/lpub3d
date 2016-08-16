@@ -8,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>522</height>
+    <height>607</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -322,7 +322,7 @@
          <x>16</x>
          <y>260</y>
          <width>441</width>
-         <height>170</height>
+         <height>241</height>
         </rect>
        </property>
        <property name="title">
@@ -453,6 +453,58 @@
          <string>L3P</string>
         </property>
        </widget>
+       <widget class="QGroupBox" name="povFileGeneratorBox">
+        <property name="geometry">
+         <rect>
+          <x>12</x>
+          <y>164</y>
+          <width>421</width>
+          <height>61</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>POV-Ray file generator</string>
+        </property>
+        <widget class="QRadioButton" name="ldviewFileGenRadio">
+         <property name="geometry">
+          <rect>
+           <x>12</x>
+           <y>26</y>
+           <width>91</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>LDView</string>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="l3pFileGenRadio">
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>26</y>
+           <width>81</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>L3P</string>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="noFileGenRadio">
+         <property name="geometry">
+          <rect>
+           <x>280</x>
+           <y>27</y>
+           <width>81</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>None</string>
+         </property>
+        </widget>
+       </widget>
        <zorder>povrayPath</zorder>
        <zorder>browsePOVRAY</zorder>
        <zorder>lgeoBox</zorder>
@@ -460,6 +512,7 @@
        <zorder>l3pPath</zorder>
        <zorder>label_3</zorder>
        <zorder>label_7</zorder>
+       <zorder>povFileGeneratorBox</zorder>
       </widget>
       <widget class="QGroupBox" name="ldgliteBox">
        <property name="geometry">
@@ -594,7 +647,7 @@
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>470</y>
+         <y>500</y>
          <width>431</width>
          <height>20</height>
         </rect>
