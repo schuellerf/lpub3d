@@ -187,6 +187,10 @@ int Step::createCsi(
         }
     }
 
+  QString csiFilePath = QString("%1/%2").arg(QDir::currentPath()).arg(Paths::tmpDir);
+  int ln = top.lineNumber;                      // we need this to facilitate placing the ROTSTEP meta from the viewer window later on
+  QString tln = QString("viewer_%1").arg(ln);
+
   QString key = QString("%1_%2_%3_%4_%5_%6")
       .arg(csiName()+orient)
       .arg(sn)
@@ -213,15 +217,12 @@ int Step::createCsi(
     }
 
   // generate CSI file as appropriate
-  int rc;
-  QString csiFile;
   if ( ! csiExist || csiOutOfDate ) {
-
+      int rc;
       if (renderer->useLDViewSCall()) {
 
           // populate ldr file name
-          ldrName = QDir::currentPath() + "/" +
-              Paths::tmpDir + "/" + key + ".ldr";
+          ldrName = QString("%1/%2.ldr").arg(csiFilePath).arg(key);
 
           // generate and assign the CSI ldr file and rotate its parts
           rc = renderer->rotateParts(addLine,meta.rotStep, csiParts, ldrName);
@@ -229,9 +230,20 @@ int Step::createCsi(
               emit gui->statusMessage(false,QMessageBox::tr("Creation and rotation of CSI ldr file failed for:\n%1.")
                                       .arg(ldrName));
               return rc;
-            }
+          }
 
-        } else {
+          // make a viewer copy
+          csi3DName = QString("%1/%2_%3.ldr").arg(csiFilePath).arg(key).arg(tln);
+          QFile csi3DFile(csi3DName);
+          if (! csi3DFile.exists() || csi3DFile.remove()) {
+              if (! QFile::copy(ldrName, csi3DName)){
+                  emit gui->messageSig(false,QMessageBox::tr("csi2D File copy from \n%1to\n%2 failed ")
+                                             .arg(ldrName).arg(csi3DName));
+                        return -1;
+              }
+          }
+
+      } else {
 
           QElapsedTimer timer;
           timer.start();
@@ -240,27 +252,37 @@ int Step::createCsi(
           rc = renderer->renderCsi(addLine,csiParts, pngName, meta);
           if (rc != 0) {
               emit gui->statusMessage(false,QMessageBox::tr("Render CSI part failed for:\n%1.")
-                                    .arg(pngName));
+                                      .arg(pngName));
               return rc;
-            }
-           csiFile = QDir::currentPath() + "/" + Paths::tmpDir + "/csi.ldr";
+          }
 
-//          qDebug() << Render::getRenderer()
+          // make a viewer copy
+          QString ldr_Name = QString("%1/csi.ldr").arg(csiFilePath);
+          csi3DName = QString("%1/csi_%2_%3.ldr").arg(csiFilePath).arg(sn).arg(tln); //File Name Format = csi_sn_viewer_tln.ldr
+          QFile csi3DFile(csi3DName);
+          if (! csi3DFile.exists() || csi3DFile.remove()) {
+              if (! QFile::copy(ldr_Name, csi3DName)){
+                  emit gui->messageSig(false,QMessageBox::tr("csi2D File copy from \n%1to\n%2 failed ")
+                                             .arg(ldr_Name).arg(csi3DName));
+                        return -1;
+              }
+          }
+
           logTrace() << "\n" << Render::getRenderer()
                      << "CSI render call took "
                      << timer.elapsed() << "milliseconds"
                      << "to render image for " << (calledOut ? "called out," : "simple,")
                      << (multiStep ? "step group" : "single step") << sn
                      << "on page " << gui->stepPageNum << ".";
-        }
-
-  } else if (! renderer->useLDViewSCall()) {
-      csiFile = QDir::currentPath() + "/" + Paths::tmpDir + "/csi.ldr";
-      if ((rc = renderer->rotateParts(addLine,meta.rotStep, csiParts, csiFile)) < 0) {
-          emit gui->statusMessage(false,QMessageBox::tr("Creation and rotation of CSI ldr file failed for:\n%1.")
-                                  .arg(csiFile));
-          return rc;
       }
+
+  } else {
+      // files  exist so just populate the  csi3DNames
+       if (renderer->useLDViewSCall()) {
+           csi3DName = QString("%1/%2_%3.ldr").arg(csiFilePath).arg(key).arg(tln);
+       } else {
+           csi3DName = QString("%1/csi_%2_%3.ldr").arg(csiFilePath).arg(sn).arg(tln);
+       }
   }
 
   // If not using LDView SCall, populate pixmap
@@ -270,27 +292,8 @@ int Step::createCsi(
       csiPlacement.size[1] = pixmap->height();
     }
 
+  // Populate the 3D Viewer
   if (! gMainWindow->GetHalt3DViewer()) {
-
-      int ln = top.lineNumber;   // we need this to facilitate placing the ROTSTEP meta later on
-
-      // populate ldr file name
-      if (renderer->useLDViewSCall()) {
-          if (ldrName.isEmpty()) {
-              ldrName = QDir::currentPath() + "/" +
-                      Paths::tmpDir + "/" + key + ".ldr";
-
-              QFile ldrFile(ldrName);
-              if (! ldrFile.exists()) {
-                  emit gui->statusMessage(false,QMessageBox::tr("Ldr file does not exist:\n%1.")
-                                          .arg(ldrName));
-                  return -1;
-              }
-          }
-          csi3DName = QString("%1_%2").arg(ln).arg(ldrName);
-      } else {
-          csi3DName = QString("%1_%2").arg(ln).arg(csiFile);
-      }
 
       if (! gMainWindow->OpenProject(csi3DName)) {
           emit gui->statusMessage(false,QMessageBox::tr("Could not load 3D Viewer project with file :\n%1.")

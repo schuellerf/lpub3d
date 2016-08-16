@@ -22,6 +22,8 @@
 
 /*** LPub3D modification 21: - includes ***/
 #include "lpub.h"
+#include "range.h"
+#include "step.h"
 /*** LPub3D modification end ***/
 
 lcMainWindow* gMainWindow;
@@ -2045,9 +2047,7 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 	if (!SaveProjectIfModified())
 		return false;
 
-    /*** LPub3D modification 2048: - rotstep ***/
-    QString LoadFileName = FileName.split("_").last();    // input file format ln_csiName.ldr
-    /*** LPub3D modification end ***/
+    QString LoadFileName = FileName;
 
 	if (LoadFileName.isEmpty())
 	{
@@ -2067,8 +2067,9 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 	if (NewProject->Load(LoadFileName))
 	{
         /*** LPub3D modification 2069: - rotstep ***/
-        mRotateStepLineNumber = FileName.split("_").first();
-        logDebug() << "Rotstep Line Number from Step: " << mRotateStepLineNumber;
+        QString fileNamePart = FileName.split("_").last();
+        mRotateStepLineNumber = fileNamePart.split(".").first();
+        //logDebug() << "Rotstep Line Number from Step: " << mRotateStepLineNumber;
         /*** LPub3D modification end ***/
 		g_App->SetProject(NewProject);
 		AddRecentFile(LoadFileName);
