@@ -439,8 +439,8 @@ int Pli::createPartImage(
       .arg(pliMeta.angle.value(1));
   QString imageName = QDir::currentPath() + "/" +
       Paths::partsDir + "/" + key + ".png";
-  QString ldrName = QDir::currentPath() + "/" +
-      Paths::tmpDir + "/pli.ldr";
+  QStringList ldrNames = (QStringList() << QDir::currentPath() + "/" +
+      Paths::tmpDir + "/pli.ldr");
   QFile part(imageName);
   
   if ( ! part.exists()) {
@@ -450,12 +450,12 @@ int Pli::createPartImage(
 
       // create a temporary DAT to feed the renderer
 
-      part.setFileName(ldrName);
+      part.setFileName(ldrNames.first());
 
       if ( ! part.open(QIODevice::WriteOnly)) {
           QMessageBox::critical(NULL,QMessageBox::tr(VER_PRODUCTNAME_STR),
                                 QMessageBox::tr("Cannot open file for writing %1:\n%2.")
-                                .arg(ldrName)
+                                .arg(ldrNames.first())
                                 .arg(part.errorString()));
           return -1;
         }
@@ -466,7 +466,7 @@ int Pli::createPartImage(
       
       // feed DAT to renderer
 
-      int rc = renderer->renderPli(ldrName,imageName,*meta, bom);
+      int rc = renderer->renderPli(ldrNames,imageName,*meta, bom);
 
       if (rc != 0) {
           QMessageBox::warning(NULL,QMessageBox::tr(VER_PRODUCTNAME_STR),
@@ -499,7 +499,8 @@ int Pli::createPartImagesLDViewSCall(QStringList &ldrNames) {
       QElapsedTimer timer;
       timer.start();
       // feed DAT to renderer
-      int rc = renderer->renderLDViewSCallPli(ldrNames,*meta, bom);
+      QString empty("");
+      int rc = renderer->renderPli(ldrNames,empty,*meta,bom);
       if (rc != 0) {
           QMessageBox::warning(NULL,QMessageBox::tr(VER_PRODUCTNAME_STR),
                                QMessageBox::tr("Render failed for Pli images."));

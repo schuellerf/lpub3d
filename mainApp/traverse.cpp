@@ -914,7 +914,9 @@ int Gui::drawPage(LGraphicsView  *view,
                       QElapsedTimer timer;
                       timer.start();
 
-                      int rc = renderer->renderLDViewSCallCsi(ldrStepFiles, steps->meta);
+                      QString empty("");
+                      int rc = renderer->renderCsi(empty,ldrStepFiles,empty,steps->meta);
+
                       if (rc != 0) {
                           QMessageBox::critical(NULL,QMessageBox::tr(VER_PRODUCTNAME_STR),
                                                 QMessageBox::tr("Render CSI images failed."));
@@ -1093,7 +1095,9 @@ int Gui::drawPage(LGraphicsView  *view,
                           QElapsedTimer timer;
                           timer.start();
 
-                          int rc = renderer->renderLDViewSCallCsi(ldrStepFiles, steps->meta);
+                          QString empty("");
+                          int rc = renderer->renderCsi(empty,ldrStepFiles,empty,steps->meta);
+
                           if (rc != 0) {
                               QMessageBox::critical(NULL,QMessageBox::tr(VER_PRODUCTNAME_STR),
                                                     QMessageBox::tr("Render CSI images failed."));

@@ -48,7 +48,7 @@ public:
                                    const QStringList &,
                                    const QString &,
                                    Meta &) = 0;
-  virtual int 		 renderPli(const QString &,
+  virtual int 		 renderPli(const QStringList &,
                                    const QString &,
                                    Meta &,
                                    bool bom) = 0;
@@ -56,11 +56,6 @@ public:
                                       RotStepMeta &rotStep,
                                       const QStringList &parts,
                                       QString &ldrName);
-  int                    renderLDViewSCallCsi(const QStringList &,
-                                     Meta &);
-  int                    renderLDViewSCallPli(const QStringList &,
-                                         Meta &,
-                                         bool bom);
   static int             rotateParts(const QString &addLine,
                                      RotStepMeta &rotStep,
                                      QStringList &parts,
@@ -77,7 +72,7 @@ public:
   POVRay() {}
   virtual ~POVRay() {}
   virtual int renderCsi(const QString &,  const QStringList &, const QString &, Meta &);
-  virtual int renderPli(                  const QString &,     const QString &, Meta &, bool bom);
+  virtual int renderPli(                  const QStringList &, const QString &, Meta &, bool bom);
   virtual float cameraDistance(Meta &meta, float);
 };
 
@@ -87,7 +82,7 @@ public:
   LDGLite() {}
   virtual ~LDGLite() {}
   virtual int renderCsi(const QString &,  const QStringList &, const QString &, Meta &);
-  virtual int renderPli(                  const QString &,     const QString &, Meta &, bool bom);
+  virtual int renderPli(                  const QStringList &, const QString &, Meta &, bool bom);
   virtual float cameraDistance(Meta &meta, float);
 };
 
@@ -97,7 +92,7 @@ public:
   LDView() {}
   virtual ~LDView() {}
   virtual int renderCsi(const QString &,  const QStringList &, const QString &, Meta &);
-  virtual int renderPli(                  const QString &,     const QString &, Meta &, bool bom);
+  virtual int renderPli(                  const QStringList &, const QString &, Meta &, bool bom);
   virtual float cameraDistance(Meta &meta, float);
 };
 

@@ -1,4 +1,4 @@
- 
+
 /****************************************************************************
 **
 ** Copyright (C) 2007-2009 Kevin Clague. All rights reserved.
@@ -307,12 +307,12 @@ int POVRay::renderCsi(
         }
         arguments << ldrName;
 
-        emit gui->messageSig(true, "Execute command: POVRay (LDView) render CSI.");
+        emit gui->messageSig(true, "POVRay (LDView) render CSI...");
 
         QProcess    ldview;
         ldview.setEnvironment(QProcess::systemEnvironment());
         ldview.setWorkingDirectory(QDir::currentPath()+"/"+Paths::tmpDir);
-        qDebug() << qPrintable(Preferences::ldviewExe + " " + arguments.join(" ")) << "\n";
+        //qDebug() << qPrintable(Preferences::ldviewExe + " " + arguments.join(" ")) << "\n";
         ldview.start(Preferences::ldviewExe,arguments);
         if ( ! ldview.waitForFinished(rendererTimeout())) {
           if (ldview.exitCode() != 0 || 1) {
@@ -354,7 +354,7 @@ int POVRay::renderCsi(
         arguments << QDir::toNativeSeparators(ldrName);
         arguments << QDir::toNativeSeparators(povName);
 
-        emit gui->messageSig(true, "Execute command: POVRay (L3P) render CSI.");
+        emit gui->messageSig(true, "POVRay (L3P) render CSI...");
 
         QProcess l3p;
         QStringList env = QProcess::systemEnvironment();
@@ -362,7 +362,7 @@ int POVRay::renderCsi(
         l3p.setWorkingDirectory(QDir::currentPath() +"/"+Paths::tmpDir);
         l3p.setStandardErrorFile(QDir::currentPath() + "/stderr");
         l3p.setStandardOutputFile(QDir::currentPath() + "/stdout");
-        qDebug() << qPrintable(Preferences::l3pExe + " " + arguments.join(" ")) << "\n";
+        //qDebug() << qPrintable(Preferences::l3pExe + " " + arguments.join(" ")) << "\n";
         l3p.start(Preferences::l3pExe,arguments);
         if ( ! l3p.waitForFinished(rendererTimeout())) {
             if (l3p.exitCode() != 0) {
@@ -404,7 +404,7 @@ int POVRay::renderCsi(
 		}
 	}
 	
-	emit gui->messageSig(true, "Execute command: POV-RAY render CSI.");
+    emit gui->messageSig(true, "POV-RAY render CSI...");
 
 	QProcess povray;
 	QStringList povEnv = QProcess::systemEnvironment();
@@ -412,7 +412,7 @@ int POVRay::renderCsi(
 	povray.setWorkingDirectory(QDir::currentPath()+"/"+Paths::tmpDir);
 	povray.setStandardErrorFile(QDir::currentPath() + "/stderr-povray");
 	povray.setStandardOutputFile(QDir::currentPath() + "/stdout-povray");
-	qDebug() << qPrintable(Preferences::povrayExe + " " + povArguments.join(" ")) << "\n";
+    //qDebug() << qPrintable(Preferences::povrayExe + " " + povArguments.join(" ")) << "\n";
 	povray.start(Preferences::povrayExe,povArguments);
     if ( ! povray.waitForFinished(rendererTimeout())) {
 		if (povray.exitCode() != 0) {
@@ -430,12 +430,13 @@ int POVRay::renderCsi(
 	
 }
 
-int POVRay::renderPli(const QString &ldrName,
+int POVRay::renderPli(
+           const QStringList &ldrNames,
 		   const QString &pngName,
 		   Meta    &meta,
 		   bool     bom){
 	
-	QString povName = ldrName +".pov";
+    QString povName = ldrNames.first() +".pov";
 
     QStringList arguments;
     QStringList list;
@@ -451,7 +452,6 @@ int POVRay::renderPli(const QString &ldrName,
 
         /* determine camera distance */
         int cd = cameraDistance(meta,pliMeta.modelScale.value())*1700/1000;
-        //qDebug() << "LDView (Native) Camera Distance: " << cd;
 
         QString cg = QString("-cg%1,%2,%3") .arg(pliMeta.angle.value(0))
                 .arg(pliMeta.angle.value(1))
@@ -481,14 +481,14 @@ int POVRay::renderPli(const QString &ldrName,
                 arguments << list[i];
             }
         }
-        arguments << ldrName;
+        arguments << ldrNames.first();
 
-        emit gui->messageSig(true, "Execute command: POV-RAY (LDView) render PLI.");
+        emit gui->messageSig(true, "POV-RAY (LDView) render PLI...");
 
         QProcess    ldview;
         ldview.setEnvironment(QProcess::systemEnvironment());
         ldview.setWorkingDirectory(QDir::currentPath());
-        qDebug() << qPrintable(Preferences::ldviewExe + " " + arguments.join(" ")) << "\n";
+        //qDebug() << qPrintable(Preferences::ldviewExe + " " + arguments.join(" ")) << "\n";
         ldview.start(Preferences::ldviewExe,arguments);
         if ( ! ldview.waitForFinished()) {
             if (ldview.exitCode() != 0) {
@@ -538,10 +538,10 @@ int POVRay::renderPli(const QString &ldrName,
             }
         }
 
-        arguments << QDir::toNativeSeparators(ldrName);
+        arguments << QDir::toNativeSeparators(ldrNames.first());
         arguments << QDir::toNativeSeparators(povName);
 
-        emit gui->messageSig(true, "Execute command: POV-RAY (L3P) render PLI.");
+        emit gui->messageSig(true, "POV-RAY (L3P) render PLI...");
 
         QProcess    l3p;
         QStringList env = QProcess::systemEnvironment();
@@ -549,7 +549,7 @@ int POVRay::renderPli(const QString &ldrName,
         l3p.setWorkingDirectory(QDir::currentPath());
         l3p.setStandardErrorFile(QDir::currentPath() + "/stderr");
         l3p.setStandardOutputFile(QDir::currentPath() + "/stdout");
-        qDebug() << qPrintable(Preferences::l3pExe + " " + arguments.join(" ")) << "\n";
+        //qDebug() << qPrintable(Preferences::l3pExe + " " + arguments.join(" ")) << "\n";
         l3p.start(Preferences::l3pExe,arguments);
         if (! l3p.waitForFinished()) {
             if (l3p.exitCode()) {
@@ -598,7 +598,7 @@ int POVRay::renderPli(const QString &ldrName,
 	povray.setWorkingDirectory(QDir::currentPath()+"/"+Paths::tmpDir);
 	povray.setStandardErrorFile(QDir::currentPath() + "/stderr-povray");
 	povray.setStandardOutputFile(QDir::currentPath() + "/stdout-povray");
-	qDebug() << qPrintable(Preferences::povrayExe + " " + povArguments.join(" ")) << "\n";
+    //qDebug() << qPrintable(Preferences::povrayExe + " " + povArguments.join(" ")) << "\n";
 	povray.start(Preferences::povrayExe,povArguments);
     if ( ! povray.waitForFinished(rendererTimeout())) {
 		if (povray.exitCode() != 0) {
@@ -687,7 +687,7 @@ int LDGLite::renderCsi(
   arguments << mf;                  // .png file name
   arguments << ldrName;             // csi.ldr (input file)
 
-  emit gui->messageSig(true, "Execute command: LDGLite render CSI.");
+  emit gui->messageSig(true, "LDGLite render CSI...");
 
   QProcess    ldglite;
   QStringList env = QProcess::systemEnvironment();
@@ -712,14 +712,14 @@ int LDGLite::renderCsi(
       return -1;
     }
   }
-  //QFile::remove(ldrName);
+
   return 0;
 }
 
   
 int LDGLite::renderPli(
-  const QString &ldrName,
-  const QString &pngName,
+  const QStringList &ldrNames,
+  const QString     &pngName,
   Meta    &meta,
   bool     bom)
 {
@@ -762,9 +762,9 @@ int LDGLite::renderPli(
 	  }
   }
   arguments << mf;
-  arguments << ldrName;
+  arguments << ldrNames.first();
   
-  emit gui->messageSig(true, "Execute command: LDGLite render PLI.");
+  emit gui->messageSig(true, "LDGLite render PLI...");
 
   QProcess    ldglite;
   QStringList env = QProcess::systemEnvironment();
@@ -789,6 +789,7 @@ int LDGLite::renderPli(
       return -1;
     }
   }
+
   return 0;
 }
 
@@ -831,33 +832,36 @@ float LDView::cameraDistance(
 
 int LDView::renderCsi(
   const QString     &addLine,
-  const QStringList &csiParts,
+  const QStringList &content,
   const QString     &pngName,
         Meta        &meta)
 {
-  /* Create the CSI DAT file */
-  QString ldrName;
-  int rc;
-  ldrName = QDir::currentPath() + "/" + Paths::tmpDir + "/csi.ldr";
-  if ((rc = rotateParts(addLine,meta.rotStep, csiParts, ldrName)) < 0) {
-      return rc;
-    }
-
+  QStringList ldrNames;
 
   /* determine camera distance */
   
-  QStringList arguments;
-
   int cd = cameraDistance(meta,meta.LPub.assem.modelScale.value())*1700/1000;
   int width = meta.LPub.page.size.valuePixels(0);
   int height = meta.LPub.page.size.valuePixels(1);
 
+  QString cg = QString("-cg0.0,0.0,%1") .arg(cd);
   QString w  = QString("-SaveWidth=%1") .arg(width);
   QString h  = QString("-SaveHeight=%1") .arg(height);
-  QString s  = QString("-SaveSnapShot=%1") .arg(pngName);
+  QString s;
+  if (useLDViewSCall()) {
+      s  = QString("-SaveSnapShots=1");
+      ldrNames = content;
+  } else {
+      s  = QString("-SaveSnapShot=%1") .arg(pngName);
+      /* Create the CSI DAT file */
+      int rc;
+      ldrNames << QDir::currentPath() + "/" + Paths::tmpDir + "/csi.ldr";
+      if ((rc = rotateParts(addLine,meta.rotStep, content, ldrNames.first())) < 0) {
+          return rc;
+      }
+  }
 
-  QString cg = QString("-cg0.0,0.0,%1") .arg(cd);
-
+  QStringList arguments;
   arguments << CA;
   arguments << cg;
   arguments << "-SaveAlpha=1";
@@ -880,15 +884,15 @@ int LDView::renderCsi(
       arguments << list[i];
     }
   }
-  arguments << ldrName;
+  arguments = arguments + ldrNames;
 
-  emit gui->messageSig(true, "Execute command: LDView render CSI.");
+  emit gui->messageSig(true, "LDView render CSI...");
   
   QProcess    ldview;
   ldview.setEnvironment(QProcess::systemEnvironment());
   ldview.setWorkingDirectory(QDir::currentPath()+"/"+Paths::tmpDir);
   ldview.start(Preferences::ldviewExe,arguments);
-
+  //qDebug() << qPrintable(Preferences::ldviewExe + " " + arguments.join(" ")) << "\n";
   if ( ! ldview.waitForFinished(rendererTimeout())) {
     if (ldview.exitCode() != 0 || 1) {
       QByteArray status = ldview.readAll();
@@ -898,39 +902,54 @@ int LDView::renderCsi(
       return -1;
     }
   }
-  //QFile::remove(ldrName);
+
+  if (useLDViewSCall()){
+    // move generated CSI images
+    QString ldrName;
+    QDir dir(QDir::currentPath() + "/" + Paths::tmpDir);
+    foreach(ldrName, ldrNames){
+        QFileInfo fInfo(ldrName.replace(".ldr",".png"));
+        QString imageFilePath = QDir::currentPath() + "/" +
+            Paths::assemDir + "/" + fInfo.fileName();
+        if (! dir.rename(fInfo.absoluteFilePath(), imageFilePath)){
+            //in case failure because file exist
+            QFile pngFile(imageFilePath);
+            if (! pngFile.exists()){
+                emit gui->messageSig(false,QMessageBox::tr("LDView CSI image file move failed for\n%1")
+                                     .arg(imageFilePath));
+                return -1;
+              }
+          }
+      }
+  }
+
   return 0;
 }
 
 int LDView::renderPli(
-  const QString &ldrName,
+  const QStringList &ldrNames,
   const QString &pngName,
   Meta    &meta,
   bool     bom)
 {
-  int width  = meta.LPub.page.size.valuePixels(0);
-  int height = meta.LPub.page.size.valuePixels(1);
-
-  QFileInfo fileInfo(ldrName);
-
-  if ( ! fileInfo.exists()) {
-    return -1;
-  }
+  PliMeta &pliMeta = bom ? meta.LPub.bom : meta.LPub.pli;
 
   /* determine camera distance */
 
-  PliMeta &pliMeta = bom ? meta.LPub.bom : meta.LPub.pli;
-
   int cd = cameraDistance(meta,pliMeta.modelScale.value())*1700/1000;
-
-  //qDebug() << "LDView (Native) Camera Distance: " << cd;
+  int width  = meta.LPub.page.size.valuePixels(0);
+  int height = meta.LPub.page.size.valuePixels(1);
 
   QString cg = QString("-cg%1,%2,%3") .arg(pliMeta.angle.value(0))
                                       .arg(pliMeta.angle.value(1))
                                       .arg(cd);
   QString w  = QString("-SaveWidth=%1")  .arg(width);
   QString h  = QString("-SaveHeight=%1") .arg(height);
-  QString s  = QString("-SaveSnapShot=%1") .arg(pngName);
+  QString s;
+  if (useLDViewSCall())
+      s  = QString("-SaveSnapShots=1");
+  else
+      s  = QString("-SaveSnapShot=%1") .arg(pngName);
 
   QStringList arguments;
   arguments << CA;
@@ -955,14 +974,14 @@ int LDView::renderPli(
       arguments << list[i];
     }
   }
-  arguments << ldrName;
+  arguments = arguments + ldrNames;
 
-  //qDebug() << "LDView (Native) PLI Arguments: " << arguments;
-  emit gui->messageSig(true, "Execute command: LDView render PLI.");
+  emit gui->messageSig(true, "LDView render PLI...");
 
   QProcess    ldview;
   ldview.setEnvironment(QProcess::systemEnvironment());
   ldview.setWorkingDirectory(QDir::currentPath());
+  //qDebug() << qPrintable(Preferences::ldviewExe + " " + arguments.join(" ")) << "\n";
   ldview.start(Preferences::ldviewExe,arguments);
   if ( ! ldview.waitForFinished()) {
     if (ldview.exitCode() != 0) {
@@ -974,171 +993,25 @@ int LDView::renderPli(
     }
   }
 
-  return 0;
-}
-
-int Render::renderLDViewSCallCsi(
-  const QStringList &ldrNames,
-        Meta        &meta)
-{
-
-  //logInfo() << "LDView SC CSI Renderer Timeout:" << rendererTimeout();
-
-  int width = meta.LPub.page.size.valuePixels(0);
-  int height = meta.LPub.page.size.valuePixels(1);
-
-  /* determine camera distance */
-
-  int cd = cameraDistance(meta,meta.LPub.assem.modelScale.value())*1700/1000;
-  QString cg = QString("-cg0.0,0.0,%1") .arg(cd);
-  QString w  = QString("-SaveWidth=%1") .arg(width);
-  QString h  = QString("-SaveHeight=%1") .arg(height);
-  QString s  = QString("-SaveSnapShots=1");
-
-  QStringList arguments;
-  arguments << CA;
-  arguments << cg;
-  arguments << "-SaveAlpha=1";
-  arguments << "-AutoCrop=1";
-  arguments << "-ShowHighlightLines=1";
-  arguments << "-ConditionalHighlights=1";
-  arguments << "-SaveZoomToFit=0";
-  arguments << "-SubduedLighting=1";
-  arguments << "-UseSpecular=0";
-  arguments << "-LightVector=0,1,1";
-  arguments << "-SaveActualSize=0";
-  arguments << w;
-  arguments << h;
-  arguments << s;
-
-  QStringList list;
-  list = meta.LPub.assem.ldviewParms.value().split("\\s+");
-  for (int i = 0; i < list.size(); i++) {
-    if (list[i] != "" && list[i] != " ") {
-      arguments << list[i];
-    }
+  if (useLDViewSCall()){
+    // move generated CSI images
+    QString ldrName;
+    QDir dir(QDir::currentPath() + "/" + Paths::tmpDir);
+    foreach(ldrName, ldrNames){
+        QFileInfo fInfo(ldrName.replace(".ldr",".png"));
+        QString imageFilePath = QDir::currentPath() + "/" +
+            Paths::partsDir + "/" + fInfo.fileName();
+        if (! dir.rename(fInfo.absoluteFilePath(), imageFilePath)){
+            //in case failure because file exist
+            QFile pngFile(imageFilePath);
+            if (! pngFile.exists()){
+                emit gui->messageSig(false,QMessageBox::tr("LDView PLI image file move failed for\n%1")
+                           .arg(imageFilePath));
+                return -1;
+              }
+          }
+      }
   }
-  arguments = arguments + ldrNames;
-
-  emit gui->messageSig(true, "Execute command: LDView render single call CSI.");
-
-  QProcess    ldview;
-  ldview.setEnvironment(QProcess::systemEnvironment());
-  ldview.setWorkingDirectory(QDir::currentPath()+"/"+Paths::tmpDir);
-  ldview.start(Preferences::ldviewExe,arguments);  
-  if ( ! ldview.waitForFinished(rendererTimeout())) {
-    if (ldview.exitCode() != 0 || 1) {
-      QByteArray status = ldview.readAll();
-      QString str;
-      str.append(status);
-      emit gui->messageSig(false,QMessageBox::tr("LDView command failed\n%1") .arg(str));
-      return -1;
-    }
-  }
-
-  // move generated CSI images
-  QString ldrName;
-  QDir dir(QDir::currentPath() + "/" + Paths::tmpDir);
-  foreach(ldrName, ldrNames){
-      QFileInfo fInfo(ldrName.replace(".ldr",".png"));
-      QString imageFilePath = QDir::currentPath() + "/" +
-          Paths::assemDir + "/" + fInfo.fileName();
-      if (! dir.rename(fInfo.absoluteFilePath(), imageFilePath)){
-          //in case failure because file exist
-          QFile pngFile(imageFilePath);
-          if (! pngFile.exists()){
-              emit gui->messageSig(false,QMessageBox::tr("LDView CSI image file move failed for\n%1")
-                                   .arg(imageFilePath));
-              return -1;
-            }
-        }
-    }
-
-  return 0;
-}
-
-int Render::renderLDViewSCallPli(
-  const QStringList &ldrNames,
-  Meta    &meta,
-  bool     bom)
-{
-
-  //logInfo() << "LDView SC PLI Renderer Timeout:" << rendererTimeout();
-
-  PliMeta &pliMeta = bom ? meta.LPub.bom : meta.LPub.pli;
-
-  int width  = meta.LPub.page.size.valuePixels(0);
-  int height = meta.LPub.page.size.valuePixels(1);
-
-  /* determine camera distance */
-
-  int cd = cameraDistance(meta,pliMeta.modelScale.value())*1700/1000;
-  QString cg = QString("-cg%1,%2,%3") .arg(pliMeta.angle.value(0))
-                                      .arg(pliMeta.angle.value(1))
-                                      .arg(cd);
-  QString w  = QString("-SaveWidth=%1")  .arg(width);
-  QString h  = QString("-SaveHeight=%1") .arg(height);
-  QString s  = QString("-SaveSnapShots=1");
-
-  QStringList arguments;
-  arguments << CA;
-  arguments << cg;
-  arguments << "-SaveAlpha=1";
-  arguments << "-AutoCrop=1";
-  arguments << "-ShowHighlightLines=1";
-  arguments << "-ConditionalHighlights=1";
-  arguments << "-SaveZoomToFit=0";
-  arguments << "-SubduedLighting=1";
-  arguments << "-UseSpecular=0";
-  arguments << "-LightVector=0,1,1";
-  arguments << "-SaveActualSize=0";
-  arguments << w;
-  arguments << h;
-  arguments << s;
-
-  QStringList list;
-  list = meta.LPub.pli.ldviewParms.value().split("\\s+");
-  for (int i = 0; i < list.size(); i++) {
-    if (list[i] != "" && list[i] != " ") {
-      arguments << list[i];
-    }
-  }
-  arguments = arguments + ldrNames;
-
-//  qDebug() << "LDView PLI Arguments: " << arguments;
-  emit gui->messageSig(true, "Execute command: LDView render single call PLI.");
-
-  QProcess    ldview;
-  ldview.setEnvironment(QProcess::systemEnvironment());
-  ldview.setWorkingDirectory(QDir::currentPath());
-  ldview.start(Preferences::ldviewExe,arguments);  
-  if ( ! ldview.waitForFinished(rendererTimeout())) {
-      if (ldview.exitCode() != 0) {
-          QByteArray status = ldview.readAll();
-          QString str;
-          str.append(status);
-          emit gui->messageSig(false,QMessageBox::tr("LDView command failed\n%1") .arg(str));
-          return -1;
-        }
-    }
-
-  // move generated PLIimages
-  QString ldrName;
-  QDir dir(QDir::currentPath() + "/" + Paths::tmpDir);
-  foreach(ldrName, ldrNames){
-      QFileInfo fInfo(ldrName.replace(".ldr",".png"));
-      QString imageFilePath = QDir::currentPath() + "/" +
-          Paths::partsDir + "/" + fInfo.fileName();
-      if (! dir.rename(fInfo.absoluteFilePath(), imageFilePath)){
-          //in case failure because file exist
-          QFile pngFile(imageFilePath);
-          if (! pngFile.exists()){
-              emit gui->messageSig(false,QMessageBox::tr("LDView PLI image file move failed for\n%1")
-                         .arg(imageFilePath));
-              return -1;
-            }
-        }
-    }
 
   return 0;
 }
