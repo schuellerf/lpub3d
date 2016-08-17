@@ -60,6 +60,7 @@ LDGLite ldglite;
 LDView  ldview;
 POVRay povray;
 
+QString Render::csi3DName = "";
 
 //#define LduDistance 5729.57
 #define CA "-ca0.01"

@@ -41,6 +41,7 @@ class Render
 public:
   Render() {}
   virtual ~Render() {}
+  static QString csi3DName;
   static QString const   getRenderer();
   static void            setRenderer(QString const &name);
   bool                   useLDViewSCall(bool override = false);
