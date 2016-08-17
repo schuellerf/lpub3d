@@ -227,6 +227,7 @@ HEADERS += \
     plisortdialog.h \
     plisubstituteparts.h \
     pointer.h \
+    pointeritem.h \
     preferencesdialog.h \
     range.h \
     range_element.h \
@@ -304,6 +305,7 @@ SOURCES += \
     pliglobals.cpp \
     plisortdialog.cpp \
     plisubstituteparts.cpp \
+    pointeritem.cpp \
     preferencesdialog.cpp \
     printpdf.cpp \
     projectglobals.cpp \

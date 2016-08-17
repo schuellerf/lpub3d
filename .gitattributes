@@ -507,6 +507,8 @@ mainApp/plisortdialog.h -text
 mainApp/plisubstituteparts.cpp -text
 mainApp/plisubstituteparts.h -text
 mainApp/pointer.h -text
+mainApp/pointeritem.cpp -text
+mainApp/pointeritem.h -text
 mainApp/preferences.ui -text
 mainApp/preferencesdialog.cpp -text
 mainApp/preferencesdialog.h -text
