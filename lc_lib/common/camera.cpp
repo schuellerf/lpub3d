@@ -24,8 +24,8 @@ lcCamera::lcCamera(bool Simple)
 	if (Simple)
 		mState |= LC_CAMERA_SIMPLE;
 	else
-	{
-		mPosition = lcVector3(-250.0f, -250.0f, 75.0f);
+    {
+        mPosition = lcVector3(-250.0f, -250.0f, 75.0f);
 		mTargetPosition = lcVector3(0.0f, 0.0f, 0.0f);
 		mUpVector = lcVector3(-0.2357f, -0.2357f, 0.94281f);
 
@@ -65,9 +65,9 @@ lcCamera::~lcCamera()
 
 void lcCamera::Initialize()
 {
-	m_fovy = 30.0f;
-	m_zNear = 25.0f;
-	m_zFar = 12500.0f;
+    m_fovy = 30.0f;
+    m_zNear = 25.0f;
+    m_zFar = 12500.0f;
 
 	mState = 0;
 
@@ -936,7 +936,7 @@ void lcCamera::SetViewpoint(lcViewpoint Viewpoint)
 		lcVector3(    0.0f,     0.0f, -1250.0f), // LC_VIEWPOINT_BOTTOM
 		lcVector3( 1250.0f,     0.0f,     0.0f), // LC_VIEWPOINT_LEFT
 		lcVector3(-1250.0f,     0.0f,     0.0f), // LC_VIEWPOINT_RIGHT
-		lcVector3( -375.0f,  -375.0f,   187.5f)  // LC_VIEWPOINT_HOME
+        lcVector3(  375.0f,  -375.0f,   187.5f)  // LC_VIEWPOINT_HOME  /*** LPub3D modification 939: - Default Camera Position ***/
 	};
 
 	lcVector3 Ups[] =
@@ -947,7 +947,7 @@ void lcCamera::SetViewpoint(lcViewpoint Viewpoint)
 		lcVector3( 0.0f,-1.0f, 0.0f),
 		lcVector3( 0.0f, 0.0f, 1.0f),
 		lcVector3( 0.0f, 0.0f, 1.0f),
-		lcVector3(-0.2357f, -0.2357f, 0.94281f)
+        lcVector3( 0.2357f, -0.2357f, 0.94281f)   /*** LPub3D modification 939: - Default Camera UpVector ***/
 	};
 
 	mPosition = Positions[Viewpoint];

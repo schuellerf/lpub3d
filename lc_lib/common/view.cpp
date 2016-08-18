@@ -271,9 +271,9 @@ void View::SetViewpoint(lcViewpoint Viewpoint)
 void View::SetDefaultCamera()
 {
 	if (!mCamera || !mCamera->IsSimple())
-		mCamera = new lcCamera(true);
+        mCamera = new lcCamera(true);
 
-	mCamera->SetViewpoint(LC_VIEWPOINT_HOME);
+    mCamera->SetViewpoint(LC_VIEWPOINT_HOME);
 }
 
 lcMatrix44 View::GetProjectionMatrix() const

@@ -210,7 +210,6 @@ float stdCameraDistance(Meta &meta, float scale) {
 	float factor;
 	
 	// Do the math in pixels
-	
 	onexone  = 20*meta.LPub.resolution.ldu(); // size of 1x1 in units
 	onexone *= meta.LPub.resolution.value();  // size of 1x1 in pixels
 	onexone *= scale;
@@ -218,8 +217,6 @@ float stdCameraDistance(Meta &meta, float scale) {
 	
 	return factor*LduDistance;
 }
-
-
 
 /***************************************************************************
  *
@@ -665,7 +662,7 @@ int LDGLite::renderCsi(
                                     // ldglite always deals in 72 DPI
   QString w  = QString("-W%1")      .arg(lineThickness);
 
-  QString cg = QString("-cg0.0,0.0,%1") .arg(cd);
+  QString cg = QString("-cg0.0,0.0,%1") .arg(cd); //latitude, longitude, distance
 
   arguments << "-l3";               // use l3 parser
   arguments << "-i2";               // image type 2=.png
