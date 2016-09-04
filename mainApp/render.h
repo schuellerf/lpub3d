@@ -34,14 +34,17 @@
 class QString;
 class QStringList;
 class Meta;
+class AssemMeta;
+class UnitsMeta;
 class RotStepMeta;
+class lcVector3;
 
 class Render
 {
 public:
   Render() {}
   virtual ~Render() {}
-  static QString csi3DName;
+  static QString csi3DName; 
   static QString const   getRenderer();
   static void            setRenderer(QString const &name);
   bool                   useLDViewSCall(bool override = false);
@@ -53,6 +56,8 @@ public:
                                    const QString &,
                                    Meta &,
                                    bool bom) = 0;
+  virtual float      cameraDistance(Meta &meta, float) = 0;
+
   int                    rotateParts(const QString &addLine,
                                       RotStepMeta &rotStep,
                                       const QStringList &parts,
@@ -61,8 +66,8 @@ public:
                                      RotStepMeta &rotStep,
                                      QStringList &parts,
                                      bool  defaultRot = true);
-protected:
-  virtual float          cameraDistance(Meta &meta, float) = 0;
+  QVector<lcVector3>     cameraSettings(AssemMeta &assemMeta,
+                                        const float &cd = 0.0f);
 };
 
 extern Render *renderer;

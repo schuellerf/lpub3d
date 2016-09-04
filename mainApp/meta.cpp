@@ -16,10 +16,10 @@
 **
 ****************************************************************************/
 
-/****************************************************************************
- *
+/*******
  * This file describes a set of classes that implement a parse tree for
- * all the meta-commands that LPub supports.  Action metas such as STEP,
+ * all *********************************************************************
+ *the meta-commands that LPub supports.  Action metas such as STEP,
  * ROTSTEP, CALLOUT BEGIN, etc. return special return codes.  Configuration
  * metas that imply no action, but specify data for later use, retain
  * the onfiguration information, and return a generic OK return code.
@@ -2630,6 +2630,13 @@ AssemMeta::AssemMeta() : BranchMeta()
   modelScale.setRange(-10000.0,10000.0);
   modelScale.setFormats(7,4,"99999.9");
   modelScale.setValue(1.0);
+  angle.setRange(-360.0,360.0);
+  angle.setFormats(6,4,"#999.9");
+  angle.setValues(23,45); // iusing L3P defaults
+  fov.setRange(0.0,360.0);
+  fov.setValue(30.0);     // using LeoCAD default 30.0f
+  znear.setValue(25.0);   // using LeoCAD default 25.0f
+  zfar.setValue(12500.0); // using LeoCAD default 12500.0f
   ldgliteParms.setValue("-fh"); // change removed -w1 duplicate on 01-25-16 v1.3.3 r578
   ldviewParms.setValue("");
   l3pParms.setValue("-q4 -sw2");
@@ -2642,6 +2649,11 @@ void AssemMeta::init(BranchMeta *parent, QString name)
   margin.init        (this,"MARGINS");
   placement.init     (this,"PLACEMENT");
   modelScale.init    (this,"MODEL_SCALE");
+  angle.init         (this,"VIEW_ANGLE");
+  distance.init      (this,"VIEW_DISTANCE");
+  fov.init           (this,"VIEW_FOV");
+  znear.init         (this,"VIEW_ZNEAR");
+  zfar.init          (this,"VIEW_ZFAR");
   ldviewParms.init   (this,"LDGLITE_PARMS");
   ldgliteParms.init  (this,"LDVIEW_PARMS");
   l3pParms .init     (this,"L3P_PARMS");

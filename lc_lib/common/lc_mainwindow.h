@@ -254,7 +254,8 @@ public:
 	void SetRelativeTransform(bool RelativeTransform);
 
 	void NewProject();
-	bool OpenProject(const QString& FileName);
+    bool OpenProject(const QString& FileName);
+    bool ViewStepContent(const QString& FileName, const QVector<lcVector3> &viewMatrix);
 	void MergeProject();
 	bool SaveProject(const QString& FileName);
 	bool SaveProjectIfModified();
@@ -309,6 +310,12 @@ public:
 
     /*** LPub3D modification 310: - rotstep ***/
     QString mRotateStepLineNumber;
+    lcVector3 viewerCameraPosition;
+    lcVector3 viewerTargetPosition;
+    lcVector3 viewerUpVector;
+    float     viewerFovY;
+    float     viewerZNear;
+    float     viewerZFar;
     /*** LPub3D modification end ***/
 
 /*** LPub3D modification 314: - halt viewer ***/

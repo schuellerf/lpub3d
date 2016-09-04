@@ -42,6 +42,7 @@ public:
   Meta       meta;
   QString    topLevelFile;
   QList<MetaGui *> children;
+  MetaGui   *viewAngle;
   MetaGui   *modelScale;
 
   GlobalAssemPrivate(QString &_topLevelFile, Meta &_meta)
@@ -83,14 +84,18 @@ GlobalAssemDialog::GlobalAssemDialog(
   boxGrid->addWidget(child,0,0);
   //boxGrid->addWidget(child,0,0,1,2);
 
-  child = new DoubleSpinGui(
-    "Scale",&assem->modelScale,
+  child = new FloatsGui("Lattitude","Longitude",&assem->angle);
+  data->viewAngle = child;
+  data->children.append(child);
+  boxGrid->addWidget(child,1,0);
+
+  child = new DoubleSpinGui("Scale",&assem->modelScale,
     assem->modelScale._min,
     assem->modelScale._max,
     0.01);
   data->modelScale = child;
   data->children.append(child);
-  boxGrid->addWidget(child,1,0);
+  boxGrid->addWidget(child,2,0);
   //boxGrid->addWidget(child,1,0,1,2);
 
   /* Step Number */

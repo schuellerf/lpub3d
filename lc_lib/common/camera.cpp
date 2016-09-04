@@ -27,7 +27,7 @@ lcCamera::lcCamera(bool Simple)
     {
         mPosition = lcVector3(-250.0f, -250.0f, 75.0f);
 		mTargetPosition = lcVector3(0.0f, 0.0f, 0.0f);
-		mUpVector = lcVector3(-0.2357f, -0.2357f, 0.94281f);
+        mUpVector = lcVector3(-0.2357f, -0.2357f, 0.94281f);
 
 		ChangeKey(mPositionKeys, mPosition, 1, true);
 		ChangeKey(mTargetPositionKeys, mTargetPosition, 1, true);

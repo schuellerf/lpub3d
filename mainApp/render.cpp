@@ -277,7 +277,9 @@ int POVRay::renderCsi(
         int cd = cameraDistance(meta,meta.LPub.assem.modelScale.value())*1700/1000;
         //qDebug() << "LDView (Native) Camera Distance: " <<
 
-        QString cg = QString("-cg0.0,0.0,%1") .arg(cd);
+        QString cg = QString("-cg%1,%2,%3") .arg(meta.LPub.assem.angle.value(0))
+                                            .arg(meta.LPub.assem.angle.value(1))
+                                            .arg(cd);
 
         QString w  = QString("-SaveWidth=%1") .arg(width);
         QString h  = QString("-SaveHeight=%1") .arg(height);
@@ -327,7 +329,9 @@ int POVRay::renderCsi(
         int cd = cameraDistance(meta, meta.LPub.assem.modelScale.value());
         float ar = width/(float)height;
 
-        QString cg = QString("-cg0.0,0.0,%1").arg(cd);
+        QString cg = QString("-cg%1,%2,%3") .arg(meta.LPub.assem.angle.value(0))
+                                            .arg(meta.LPub.assem.angle.value(1))
+                                            .arg(cd);
         QString car = QString("-car%1").arg(ar);
         QString ldd = QString("-ldd%1").arg(QDir::toNativeSeparators(Preferences::ldrawPath));
         arguments << CA;
@@ -662,7 +666,9 @@ int LDGLite::renderCsi(
                                     // ldglite always deals in 72 DPI
   QString w  = QString("-W%1")      .arg(lineThickness);
 
-  QString cg = QString("-cg0.0,0.0,%1") .arg(cd); //latitude, longitude, distance
+  QString cg = QString("-cg%1,%2,%3") .arg(meta.LPub.assem.angle.value(0))
+                                      .arg(meta.LPub.assem.angle.value(1))
+                                      .arg(cd);
 
   arguments << "-l3";               // use l3 parser
   arguments << "-i2";               // image type 2=.png
@@ -842,7 +848,9 @@ int LDView::renderCsi(
   int width = meta.LPub.page.size.valuePixels(0);
   int height = meta.LPub.page.size.valuePixels(1);
 
-  QString cg = QString("-cg0.0,0.0,%1") .arg(cd);
+  QString cg = QString("-cg%1,%2,%3") .arg(meta.LPub.assem.angle.value(0))
+                                      .arg(meta.LPub.assem.angle.value(1))
+                                      .arg(cd);
   QString w  = QString("-SaveWidth=%1") .arg(width);
   QString h  = QString("-SaveHeight=%1") .arg(height);
   QString s;

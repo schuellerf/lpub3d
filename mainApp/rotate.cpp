@@ -161,7 +161,7 @@ int Render::rotateParts(
   QStringList rotatedParts = parts;
   QStringList unrotatedParts = parts;
 
-  rotateParts(addLine,rotStep,rotatedParts);
+  rotateParts(addLine,rotStep,rotatedParts,false);
   rotateParts(addLine,rotStep,unrotatedParts,false);
 
   QFile file(ldrName);
@@ -227,7 +227,7 @@ int Render::rotateParts(
   if (defaultRot) {
     defaultViewRots[0] = 23;    // latitude
     defaultViewRots[1] = 45;    // longitude
-    defaultViewRots[2] = 0;
+    defaultViewRots[2] = 0;     // distance
   } else {
     defaultViewRots[0] = 0;
     defaultViewRots[1] = 0;
@@ -522,4 +522,110 @@ int Render::rotateParts(
     }
   }
   return 0;
+}
+
+QVector<lcVector3> Render::cameraSettings(AssemMeta &assemMeta,
+                            const float &cd){
+
+    double camera_latitude    = 0.0;
+    double camera_longitude   = 0.0;
+    double camera_distance    = 577.0;
+
+    double projection_fromx   = 0.0;
+    double projection_fromy   = 0.0;
+    double projection_fromz   = 1000.0;
+
+    double projection_towardx = 0.0;
+    double projection_towardy = 0.0;
+    double projection_towardz = 0.0;
+
+    double projection_upx     = -0.2357; // LeoCAd default value
+    double projection_upy     = -0.2357; // LeoCAd default value
+    double projection_upz     = 0.94281; // LeoCAd default value
+
+    double projection_fov     = 67.38; //L3P default is 67.38 degrees = 2*atan(2/3)
+    double projection_znear   = 10.0;
+    double projection_zfar    = 4000.0;
+
+    double adjustment         = -37.9519;
+
+    // -caN sets the camera FOV angle in degrees, default = 67.38.
+    if ((assemMeta.fov.value() >= 0.0) && (assemMeta.fov.value() <= 360.0))
+        projection_fov = assemMeta.fov.value();
+
+    // -zN sets the near clipping plane.  (default = 25.0f)
+    // -ZN sets the far clipping plane.  (default = 12500.0f)
+    projection_znear = assemMeta.znear.value();
+    projection_zfar  = assemMeta.zfar.value();
+
+    // -cg<la>,<lo>,<r> sets the camera location on globe.
+    camera_latitude  = assemMeta.angle.value(0);
+    camera_longitude = assemMeta.angle.value(1);
+    if (cd > 0)
+        camera_distance = cd;
+
+    // Base spin on Front.
+    double la, lo;
+    la = 3.1415927 * camera_latitude / 180.0;
+    lo = 3.1415927 * camera_longitude / 180.0;
+
+    projection_fromx = camera_distance * sin(lo);
+    projection_fromy = camera_distance * sin(la);
+    projection_fromz = camera_distance * cos(lo);
+
+    projection_fromx *= cos(la);
+    projection_fromz *= cos(la);
+
+    float fx, fy, fz, tx, ty, tz, ux, uy, uz;
+    // Position
+    // solve the leoCAD HOME position which should be equivalent to
+    // using camera globe settings: 23 latitude, 45 longitude and 577 camera distance.
+    fx = projection_fromx;
+    fy = -projection_fromz;             // switch z and y and make negative to comply with LeoCAD format
+    fz = projection_fromy + adjustment; // adjust (-37.9519) to reach LeoCAD default value of 187.5
+    // Target using 0,0,0
+    tx = projection_towardx;
+    ty = projection_towardy;
+    tz = projection_towardz;
+    // Up vector using LeoCAD defaults
+    ux = projection_upx;
+    uy = projection_upy;
+    uz = projection_upz;
+
+    // return camara position, target, up vector, fov, znear and zfar
+    QVector<lcVector3> viewMatrix(0);
+    viewMatrix.append(lcVector3(fx,fy,fz));         // camera position
+    viewMatrix.append(lcVector3(tx,ty,tz));         // camera target
+    viewMatrix.append(lcVector3(ux,uy,uz));         // camera up vector
+    viewMatrix.append(lcVector3(projection_fov,     // fov
+                                projection_znear,   // znear
+                                projection_zfar));  // zfar
+
+    ///____________________________________________LOGGING_____________________________________///
+
+    // -caN sets the camera FOV angle in degrees, default = 30.0f.
+//    logTrace() << QString("[-caN] FOV = %1").arg(projection_fov,0,'f',1);
+    // -zN sets the near clipping plane.  (default = 25.0f)
+    // -ZN sets the far clipping plane.  (default = 12500.0f)
+//    logTrace() << QString("[-zN],[-ZN] ZCLIP = %1 znear, %2 zfar").arg(projection_znear,0,'f',1).arg(projection_zfar,0,'f',1);
+    // -cg<la>,<lo>,<r> sets the camera location on globe.                         FROM
+//    logTrace() << QString("[-cg<la>,<lo>,<r>] CAMERA GLOBE = %1, %2, %3").arg(assemMeta.angle.value(0)).arg(assemMeta.angle.value(1)).arg(cd > 0 ? cd : camera_distance,0,'f',1);
+//    logTrace() << QString("CAMERA POS = %1, %2, %3").arg(projection_fromx,0,'f',4).arg(projection_fromy,0,'f',4).arg(projection_fromz,0,'f',4);
+    // -coX,Y,Z sets the model origin for the camera to look at.  (default = 0,0,0) TO
+//    logTrace() << QString("LOOK AT    = %1, %2, %3").arg(projection_towardx,0,'f',4).arg(projection_towardy,0,'f',4).arg(projection_towardz,0,'f',4);
+    // -cuX,Y,Z sets the camera up vector.  (default = 0,0,1)						UP
+//    logTrace() << QString("UP VECTOR  = %1, %2, %3").arg(projection_upx,0,'f',4).arg(projection_upy,0,'f',4).arg(projection_upz,0,'f',4);
+    // viewMatrix
+//    logTrace() << QString("viewMatrix = fx %1, fy %2, fz %3, tx %4, ty %5, tz %6, ux %7, uy %8, uz %9")
+//                  .arg(fx,0,'f',4)
+//                  .arg(fy,0,'f',4)
+//                  .arg(fz,0,'f',4)
+//                  .arg(tx,0,'f',4)
+//                  .arg(ty,0,'f',4)
+//                  .arg(tz,0,'f',4)
+//                  .arg(ux,0,'f',4)
+//                  .arg(uy,0,'f',4)
+//                  .arg(uz,0,'f',4);
+
+    return viewMatrix;
 }

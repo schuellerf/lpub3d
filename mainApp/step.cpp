@@ -47,6 +47,7 @@
 #include "dependencies.h"
 #include "paths.h"
 #include "ldrawfiles.h"
+#include "lc_application.h"
 
 bool Step::refreshCsi(true);  //detect preference dialog updates
 
@@ -170,7 +171,7 @@ int Step::createCsi(
     QStringList const &csiParts,  // the partially assembles model
     QPixmap           *pixmap,
     Meta              &meta)
-{
+{  
   qreal       modelScale = meta.LPub.assem.modelScale.value();
   int         sn = stepNumber.number;
   bool        csiExist = false;
@@ -272,7 +273,10 @@ int Step::createCsi(
   // Populate the 3D Viewer
   if (! gMainWindow->GetHalt3DViewer()) {
 
-      if (! gMainWindow->OpenProject(csi3DName)) {
+      // set camera settings
+      viewMatrix = renderer->cameraSettings(meta.LPub.assem);
+
+      if (! gMainWindow->ViewStepContent(csi3DName,viewMatrix)) {
           emit gui->statusMessage(false,QMessageBox::tr("Could not load 3D Viewer project with file :\n%1.")
                                   .arg(csi3DName));
           return -1;

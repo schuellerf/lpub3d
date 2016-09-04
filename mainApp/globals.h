@@ -150,7 +150,7 @@ private:
 public:
   GlobalPliDialog(QString &topLevelFile, Meta &meta, bool);
   ~GlobalPliDialog() {}
-  static void getPliGlobals(QString topLevelFile, Meta &meta);
+  static void  getPliGlobals(QString topLevelFile, Meta &meta);
   static void getBomGlobals(QString topLevelFile, Meta &meta);
 
 public slots:

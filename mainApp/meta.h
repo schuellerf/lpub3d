@@ -1957,6 +1957,11 @@ public:
   MarginsMeta   margin;
   PlacementMeta placement;
   FloatMeta     modelScale;
+  FloatPairMeta angle;
+  IntMeta       distance;
+  FloatMeta     fov;
+  FloatMeta     znear;
+  FloatMeta     zfar;
   StringMeta    ldviewParms;
   StringMeta    ldgliteParms;
   StringMeta    l3pParms;

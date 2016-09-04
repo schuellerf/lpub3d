@@ -22,8 +22,6 @@
 
 /*** LPub3D modification 21: - includes ***/
 #include "lpub.h"
-#include "range.h"
-#include "step.h"
 /*** LPub3D modification end ***/
 
 lcMainWindow* gMainWindow;
@@ -53,6 +51,12 @@ lcMainWindow::lcMainWindow()
 	mRelativeTransform = true;
 	/*** LPub3D modification 49: - halt viewer ***/
 	mHalt3DViewer = false;
+    viewerCameraPosition = lcVector3(0, 0, 0);
+    viewerTargetPosition = lcVector3(375.0f,  -375.0f,   187.5);
+    viewerUpVector       = lcVector3(0.2357f, -0.2357f, 0.94281f);
+    viewerFovY           = 30.0f;
+    viewerZNear          = 25.0f;
+    viewerZFar           = 12500.0f;
 	/*** LPub3D modification end ***/
 
 	memset(&mSearchOptions, 0, sizeof(mSearchOptions));
@@ -1329,6 +1333,12 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 	CentralLayout->setContentsMargins(0, 0, 0, 0);
 
 	View* NewView = new View(Model);
+    /*** LPub3D modification 1336: - camera settings ***/
+    NewView->mCamera->m_fovy     = viewerFovY;
+    NewView->mCamera->m_zNear    = viewerZNear;
+    NewView->mCamera->m_zFar     = viewerZFar;
+    NewView->mCamera->mWorldView = lcMatrix44LookAt(viewerCameraPosition, viewerTargetPosition, viewerUpVector);
+    /*** LPub3D modification end ***/
 	QWidget* ViewWidget = new lcQGLWidget(TabWidget, mPiecePreviewWidget, NewView, true);
 	CentralLayout->addWidget(ViewWidget, 0, 0, 1, 1);
 	ViewWidget->show();
@@ -2066,11 +2076,6 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 
 	if (NewProject->Load(LoadFileName))
 	{
-        /*** LPub3D modification 2069: - rotstep ***/
-        QString fileNamePart = FileName.split("_").last();
-        mRotateStepLineNumber = fileNamePart.split(".").first();
-        //logDebug() << "Rotstep Line Number from Step: " << mRotateStepLineNumber;
-        /*** LPub3D modification end ***/
 		g_App->SetProject(NewProject);
 		AddRecentFile(LoadFileName);
 		UpdateAllViews();
@@ -2083,6 +2088,52 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 
 	return false;
 }
+
+ /*** LPub3D modification 2080: - view content, camera settings ***/
+bool lcMainWindow::ViewStepContent(const QString& FileName, const QVector<lcVector3> &viewMatrix)
+{
+
+    QString LoadFileName = FileName;
+
+    Project* NewProject = new Project();
+
+    if (NewProject->Load(LoadFileName))
+    {
+        QString fileNamePart = FileName.split("_").last();
+        mRotateStepLineNumber = fileNamePart.split(".").first();
+        logStatus() << "Viewer Rotstep Line Number from Step: " << mRotateStepLineNumber;
+        viewerCameraPosition = viewMatrix.at(0);
+        viewerTargetPosition = viewMatrix.at(1);
+        viewerUpVector       = viewMatrix.at(2);
+        viewerFovY           = viewMatrix.at(3).x;
+        viewerZNear          = viewMatrix.at(3).y;
+        viewerZFar           = viewMatrix.at(3).z;
+        logStatus() << QString("Viewer Step Camera Settings = fx %1, fy %2, fz %3, tx %4, ty %5, tz %6, ux %7, uy %8, uz %9, fov %10, znear %11, zfar %12")
+                      .arg(viewerCameraPosition.x,0,'f',4)
+                      .arg(viewerCameraPosition.y,0,'f',4)
+                      .arg(viewerCameraPosition.z,0,'f',4)
+                      .arg(viewerTargetPosition.x,0,'f',4)
+                      .arg(viewerTargetPosition.y,0,'f',4)
+                      .arg(viewerTargetPosition.z,0,'f',4)
+                      .arg(viewerUpVector.x,0,'f',4)
+                      .arg(viewerUpVector.y,0,'f',4)
+                      .arg(viewerUpVector.z,0,'f',4)
+                      .arg(viewerFovY)
+                      .arg(viewerZNear)
+                      .arg(viewerZFar);
+        g_App->SetProject(NewProject);
+        AddRecentFile(LoadFileName);
+        UpdateAllViews();
+
+        return true;
+    }
+
+    QMessageBox::information(this, tr("3DViewer"), tr("Error loading '%1'.").arg(LoadFileName));
+    delete NewProject;
+
+    return false;
+}
+/*** LPub3D modification end ***/
 
 void lcMainWindow::MergeProject()
 {

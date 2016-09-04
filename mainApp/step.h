@@ -38,6 +38,7 @@
 #include "meta.h"
 #include "csiitem.h"
 #include "callout.h"
+#include "lc_math.h"
 
 #define NOSTEPNUMBER -3
 
@@ -67,6 +68,7 @@ class Step : public AbstractRangeElement
     bool                  csiOutOfDate;
     static bool           refreshCsi;
     PlacementMeta         placement;
+    QVector<lcVector3>    viewMatrix;
     QString               ldrName;
     QString               pngName;
     QString               csi3DName;
