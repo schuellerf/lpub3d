@@ -677,7 +677,7 @@ void Gui::clearFadeCache()
                              QMessageBox::Ok | QMessageBox::Discard | QMessageBox::Cancel);
   if (ret == QMessageBox::Ok) {
 
-      QString dirName = QDir::toNativeSeparators(QString("%1/%2").arg(Preferences::ldrawPath).arg("Unofficial/fade"));
+      QString dirName = QDir::toNativeSeparators(QString("%1/fade").arg(Preferences::lpubDataPath));
 
       int count = 0;
       if (removeDir(count, dirName)){
