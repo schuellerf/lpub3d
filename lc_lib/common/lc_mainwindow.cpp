@@ -2101,14 +2101,14 @@ bool lcMainWindow::ViewStepContent(const QString& FileName, const QVector<lcVect
     {
         QString fileNamePart = FileName.split("_").last();
         mRotateStepLineNumber = fileNamePart.split(".").first();
-        logStatus() << "Viewer Rotstep Line Number from Step: " << mRotateStepLineNumber;
+        logTrace() << "Viewer Rotstep Line Number from Step: " << mRotateStepLineNumber;
         viewerCameraPosition = viewMatrix.at(0);
         viewerTargetPosition = viewMatrix.at(1);
         viewerUpVector       = viewMatrix.at(2);
         viewerFovY           = viewMatrix.at(3).x;
         viewerZNear          = viewMatrix.at(3).y;
         viewerZFar           = viewMatrix.at(3).z;
-        logStatus() << QString("Viewer Step Camera Settings = fx %1, fy %2, fz %3, tx %4, ty %5, tz %6, ux %7, uy %8, uz %9, fov %10, znear %11, zfar %12")
+        logTrace() << QString("Viewer Step Camera Settings = fx %1, fy %2, fz %3, tx %4, ty %5, tz %6, ux %7, uy %8, uz %9, fov %10, znear %11, zfar %12")
                       .arg(viewerCameraPosition.x,0,'f',4)
                       .arg(viewerCameraPosition.y,0,'f',4)
                       .arg(viewerCameraPosition.z,0,'f',4)

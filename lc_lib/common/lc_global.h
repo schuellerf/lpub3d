@@ -39,9 +39,6 @@ typedef quintptr lcuintptr;
 /*** LPub3D modification 39: - Build ***/
 #ifdef Q_OS_WIN
 #define snprintf _snprintf
-#ifndef _WIN64
-#define isnan _isnan
-#endif
 #if (_MSC_VER >= 1500)
 #define strcasecmp stricmp
 #define strncasecmp strnicmp
@@ -58,10 +55,10 @@ int stricmp(const char* str1, const char* str2);
 // Version number.
 #define LC_VERSION_MAJOR 0
 #define LC_VERSION_MINOR 83
-#define LC_VERSION_PATCH 0
-#define LC_VERSION_TEXT "0.83.0"
+#define LC_VERSION_PATCH 1
+#define LC_VERSION_TEXT "0.83.1"
 /*** LPub3D modification 61: - Build ***/
-#define LC_VERSION_BUILD "1953"
+#define LC_VERSION_BUILD "1957"
 /*** LPub3D modification end ***/
 
 
