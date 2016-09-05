@@ -15,7 +15,7 @@
 #ifndef LDSEARCHDIRS_H
 #define LDSEARCHDIRS_H
 
-#include "ldrawini_global.h"
+#include "ldrawini.h"
 
 #if defined (__APPLE__)
 #include <wchar.h>
