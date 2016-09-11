@@ -3068,7 +3068,6 @@ void MetaItem::writeRotateStep(QString &value)
     QString prefix              = "0 ROTSTEP ";
     bool multiStep              = false;
     bool rotStep                = false;
-    bool ok;
 
     QStringList argv = value.split(QRegExp("\\s"));
     int stepNumber = gui->getViewerStepStepNum(argv[0]);
@@ -3089,7 +3088,7 @@ void MetaItem::writeRotateStep(QString &value)
         }
     }
 
-    QString stepType = multiStep ? "iMulti-Step " : "iSingle-Step ";
+    //QString stepType = multiStep ? "iMulti-Step " : "iSingle-Step ";
     //logTrace() << "-STARTING INPUT - iStepType " << stepType << " iModel: " << modelName << " iStepNumber: " << stepNumber << " iMeta (ROTSTEP): " << meta ;
 
     // If multi-step find step's top line Number

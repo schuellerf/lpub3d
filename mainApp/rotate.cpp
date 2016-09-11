@@ -554,8 +554,8 @@ QVector<lcVector3> Render::cameraSettings(AssemMeta &assemMeta,
     // solve the leoCAD HOME position which should be equivalent to
     // using camera globe settings: 23 latitude, 45 longitude and 577 camera distance.
     fx = projection_fromx;
-    fy = -projection_fromz;             // switch z and y and make negative to comply with LeoCAD format
-    fz = projection_fromy + adjustment; // adjust (-37.9519) to reach LeoCAD default value of 187.5
+    fy = -projection_fromz;             // Switch Y and Z coordinates to match LeoCAD. Set Y negative to match LDraw Y axis vertical with negative value in the up direction
+    fz = projection_fromy + adjustment; // adjust (-37.9519) to reach LeoCAD default value of 187.5 //TODO see if can do better
     // Target using 0,0,0
     tx = projection_towardx;
     ty = projection_towardy;

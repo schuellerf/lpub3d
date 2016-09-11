@@ -472,14 +472,48 @@ void Gui::zoomOut(
   view->scale(1.0/1.1,1.0/1.1);
 }
 
-void Gui::UpdateStepRotation()
+void Gui::SetStepRotation(QString &rotationValue, bool propagate)
 {
-    mModelStepRotation = lcVector3(mRotStepAngleX, mRotStepAngleY, mRotStepAngleZ);
+    QStringList argv = rotationValue.split(QRegExp("\\s"));
 
+    if (propagate && getCurFile() != "") {
+
+        mStepRotation[0] = mRotStepAngleX;
+        mStepRotation[1] = mRotStepAngleY;
+        mStepRotation[2] = mRotStepAngleZ;
+
+        QString rotationValue("%1 %2 %3 %4 %5");
+        rotationValue = rotationValue.arg(gMainWindow->mCsiName,
+                      QString::number(mStepRotation[0], 'f', 2),
+                      QString::number(mStepRotation[1], 'f', 2),
+                      QString::number(mStepRotation[2], 'f', 2),
+                      argv[3]);
+
+        MetaItem mi;
+        mi.writeRotateStep(rotationValue);
+    } else {
+        bool ok[3];
+        float x = argv[0].toFloat(&ok[0]);
+        float y = argv[1].toFloat(&ok[1]);
+        float z = argv[2].toFloat(&ok[2]);
+
+        if (ok[0] && ok[1] && ok[2]){
+            mStepRotation[0] = x;
+            mStepRotation[1] = y;
+            mStepRotation[2] = z;
+        } else {
+            emit messageSig(false, "Invalid ROTSTEP values detected.");
+        }
+    }
+    UpdateStepRotationStatus();
+}
+
+void Gui::UpdateStepRotationStatus()
+{
     QString rotLabel("Step Rotation %1 %2 %3");
-    rotLabel = rotLabel.arg(QString::number(mModelStepRotation[0], 'f', 2),
-                            QString::number(mModelStepRotation[1], 'f', 2),
-                            QString::number(mModelStepRotation[2], 'f', 2));
+    rotLabel = rotLabel.arg(QString::number(mRotStepAngleX, 'f', 2),
+                            QString::number(mRotStepAngleY, 'f', 2),
+                            QString::number(mRotStepAngleZ, 'f', 2));
     statusBarMsg(rotLabel);
 }
 
@@ -963,8 +997,7 @@ Gui::Gui()
     progressBarPerm = new QProgressBar();
     progressBarPerm->setMaximumWidth(300);
 
-    mExistingRotStep = lcVector3(0.0f, 0.0f, 0.0f);
-    mModelStepRotation = lcVector3(0.0f, 0.0f, 0.0f);
+    mStepRotation = lcVector3(0.0f, 0.0f, 0.0f);
 
     emit Application::instance()->splashMsgSig("50% - Mainwindow initializing...");
 
@@ -1106,12 +1139,22 @@ bool Gui::InitializeApp(int argc, char *argv[], const char* LibraryInstallPath, 
 
       connect(this,           SIGNAL(loadFileSig(QString)),
               this,           SLOT(  loadFile(QString)));
-
       connect(this,           SIGNAL(halt3DViewerSig(bool)),
               gMainWindow,    SLOT(  halt3DViewer   (bool)));
-
       connect(this,           SIGNAL(enable3DActionsSig()),
               gMainWindow,    SLOT(  enable3DActions()));
+      connect(gMainWindow,    SIGNAL(SetStepRotation(QString&,bool)),
+              this,           SLOT(SetStepRotation(QString&,bool)));
+      connect(gMainWindow,    SIGNAL(ResetStepRotation()),
+              this,           SLOT(ResetStepRotation()));
+      connect(gMainWindow,    SIGNAL(SetRotStepAngleX(float)),
+              this,           SLOT(SetRotStepAngleX(float)));
+      connect(gMainWindow,    SIGNAL(SetRotStepAngleY(float)),
+              this,           SLOT(SetRotStepAngleY(float)));
+      connect(gMainWindow,    SIGNAL(SetRotStepAngleZ(float)),
+              this,           SLOT(SetRotStepAngleZ(float)));
+      connect(gMainWindow,    SIGNAL(GetStepRotation()),
+              this,           SLOT(GetStepRotation()));
 
     }
 

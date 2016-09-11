@@ -560,56 +560,50 @@ public:
   {
     return KpageView;
   }
-  //**3D  
-  void UpdateStepRotation();
-
-  lcVector3 GetStepRotationStatus() const
-  {
-      return mModelStepRotation;
-  }
-
-  lcVector3 GetExistingRotStep() const
-  {
-      return mExistingRotStep;
-  }
-
-  void ResetStepRotation()
-  {
-      mRotStepAngleX = mExistingRotStep[0];
-      mRotStepAngleY = mExistingRotStep[1];
-      mRotStepAngleZ = mExistingRotStep[2];
-      UpdateStepRotation();
-  }
-
-  void SetExistingRotStep(lcVector3 rotStep)
-  {
-      mExistingRotStep = rotStep;
-  }
-
-  void SetRotStepAngleX(float AngleX)
-  {
-      mRotStepAngleX = AngleX;
-  }
-
-  void SetRotStepAngleY(float AngleY)
-  {
-      mRotStepAngleY = AngleY;
-  }
-
-  void SetRotStepAngleZ(float AngleZ)
-  {
-      mRotStepAngleZ = AngleZ;
-  }
 
   QString getCurFile()
   {
       return curFile;
   }
 
-  //**
-
+  //**3D Viewer Manage Step Rotation
 
 public slots:
+
+  void SetStepRotation(QString &rotationValue, bool propagate = false);
+  void UpdateStepRotationStatus();
+
+  lcVector3 GetStepRotation() const
+  {
+      return mStepRotation;
+  }
+
+  void ResetStepRotation()
+  {
+      mRotStepAngleX = mStepRotation[0];
+      mRotStepAngleY = mStepRotation[1];
+      mRotStepAngleZ = mStepRotation[2];
+      UpdateStepRotationStatus();
+  }
+
+  void SetRotStepAngleX(float AngleX)
+  {
+      mRotStepAngleX = AngleX;
+      UpdateStepRotationStatus();
+  }
+
+  void SetRotStepAngleY(float AngleY)
+  {
+      mRotStepAngleY = AngleY;
+      UpdateStepRotationStatus();
+  }
+
+  void SetRotStepAngleZ(float AngleZ)
+  {
+      mRotStepAngleZ = AngleZ;
+      UpdateStepRotationStatus();
+  }
+  //**
 
   /* The undoStack needs access to these */
 
@@ -1097,8 +1091,7 @@ private:
 
   // capture camera rotation from LeoCad module
 protected:
-  lcVector3 mExistingRotStep;
-  lcVector3 mModelStepRotation;
+  lcVector3 mStepRotation;
   float mRotStepAngleX;
   float mRotStepAngleY;
   float mRotStepAngleZ;

@@ -2977,34 +2977,31 @@ void View::GetRotateStepAngles()
     if (mTrackButton != LC_TRACKBUTTON_NONE)
     {
         float Angle;
-        lcVector3 ExistingRotStep = gui->GetExistingRotStep();
+        lcVector3 ExistingRotStep = gMainWindow->GetStepRotation();
 
         switch (mTrackTool)
         {
         case LC_TRACKTOOL_ROTATE_X:
             Angle = MouseToolDistance[0] + ExistingRotStep[0];
-            gui->SetRotStepAngleX(Angle);
+            emit gMainWindow->SetRotStepAngleX(Angle);
             qDebug() << "Rotate X: " << Angle;
             break;
         case LC_TRACKTOOL_ROTATE_Y:
-            //Switch leoCAD Y and Z coordinates to match LDraw
+            //Switch Y and Z coordinates to match LDraw
             Angle = MouseToolDistance[1] + ExistingRotStep[2];
-            gui->SetRotStepAngleZ(Angle);
+            emit gMainWindow->SetRotStepAngleZ(Angle);
             qDebug() << "Rotate Y(Z): " << Angle;
             break;
         case LC_TRACKTOOL_ROTATE_Z:
             //LDraw Y axis is vertical, with negative value in the up direction
             Angle = MouseToolDistance[2] + -ExistingRotStep[1];
-            gui->SetRotStepAngleY(-Angle);
+            emit gMainWindow->SetRotStepAngleY(-Angle);
             qDebug() << "Rotate Z(Y): Angle: " << Angle << " (Neg) Angle: " << -Angle;
             break;
         default:
             Angle = 0.0f;
             break;
         };
-        // display the combined angle in the status bar
-        gui->UpdateStepRotation();
     }
-
 }
 /*** LPub3D modification end ***/

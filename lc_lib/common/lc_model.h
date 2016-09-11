@@ -314,8 +314,8 @@ public:
 	void ScaleSelectedPieces(const float Scale, bool Update, bool Checkpoint);
 	void TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform);
     /*** LPub3D modification 316: - rotate step ***/
-	void RotateStepSelectedObjects(lcRotateStepType RotateStepType, const lcVector3& RotateStep);
-	void ParseExsitingRotStepLine(QTextStream& LineStream);
+    void RotateStepSelectedObjects();
+    void ParseAndSetRotStep(QTextStream& LineStream);
 	/*** LPub3D modification end ***/
 	void SetSelectedPiecesColorIndex(int ColorIndex);
 	void SetSelectedPiecesPieceInfo(PieceInfo* Info);

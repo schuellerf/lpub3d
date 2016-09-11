@@ -1559,17 +1559,6 @@ void lcMainWindow::SetRotateStepType(lcRotateStepType RotateStepType)
 }
 /*** LPub3D modification end ***/
 
-/*** LPub3D modification 1576: - rotate step ***/
-lcVector3 lcMainWindow::GetRotateStepAmount()
-{
-  lcVector3    rotateStep(0.0f, 0.0f, 0.0f);
-
-  rotateStep = gui->GetStepRotationStatus();
-
-  return rotateStep;
-}
-/*** LPub3D modification end ***/
-
 void lcMainWindow::SplitView(Qt::Orientation Orientation)
 {
 	QWidget* Focus = focusWidget();
@@ -1997,7 +1986,6 @@ void lcMainWindow::UpdateModels()
     PieceInfo* CurPiece = mPreviewWidget->GetCurrentPiece();
     if (CurPiece->GetModel() == CurrentModel)
         mPreviewWidget->SetDefaultPiece();
-
 }
 
 void lcMainWindow::UpdateCategories()
@@ -2851,7 +2839,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_EDIT_ACTION_ROTATE:
 		SetTool(LC_TOOL_ROTATE);
         /*** LPub3D modification 2822: - rotate step ***/
-		gui->ResetStepRotation();
+        emit ResetStepRotation();
         lcGetActiveModel()->SelectAllPieces();
 		/*** LPub3D modification end ***/	
 		break;
@@ -2887,7 +2875,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
     /*** LPub3D modification 2856: - rotate step ***/
 	case LC_EDIT_ACTION_ROTATESTEP:
 		SetTool(LC_TOOL_ROTATESTEP);
-		lcGetActiveModel()->RotateStepSelectedObjects(GetRotateStepType(), GetRotateStepAmount());
+        lcGetActiveModel()->RotateStepSelectedObjects();
 		break; 
 	/*** LPub3D modification end ***/
 

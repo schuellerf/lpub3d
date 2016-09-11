@@ -294,10 +294,6 @@ public:
 	void UpdateShortcuts();
 
 	lcVector3 GetTransformAmount();
-    /*** LPub3D modification 296: - rotate step ***/
-	lcVector3 GetRotateStepAmount();
-	/*** LPub3D modification end ***/
-
 	QString mRecentFiles[LC_MAX_RECENT_FILES];
 	PiecePreview* mPreviewWidget;
 	int mColorIndex;
@@ -318,10 +314,18 @@ public:
     float     viewerZFar;
     /*** LPub3D modification end ***/
 
-/*** LPub3D modification 314: - halt viewer ***/
+/*** LPub3D modification 314: - signals ***/
 public slots:
     void halt3DViewer(bool b);
     void enable3DActions();
+
+signals:
+    lcVector3 GetStepRotation();
+    void SetStepRotation(QString&, bool);
+    void ResetStepRotation();
+    void SetRotStepAngleX(float);
+    void SetRotStepAngleY(float);
+    void SetRotStepAngleZ(float);
 /*** LPub3D modification end ***/
 protected slots:
 	void ModelTabClosed(int Index);
