@@ -1,4 +1,4 @@
- 
+
 /****************************************************************************
 **
 ** Copyright (C) 2007-2009 Kevin Clague. All rights reserved.
@@ -75,9 +75,23 @@ LDrawSubFile::LDrawSubFile(
   _startPageNumber = 0;
 }
 
+/* initialize viewer step*/
+
+ViewerStep::ViewerStep( const QStringList &contents,
+                        const QString     &filePath,
+                        const int         &stepNum,
+                        const int         &topLine){
+    _contents << contents;
+    _filePath = filePath;
+    _modified = false;
+    _stepNum  = stepNum;
+    _topLine  = topLine;
+}
+
 void LDrawFile::empty()
 {
   _subFiles.clear();
+  _viewerSteps.clear();
   _subFileOrder.clear();
   _mpd = false;
 }
@@ -1006,7 +1020,94 @@ void LDrawFile::tempCacheCleared()
   }
 }
 
+/* Add a new ViewerStep */
 
+void LDrawFile::insertStep(const QString &fileName,
+                           const QStringList &contents,
+                           const QString &filePath,
+                           const int     &stepNum,
+                           const int     &topLine)
+{
+  QString    mfileName = fileName.toLower();
+  QMap<QString, ViewerStep>::iterator i = _viewerSteps.find(mfileName);
+
+  if (i != _viewerSteps.end()) {
+    _viewerSteps.erase(i);
+  }
+  ViewerStep viewerStep(contents,filePath,stepNum,topLine);
+  _viewerSteps.insert(mfileName,viewerStep);
+}
+
+/* Update ViewerStep */
+
+void LDrawFile::updateStep(const QString &fileName,
+                           const QStringList &contents)
+{
+  QString    mfileName = fileName.toLower();
+  QMap<QString, ViewerStep>::iterator i = _viewerSteps.find(mfileName);
+
+  if (i != _viewerSteps.end()) {
+    i.value()._contents = contents;
+    i.value()._modified = true;
+  }
+}
+
+/* return viewer step */
+
+QStringList LDrawFile::getViewerStepContents(const QString &fileName)
+{
+  QString mfileName = fileName.toLower();
+  QMap<QString, ViewerStep>::iterator i = _viewerSteps.find(mfileName);
+  if (i != _viewerSteps.end()) {
+    return i.value()._contents;
+  }
+  return _emptyList;
+}
+
+/* return viewer file path */
+
+QString LDrawFile::getViewerStepFilePath(const QString &fileName)
+{
+  QString mfileName = fileName.toLower();
+  QMap<QString, ViewerStep>::iterator i = _viewerSteps.find(mfileName);
+  if (i != _viewerSteps.end()) {
+    return i.value()._filePath;
+  }
+  return _emptyString;
+}
+
+/* return viewer step number */
+
+int LDrawFile::getViewerStepStepNum(const QString &fileName)
+{
+  QString mfileName = fileName.toLower();
+  QMap<QString, ViewerStep>::iterator i = _viewerSteps.find(mfileName);
+  if (i != _viewerSteps.end()) {
+    return i.value()._stepNum;
+  }
+  return 0;
+}
+
+/* return viewer top line */
+
+int LDrawFile::getViewerStepTopLine(const QString &fileName)
+{
+  QString mfileName = fileName.toLower();
+  QMap<QString, ViewerStep>::iterator i = _viewerSteps.find(mfileName);
+  if (i != _viewerSteps.end()) {
+    return i.value()._topLine;
+  }
+  return 0;
+}
+
+/* Clear ViewerSteps */
+
+void LDrawFile::clearSteps()
+{
+  _viewerSteps.clear();
+}
+
+// -- -- Utility Items -- -- //
 int split(const QString &line, QStringList &argv)
 {
   QString     chopped = line;

@@ -241,6 +241,7 @@ public:
 	void SetTransformType(lcTransformType TransformType);
     /*** LPub3D modification 242: - rotate view ***/
 	void SetRotateStepType(lcRotateStepType RotateStepType);
+    bool ViewStepContent(const QString& CsiName, const QVector<lcVector3> &viewMatrix);
 	/*** LPub3D modification end ***/
 	void SetColorIndex(int ColorIndex);
 	void SetMoveSnapEnabled(bool Enabled);
@@ -255,7 +256,6 @@ public:
 
 	void NewProject();
     bool OpenProject(const QString& FileName);
-    bool ViewStepContent(const QString& FileName, const QVector<lcVector3> &viewMatrix);
 	void MergeProject();
 	bool SaveProject(const QString& FileName);
 	bool SaveProjectIfModified();
@@ -309,7 +309,7 @@ public:
     /*** LPub3D modification end ***/
 
     /*** LPub3D modification 310: - rotstep ***/
-    QString mRotateStepLineNumber;
+    QString   mCsiName;
     lcVector3 viewerCameraPosition;
     lcVector3 viewerTargetPosition;
     lcVector3 viewerUpVector;
@@ -405,14 +405,14 @@ protected:
 	QLineEdit* mTransformZEdit;
 
 	QLabel* mStatusBarLabel;
-    /*** LPub3D modification 390: - suppress status ***/
+    /*** LPub3D modification 408: - suppress status ***/
 	QLabel* mStatusPositionLabel;
 	QLabel* mStatusSnapLabel;
 	QLabel* mStatusTimeLabel;
 	/*** LPub3D modification end ***/
 	QMenu* mCameraMenu;
 	QMenu* mViewpointMenu;
-    /*** LPub3D modification 404: - move tab to Gui ***/
+    /*** LPub3D modification 415: - move tab to Gui ***/
     QWidget* mPartsContents;
     /*** LPub3D modification end ***/
 };

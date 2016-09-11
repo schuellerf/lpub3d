@@ -351,9 +351,9 @@ void CsiItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
   position = pos();
   gui->showLine(step->topOfStep());
 
-  if (! gMainWindow->ViewStepContent(step->csi3DName, step->viewMatrix)) {
+  if (! gMainWindow->ViewStepContent(step->viewerCsiName, step->viewMatrix)) {
      emit gui->statusMessage(false,QMessageBox::tr("Could not load 3D Viewer with file :\n%1.")
-                            .arg(step->csiName()));
+                            .arg(step->viewerCsiName));
   }
 }
 

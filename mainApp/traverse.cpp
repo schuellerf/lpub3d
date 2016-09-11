@@ -923,13 +923,13 @@ int Gui::drawPage(LGraphicsView  *view,
                           return rc;
                         }
 
-                      logTrace() << Render::getRenderer()
-                                 << "CSI single call render took"
-                                 << timer.elapsed() << "milliseconds"
-                                 << "to render " << ldrStepFiles.size()
-                                 << (ldrStepFiles.size() > 1 ? "images" : "image")
-                                 << (calledOut ? "for called out," : "for simple,")
-                                 << "step group on page" << stepPageNum << ".";
+                      logStatus() << Render::getRenderer()
+                                  << "CSI single call render took"
+                                  << timer.elapsed() << "milliseconds"
+                                  << "to render " << ldrStepFiles.size()
+                                  << (ldrStepFiles.size() > 1 ? "images" : "image")
+                                  << (calledOut ? "for called out," : "for simple,")
+                                  << "step group on page" << stepPageNum << ".";
                     }
 
                   addGraphicsPageItems(steps, coverPage, modelDisplayPage, endOfSubmodel,instances, view, scene, printing);

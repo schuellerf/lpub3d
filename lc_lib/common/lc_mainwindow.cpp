@@ -1994,9 +1994,10 @@ void lcMainWindow::UpdateModels()
 
 	mPartsTree->UpdateModels();
 
-	PieceInfo* CurPiece = mPreviewWidget->GetCurrentPiece();
-	if (CurPiece->GetModel() == CurrentModel)
-		mPreviewWidget->SetDefaultPiece();
+    PieceInfo* CurPiece = mPreviewWidget->GetCurrentPiece();
+    if (CurPiece->GetModel() == CurrentModel)
+        mPreviewWidget->SetDefaultPiece();
+
 }
 
 void lcMainWindow::UpdateCategories()
@@ -2089,26 +2090,27 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 	return false;
 }
 
- /*** LPub3D modification 2080: - view content, camera settings ***/
-bool lcMainWindow::ViewStepContent(const QString& FileName, const QVector<lcVector3> &viewMatrix)
+ /*** LPub3D modification 2092: - view content, camera settings ***/
+bool lcMainWindow::ViewStepContent(const QString& CsiName, const QVector<lcVector3> &viewMatrix)
 {
 
-    QString LoadFileName = FileName;
+    QString LoadFileName = gui->getViewerStepFilePath(CsiName);
 
     Project* NewProject = new Project();
-
-    if (NewProject->Load(LoadFileName))
+    if (NewProject->LoadViewer(CsiName))
     {
-        QString fileNamePart = FileName.split("_").last();
-        mRotateStepLineNumber = fileNamePart.split(".").first();
-        logTrace() << "Viewer Rotstep Line Number from Step: " << mRotateStepLineNumber;
+
+        mCsiName = CsiName;
+        logStatus() << "CsiName:            " << mCsiName;
+        logStatus() << "Viewer LoadFileName:" << LoadFileName;
+
         viewerCameraPosition = viewMatrix.at(0);
         viewerTargetPosition = viewMatrix.at(1);
         viewerUpVector       = viewMatrix.at(2);
         viewerFovY           = viewMatrix.at(3).x;
         viewerZNear          = viewMatrix.at(3).y;
         viewerZFar           = viewMatrix.at(3).z;
-        logTrace() << QString("Viewer Step Camera Settings = fx %1, fy %2, fz %3, tx %4, ty %5, tz %6, ux %7, uy %8, uz %9, fov %10, znear %11, zfar %12")
+        logStatus() << QString("Viewer Step Camera Settings = fx %1, fy %2, fz %3, tx %4, ty %5, tz %6, ux %7, uy %8, uz %9, fov %10, znear %11, zfar %12")
                       .arg(viewerCameraPosition.x,0,'f',4)
                       .arg(viewerCameraPosition.y,0,'f',4)
                       .arg(viewerCameraPosition.z,0,'f',4)
@@ -2128,7 +2130,6 @@ bool lcMainWindow::ViewStepContent(const QString& FileName, const QVector<lcVect
         return true;
     }
 
-    QMessageBox::information(this, tr("3DViewer"), tr("Error loading '%1'.").arg(LoadFileName));
     delete NewProject;
 
     return false;
@@ -2851,7 +2852,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		SetTool(LC_TOOL_ROTATE);
         /*** LPub3D modification 2822: - rotate step ***/
 		gui->ResetStepRotation();
-		lcGetActiveModel()->SelectAllPieces();
+        lcGetActiveModel()->SelectAllPieces();
 		/*** LPub3D modification end ***/	
 		break;
 

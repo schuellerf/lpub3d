@@ -46,8 +46,6 @@
 #include "resolution.h"
 #include "dependencies.h"
 #include "paths.h"
-#include "ldrawfiles.h"
-#include "lc_application.h"
 
 bool Step::refreshCsi(true);  //detect preference dialog updates
 
@@ -189,8 +187,6 @@ int Step::createCsi(
     }
 
   QString csiFilePath = QString("%1/%2").arg(QDir::currentPath()).arg(Paths::tmpDir);
-  int ln = top.lineNumber;                      // we need this to facilitate placing the ROTSTEP meta from the viewer window later on
-  QString tln = QString("viewer_%1").arg(ln);
 
   QString key = QString("%1_%2_%3_%4_%5_%6")
       .arg(csiName()+orient)
@@ -217,25 +213,17 @@ int Step::createCsi(
         }
     }
 
-  // Populate the csi3DNames
-   if (renderer->useLDViewSCall()) {
-       csi3DName = QString("%1/%2_%3.ldr").arg(csiFilePath).arg(key).arg(tln);
-   } else {
-       csi3DName = QString("%1/csi_%2_%3.ldr").arg(csiFilePath).arg(sn).arg(tln);
-   }
-
   // generate CSI file as appropriate
   if ( ! csiExist || csiOutOfDate ) {
 
       int rc;
-      Render::csi3DName = csi3DName;
       if (renderer->useLDViewSCall()) {
 
           // populate ldr file name
           ldrName = QString("%1/%2.ldr").arg(csiFilePath).arg(key);
 
           // Create the CSI ldr file and rotate its parts
-          rc = renderer->rotateParts(addLine,meta.rotStep, csiParts, ldrName);
+          rc = renderer->rotateParts(addLine, meta.rotStep, csiParts, ldrName);
           if (rc != 0) {
               emit gui->statusMessage(false,QMessageBox::tr("Creation and rotation of CSI ldr file failed for:\n%1.")
                                       .arg(ldrName));
@@ -271,15 +259,40 @@ int Step::createCsi(
     }
 
   // Populate the 3D Viewer
-  if (! gMainWindow->GetHalt3DViewer()) {
+  if (! gMainWindow->GetHalt3DViewer() ) {
+
+      // Populate the viewerCsiName
+      viewerCsiName = QString("%1_%2").arg(csiName()).arg(sn);
+
+      // Populate the csi file paths
+      QString csiFullFilePath;
+       if (renderer->useLDViewSCall()) {
+           csiFullFilePath = QString("%1/%2.ldr").arg(csiFilePath).arg(key);
+       } else {
+           csiFullFilePath = QString("%1/csi.ldr").arg(csiFilePath);
+       }
+
+      // Populate the step content
+      QStringList rotatedParts = csiParts;
+      renderer->rotateParts(addLine,meta.rotStep,rotatedParts);
+      QString rotsComment = QString("0 // ROTSTEP %1 %2 %3 %4")
+                                    .arg(meta.rotStep.value().type)
+                                    .arg(meta.rotStep.value().rots[0])
+                                    .arg(meta.rotStep.value().rots[1])
+                                    .arg(meta.rotStep.value().rots[2]);
+      rotatedParts.prepend(rotsComment);
+      gui->insertStep(viewerCsiName,rotatedParts,csiFullFilePath,sn,top.lineNumber);
 
       // set camera settings
       viewMatrix = renderer->cameraSettings(meta.LPub.assem);
 
-      if (! gMainWindow->ViewStepContent(csi3DName,viewMatrix)) {
-          emit gui->statusMessage(false,QMessageBox::tr("Could not load 3D Viewer project with file :\n%1.")
-                                  .arg(csi3DName));
-          return -1;
+      if (! calledOut) {
+          // set the step in viewer
+          if (! gMainWindow->ViewStepContent(viewerCsiName,viewMatrix)) {
+              emit gui->statusMessage(false,QMessageBox::tr("Load failed for viewer CsiName: %1")
+                                      .arg(viewerCsiName));
+              return -1;
+          }
       }
   }
 

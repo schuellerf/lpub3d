@@ -1188,198 +1188,197 @@ int Gui::addGraphicsPageItems(
 
   // If the page contains a single step then process it here
   if (page->relativeType == SingleStepType && page->list.size()) {
-      if (page->list.size()) {
-          Range *range = dynamic_cast<Range *>(page->list[0]);
-          if (range->relativeType == RangeType) {
-              Step *step = dynamic_cast<Step *>(range->list[0]);
-              if (step && step->relativeType == StepType) {
+      Range *range = dynamic_cast<Range *>(page->list[0]);
+      if (range->relativeType == RangeType) {
+          Step *step = dynamic_cast<Step *>(range->list[0]);
+          if (step && step->relativeType == StepType) {
 
-                  // populate page pixmaps - of using LDView Single Call
+              // populate page pixmaps - of using LDView Single Call
 
-                  if (renderer->useLDViewSCall()){
-                      step->csiPixmap.load(step->pngName);
-                      step->csiPlacement.size[0] = step->csiPixmap.width();
-                      step->csiPlacement.size[1] = step->csiPixmap.height();
-                      for (int k = 0; k < step->list.size(); k++) {
-                          if (step->list[k]->relativeType == CalloutType) {
-                              Callout *callout = dynamic_cast<Callout *>(step->list[k]);
-                              if (callout) {
-                                  for (int l = 0; l < callout->list.size(); l++){
-                                      Range *range = dynamic_cast<Range *>(callout->list[l]);
-                                      for (int m = 0; m < range->list.size(); m++){
-                                          if (range->relativeType == RangeType) {
-                                              Step *step = dynamic_cast<Step *>(range->list[m]);
-                                              if (step){
-                                                  step->csiPixmap.load(step->pngName);
-                                                  step->csiPlacement.size[0] = step->csiPixmap.width();
-                                                  step->csiPlacement.size[1] = step->csiPixmap.height();
-                                                } // validate step (StepType) and process...
-                                            } // validate RangeType - to cast step
-                                        } // for each step within divided group...=>list[AbstractRangeElement]->StepType
-                                    } // for each divided group within callout...=>list[AbstractStepsElement]->RangeType
-                                } // validate callout
-                            } // validate calloutType
-                        } // for divided group within step...=>list[Steps]->CalloutType
-                    }
+              if (renderer->useLDViewSCall()){
+                  step->csiPixmap.load(step->pngName);
+                  step->csiPlacement.size[0] = step->csiPixmap.width();
+                  step->csiPlacement.size[1] = step->csiPixmap.height();
+                  for (int k = 0; k < step->list.size(); k++) {
+                      if (step->list[k]->relativeType == CalloutType) {
+                          Callout *callout = dynamic_cast<Callout *>(step->list[k]);
+                          if (callout) {
+                              for (int l = 0; l < callout->list.size(); l++){
+                                  Range *range = dynamic_cast<Range *>(callout->list[l]);
+                                  for (int m = 0; m < range->list.size(); m++){
+                                      if (range->relativeType == RangeType) {
+                                          Step *step = dynamic_cast<Step *>(range->list[m]);
+                                          if (step){
+                                              step->csiPixmap.load(step->pngName);
+                                              step->csiPlacement.size[0] = step->csiPixmap.width();
+                                              step->csiPlacement.size[1] = step->csiPixmap.height();
+                                          } // validate step (StepType) and process...
+                                      } // validate RangeType - to cast step
+                                  } // for each step within divided group...=>list[AbstractRangeElement]->StepType
+                              } // for each divided group within callout...=>list[AbstractStepsElement]->RangeType
+                          } // validate callout
+                      } // validate calloutType
+                  } // for divided group within step...=>list[Steps]->CalloutType
+              }
 
-                  // add the step number
+              // add the step number
 
-                  if ( ! step->onlyChild() && step->showStepNumber) {
-                      step->stepNumber.sizeit();
-                    }
+              if ( ! step->onlyChild() && step->showStepNumber) {
+                  step->stepNumber.sizeit();
+              }
 
-                  /* Size the callouts */
-                  for (int i = 0; i < step->list.size(); i++) {
-                      step->list[i]->sizeIt();
-                    }
+              /* Size the callouts */
+              for (int i = 0; i < step->list.size(); i++) {
+                  step->list[i]->sizeIt();
+              }
 
-                  // add the assembly image to the scene
+              // add the assembly image to the scene
 
-                  step->csiItem = new CsiItem(
-                        step,
-                        &page->meta,
-                        step->csiPixmap,
-                        step->submodelLevel,
-                        pageBg,
-                        page->relativeType);
+              step->csiItem = new CsiItem(
+                          step,
+                          &page->meta,
+                          step->csiPixmap,
+                          step->submodelLevel,
+                          pageBg,
+                          page->relativeType);
 
-                  if (step->csiItem == NULL) {
-                      exit(-1);
-                    }
-                  step->csiItem->assign(&step->csiPlacement);
-                  step->csiItem->boundingSize[XX] = step->csiItem->size[XX];
-                  step->csiItem->boundingSize[YY] = step->csiItem->size[YY];
+              if (step->csiItem == NULL) {
+                  exit(-1);
+              }
+              step->csiItem->assign(&step->csiPlacement);
+              step->csiItem->boundingSize[XX] = step->csiItem->size[XX];
+              step->csiItem->boundingSize[YY] = step->csiItem->size[YY];
 
-                  // Place the step relative to the page.
+              // Place the step relative to the page.
 
-                  plPage.relativeTo(step);      // place everything
+              plPage.relativeTo(step);      // place everything
 
-                  // center the csi's bounding box relative to the page
+              // center the csi's bounding box relative to the page
 
-                  plPage.placeRelativeBounding(step->csiItem);
+              plPage.placeRelativeBounding(step->csiItem);
 
-                  // place callouts relative to the csi bounding box
+              // place callouts relative to the csi bounding box
 
-                  for (int i = 0; i < step->list.size(); i++) {
+              for (int i = 0; i < step->list.size(); i++) {
 
-                      if (step->list[i]->relativeType == CalloutType) {
-                          Callout *callout = dynamic_cast<Callout *>(step->list[i]);
+                  if (step->list[i]->relativeType == CalloutType) {
+                      Callout *callout = dynamic_cast<Callout *>(step->list[i]);
 
-                          PlacementData placementData = callout->placement.value();
+                      PlacementData placementData = callout->placement.value();
 
-                          if (placementData.relativeTo == CsiType) {
-                              step->csiItem->placeRelativeBounding(callout);
-                            }
-                        } // if callout
-                    } // callouts
-
-
-                  if (step->pli.placement.value().relativeTo == CsiType) {
-                      step->csiItem->placeRelative(&step->pli);
-                    }
-
-                  // place the CSI relative to the entire step's box
-                  step->csiItem->setPos(step->csiItem->loc[XX],
-                                        step->csiItem->loc[YY]);
+                      if (placementData.relativeTo == CsiType) {
+                          step->csiItem->placeRelativeBounding(callout);
+                      }
+                  } // if callout
+              } // callouts
 
 
+              if (step->pli.placement.value().relativeTo == CsiType) {
+                  step->csiItem->placeRelative(&step->pli);
+              }
 
-                  // add the PLI graphically to the scene
+              // place the CSI relative to the entire step's box
+              step->csiItem->setPos(step->csiItem->loc[XX],
+                                    step->csiItem->loc[YY]);
 
-                  step->pli.addPli(step->submodelLevel, pageBg);
 
-                  // place the PLI relative to the entire step's box
-                  step->pli.setPos(step->pli.loc[XX],
-                                   step->pli.loc[YY]);
 
-                  // allocate QGraphicsPixmapItem for rotate icon
+              // add the PLI graphically to the scene
 
-                  if (step->placeRotateIcon && page->meta.LPub.rotateIcon.display.value()) {
+              step->pli.addPli(step->submodelLevel, pageBg);
 
-                      step->rotateIcon.sizeit();
-                      RotateIconItem *rotateIcon =
+              // place the PLI relative to the entire step's box
+              step->pli.setPos(step->pli.loc[XX],
+                               step->pli.loc[YY]);
+
+              // allocate QGraphicsPixmapItem for rotate icon
+
+              if (step->placeRotateIcon && page->meta.LPub.rotateIcon.display.value()) {
+
+                  step->rotateIcon.sizeit();
+                  RotateIconItem *rotateIcon =
                           new RotateIconItem(
-                            step,
-                            page->relativeType,
-                            page->meta.LPub.rotateIcon,
-                            pageBg);
-                      rotateIcon->setPos(step->rotateIcon.loc[XX],
-                                         step->rotateIcon.loc[YY]);
-                      rotateIcon->relativeToSize[0] = step->rotateIcon.relativeToSize[0];
-                      rotateIcon->relativeToSize[1] = step->rotateIcon.relativeToSize[1];
-                      rotateIcon->setFlag(QGraphicsItem::ItemIsMovable,true);
-                    }
+                              step,
+                              page->relativeType,
+                              page->meta.LPub.rotateIcon,
+                              pageBg);
+                  rotateIcon->setPos(step->rotateIcon.loc[XX],
+                                     step->rotateIcon.loc[YY]);
+                  rotateIcon->relativeToSize[0] = step->rotateIcon.relativeToSize[0];
+                  rotateIcon->relativeToSize[1] = step->rotateIcon.relativeToSize[1];
+                  rotateIcon->setFlag(QGraphicsItem::ItemIsMovable,true);
+              }
 
-                  // allocate QGraphicsTextItem for step number
+              // allocate QGraphicsTextItem for step number
 
-                  if ( ! step->onlyChild() && ! modelDisplayPage) {
-                      StepNumberItem *stepNumber =
+              if ( ! step->onlyChild() && ! modelDisplayPage) {
+                  StepNumberItem *stepNumber =
                           new StepNumberItem(step,
                                              page->relativeType,
                                              page->meta.LPub.stepNumber,
                                              "%d",
                                              step->stepNumber.number,
                                              pageBg);
-                      stepNumber->setPos(step->stepNumber.loc[XX],
-                                         step->stepNumber.loc[YY]);
-                      stepNumber->relativeToSize[0] = step->stepNumber.relativeToSize[0];
-                      stepNumber->relativeToSize[1] = step->stepNumber.relativeToSize[1];
+                  stepNumber->setPos(step->stepNumber.loc[XX],
+                                     step->stepNumber.loc[YY]);
+                  stepNumber->relativeToSize[0] = step->stepNumber.relativeToSize[0];
+                  stepNumber->relativeToSize[1] = step->stepNumber.relativeToSize[1];
 
-                    } else if (step->pli.background) {
-                      step->pli.background->setFlag(QGraphicsItem::ItemIsMovable,false);
-                    }
+              } else if (step->pli.background) {
+                  step->pli.background->setFlag(QGraphicsItem::ItemIsMovable,false);
+              }
 
-                  // foreach callout
+              // foreach callout
 
-                  for (int i = 0; i < step->list.size(); i++) {
+              for (int i = 0; i < step->list.size(); i++) {
 
 
-                      Callout *callout = step->list[i];
-                      QRect    csiRect(step->csiItem->loc[XX]-callout->loc[XX],
-                                       step->csiItem->loc[YY]-callout->loc[YY],
-                                       step->csiItem->size[XX],
-                                       step->csiItem->size[YY]);
+                  Callout *callout = step->list[i];
+                  QRect    csiRect(step->csiItem->loc[XX]-callout->loc[XX],
+                                   step->csiItem->loc[YY]-callout->loc[YY],
+                                   step->csiItem->size[XX],
+                                   step->csiItem->size[YY]);
 
-                      // add the callout's graphics items to the scene
+                  // add the callout's graphics items to the scene
 
-                      callout->addGraphicsItems(0,0,csiRect,pageBg,true);
+                  callout->addGraphicsItems(0,0,csiRect,pageBg,true);
 
-                      // foreach pointer
-                      //   add the pointer to the graphics scene
+                  // foreach pointer
+                  //   add the pointer to the graphics scene
 
-                      for (int i = 0; i < callout->pointerList.size(); i++) {
-                          Pointer *pointer = callout->pointerList[i];
-                          callout->addGraphicsPointerItem(pointer,callout->underpinnings);
-                        }
-                    }
+                  for (int i = 0; i < callout->pointerList.size(); i++) {
+                      Pointer *pointer = callout->pointerList[i];
+                      callout->addGraphicsPointerItem(pointer,callout->underpinnings);
+                  }
+              }
 
-                  // Place the Bill of Materials on the page along with single step
+              // Place the Bill of Materials on the page along with single step
 
-                  if (page->pli.tsize()) {
-                      if (page->pli.bom) {
-                          page->pli.addPli(0,pageBg);
-                          page->pli.setFlag(QGraphicsItem::ItemIsSelectable,true);
-                          page->pli.setFlag(QGraphicsItem::ItemIsMovable,true);
+              if (page->pli.tsize()) {
+                  if (page->pli.bom) {
+                      page->pli.addPli(0,pageBg);
+                      page->pli.setFlag(QGraphicsItem::ItemIsSelectable,true);
+                      page->pli.setFlag(QGraphicsItem::ItemIsMovable,true);
 
-                          PlacementData pld;
+                      PlacementData pld;
 
-                          pld = page->pli.pliMeta.placement.value();
+                      pld = page->pli.pliMeta.placement.value();
 
-                          page->pli.placement.setValue(pld);
-                          if (pld.relativeTo == PageType) {
-                              plPage.placeRelative(page->pli.background);
-                            } else {
-                              step->csiItem->placeRelative(page->pli.background);
-                            }
-                          page->pli.loc[XX] = page->pli.background->loc[XX];
-                          page->pli.loc[YY] = page->pli.background->loc[YY];
+                      page->pli.placement.setValue(pld);
+                      if (pld.relativeTo == PageType) {
+                          plPage.placeRelative(page->pli.background);
+                      } else {
+                          step->csiItem->placeRelative(page->pli.background);
+                      }
+                      page->pli.loc[XX] = page->pli.background->loc[XX];
+                      page->pli.loc[YY] = page->pli.background->loc[YY];
 
-                          page->pli.setPos(page->pli.loc[XX],page->pli.loc[YY]);
-                        }
-                    }
-                }
-            }
-        }
+                      page->pli.setPos(page->pli.loc[XX],page->pli.loc[YY]);
+                  }
+              }
+          }
+      }
+
     } else {
 
       // qDebug() << "List relative type: " << RelNames[range->relativeType];

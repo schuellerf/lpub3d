@@ -60,8 +60,6 @@ LDGLite ldglite;
 LDView  ldview;
 POVRay povray;
 
-QString Render::csi3DName = "";
-
 //#define LduDistance 5729.57
 #define CA "-ca0.01"
 #define USE_ALPHA "+UA"
@@ -699,8 +697,9 @@ int LDGLite::renderCsi(
   if (!Preferences::ldgliteSearchDirs.isEmpty())
     env << "LDSEARCHDIRS=" + Preferences::ldgliteSearchDirs;
 
-//  qDebug() << "ldglite CLI Arguments: " << arguments;
-//  qDebug() << "LDSEARCHDIRS=" + Preferences::ldgliteSearchDirs;
+//  logDebug() << "ldglite CSI Arguments:" << arguments;
+//  logDebug() << "LDSEARCHDIRS:" << Preferences::ldgliteSearchDirs;
+//  logDebug() << "ENV:" << env;
 
   ldglite.setEnvironment(env);
   ldglite.setWorkingDirectory(QDir::currentPath() + "/"+Paths::tmpDir);

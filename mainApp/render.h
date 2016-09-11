@@ -44,7 +44,6 @@ class Render
 public:
   Render() {}
   virtual ~Render() {}
-  static QString csi3DName; 
   static QString const   getRenderer();
   static void            setRenderer(QString const &name);
   bool                   useLDViewSCall(bool override = false);
@@ -64,8 +63,7 @@ public:
                                       QString &ldrName);
   static int             rotateParts(const QString &addLine,
                                      RotStepMeta &rotStep,
-                                     QStringList &parts,
-                                     bool  defaultRot = true);
+                                     QStringList &parts);
   QVector<lcVector3>     cameraSettings(AssemMeta &assemMeta,
                                         const float &cd = 0.0f);
 };

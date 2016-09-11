@@ -159,10 +159,7 @@ int Render::rotateParts(
         QString     &ldrName)
 {
   QStringList rotatedParts = parts;
-  QStringList unrotatedParts = parts;
-
-  rotateParts(addLine,rotStep,rotatedParts,false);
-  rotateParts(addLine,rotStep,unrotatedParts,false);
+  rotateParts(addLine,rotStep,rotatedParts);
 
   QFile file(ldrName);
   if ( ! file.open(QFile::WriteOnly | QFile::Text)) {
@@ -173,17 +170,7 @@ int Render::rotateParts(
     return -1;
   }
 
-  QFile viewerFile(csi3DName);
-  if ( ! viewerFile.open(QFile::WriteOnly | QFile::Text)) {
-    QMessageBox::warning(NULL,
-                         QMessageBox::tr("LPub3D"),
-                         QMessageBox::tr("Cannot open viewer file %1 for writing:\n%2")
-                         .arg(ldrName) .arg(viewerFile.errorString()));
-    return -1;
-  }
-
   QTextStream out(&file);
-  QTextStream viewerOut(&viewerFile);
 
   RotStepData rotStepData = rotStep.value();
   QString rotsComment = QString("0 // ROTSTEP %1 %2 %3 %4")
@@ -193,28 +180,20 @@ int Render::rotateParts(
                                 .arg(rotStepData.rots[2]);
                                 
   out << rotsComment << endl;
-  viewerOut << rotsComment << endl;
 
   for (int i = 0; i < rotatedParts.size(); i++) {
     QString line = rotatedParts[i];
     out << line << endl;
   }
-  for (int i = 0; i < unrotatedParts.size(); i++) {
-      QString viewerLine = unrotatedParts[i];
-      viewerOut << viewerLine << endl;
-  }
 
   file.close();
-  viewerFile.close();
 
   return 0;
 }
 
-int Render::rotateParts(
-  const QString     &addLine,
+int Render::rotateParts(const QString     &addLine,
         RotStepMeta &rotStep,
-        QStringList &parts,
-        bool         defaultRot)
+        QStringList &parts)
 {
   double min[3], max[3];
 
@@ -224,15 +203,9 @@ int Render::rotateParts(
 
   double defaultViewMatrix[3][3], defaultViewRots[3];
 
-  if (defaultRot) {
-    defaultViewRots[0] = 23;    // latitude
-    defaultViewRots[1] = 45;    // longitude
-    defaultViewRots[2] = 0;     // distance
-  } else {
-    defaultViewRots[0] = 0;
-    defaultViewRots[1] = 0;
-    defaultViewRots[2] = 0;
-  }
+  defaultViewRots[0] = 0;
+  defaultViewRots[1] = 0;
+  defaultViewRots[2] = 0;
 
   matrixMakeRot(defaultViewMatrix,defaultViewRots);
 
@@ -257,7 +230,7 @@ int Render::rotateParts(
   split(addLine,tokens);
 
   if (addLine.size() && tokens.size() == 15 && tokens[0] == "1") {
-    if (LDrawFile::mirrored(tokens) || ! defaultRot) {
+    if (LDrawFile::mirrored(tokens) /* || ! defaultRot */) {                      //defRot = true so if 'false' in this instance
 
       double alm[3][3];
 

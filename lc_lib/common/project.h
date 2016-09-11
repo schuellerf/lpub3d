@@ -56,6 +56,7 @@ public:
 	lcModel* CreateNewModel(bool ShowModel);
 	void ShowModelListDialog();
 	bool Load(const QString& FileName);
+    bool LoadViewer(const QString &CsiName);
 	bool Save(const QString& FileName);
 	void Merge(Project* Other);
 

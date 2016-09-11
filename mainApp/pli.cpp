@@ -506,11 +506,11 @@ int Pli::createPartImagesLDViewSCall(QStringList &ldrNames) {
                                QMessageBox::tr("Render failed for Pli images."));
           return -1;
         }
-      logTrace() << Render::getRenderer()
-                 << "PLI single call render took"
-                 << timer.elapsed() << "milliseconds"
-                 << "to render "<< ldrNames.size()  << (ldrNames.size() > 1 ? "images" : "image")
-                 << "for " << (bom ? "BOM part list" : "Step parts list.");
+      logStatus() << Render::getRenderer()
+                  << "PLI single call render took"
+                  << timer.elapsed() << "milliseconds"
+                  << "to render "<< ldrNames.size()  << (ldrNames.size() > 1 ? "images" : "image")
+                  << "for " << (bom ? "BOM part list" : "Step parts list.");
     }
 
   QString key;

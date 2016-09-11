@@ -75,9 +75,33 @@ class LDrawSubFile {
     }
 };
 
+class ViewerStep {
+  public:
+    QStringList _contents;
+    QString	    _filePath;
+    bool        _modified;
+    int         _stepNum;
+    int         _topLine;
+
+    ViewerStep()
+    {
+      _modified = false;
+    }
+    ViewerStep(
+      const QStringList &contents,
+      const QString     &filePath,
+      const int         &stepNum,
+      const int         &topLine);
+    ~ViewerStep()
+    {
+      _contents.clear();
+    }
+};
+
 class LDrawFile {
   private:
     QMap<QString, LDrawSubFile> _subFiles;
+    QMap<QString, ViewerStep>   _viewerSteps;
     QStringList                 _emptyList;
     QString                     _emptyString;
     bool                        _mpd;
@@ -154,6 +178,19 @@ class LDrawFile {
     void countInstances(const QString &fileName, bool mirrored, const bool callout = false);
     bool changedSinceLastWrite(const QString &fileName);
     void tempCacheCleared();
+
+    void insertStep(const QString     &fileName,
+                    const QStringList &contents,
+                    const QString     &filePath,
+                    const int         &stepNum,
+                    const int         &topLine);
+    void updateStep(const QString     &fileName,
+                    const QStringList &contents);
+    QStringList getViewerStepContents(const QString &fileName);
+    QString     getViewerStepFilePath(const QString &fileName);
+    int			getViewerStepStepNum(const QString &fileName);
+    int			getViewerStepTopLine(const QString &fileName);
+    void        clearSteps();
 };
 
 int split(const QString &line, QStringList &argv);

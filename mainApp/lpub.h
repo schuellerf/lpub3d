@@ -511,6 +511,34 @@ public:
   {
       return ldrawFile;
   }
+
+  void insertStep(const QString     &fileName,
+                  const QStringList &contents,
+                  const QString     &filePath,
+                  const int         &stepNum,
+                  const int         &topLine) {
+      ldrawFile.insertStep(fileName, contents, filePath, stepNum, topLine);
+                  }
+  void updateStep(const QString     &fileName,
+                  const QStringList &contents){
+      ldrawFile.updateStep(fileName, contents);
+                  }
+  QStringList getViewerStepContents(const QString &fileName){
+      return ldrawFile.getViewerStepContents(fileName);
+  }
+  QString getViewerStepFilePath(const QString &fileName){
+      return ldrawFile.getViewerStepFilePath(fileName);
+  }
+  int getViewerStepStepNum(const QString &fileName){
+      return ldrawFile.getViewerStepStepNum(fileName);
+  }
+  int getViewerStepTopLine(const QString &fileName){
+      return ldrawFile.getViewerStepTopLine(fileName);
+  }
+  void clearSteps(){
+      ldrawFile.clearSteps();
+  }
+
   void insertLine (const Where &here, const QString &line, QUndoCommand *parent = 0);
   void appendLine (const Where &here, const QString &line, QUndoCommand *parent = 0);
   void replaceLine(const Where &here, const QString &line, QUndoCommand *parent = 0);

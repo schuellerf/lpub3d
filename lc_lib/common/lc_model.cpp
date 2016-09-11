@@ -2521,7 +2521,7 @@ void lcModel::RotateStepSelectedObjects(lcRotateStepType RotateStepType, const l
     }
 
     QString rotationValue("%1 %2 %3 %4 %5");
-    rotationValue = rotationValue.arg(gMainWindow->mRotateStepLineNumber,
+    rotationValue = rotationValue.arg(gMainWindow->mCsiName,
                   QString::number(rotateStep[0], 'f', 2),
                   QString::number(rotateStep[1], 'f', 2),
                   QString::number(rotateStep[2], 'f', 2),
@@ -2532,7 +2532,7 @@ void lcModel::RotateStepSelectedObjects(lcRotateStepType RotateStepType, const l
     if (gui->getCurFile() != "") {
 
         mi.writeRotateStep(rotationValue);
-        gui->clearAndRedrawPage();
+        //gui->clearAndRedrawPage(); //don't need to redraw page - its too costly
         gui->SetExistingRotStep(rotateStep);
         gui->UpdateStepRotation();
 

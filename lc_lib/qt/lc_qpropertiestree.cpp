@@ -864,11 +864,16 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 	lcStep Hide = 0;
 	int ColorIndex = gDefaultColor;
 	PieceInfo* Info = NULL;
-
+    /*** LPub3D modification 871: - multiple selection ***/
+    bool multipleSelection = false;
+    /*** LPub3D modification end ***/
 	if (Piece)
 	{
 		Show = Piece->GetStepShow();
-		Hide = Piece->GetStepHide();
+        /*** LPub3D modification 873: - set hide to default Step 0 ***/
+        //Hide = Piece->GetStepHide();
+        Hide = 0;
+        /*** LPub3D modification end ***/
 		ColorIndex = Piece->mColorIndex;
 		Info = Piece->mPieceInfo;
 	}
@@ -888,14 +893,17 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 			if (FirstPiece)
 			{
 				Show = SelectedPiece->GetStepShow();
-				Hide = SelectedPiece->GetStepHide();
+                /*** LPub3D modification 897: - set hide to default Step 0 ***/
+                //Hide = SelectedPiece->GetStepHide();
+                Hide = 0;
+                /*** LPub3D modification end ***/
 				ColorIndex = SelectedPiece->mColorIndex;
 				Info = SelectedPiece->mPieceInfo;
 
 				FirstPiece = false;
 			}
 			else
-			{
+			{   
 				if (SelectedPiece->GetStepShow() != Show)
 					Show = 0;
 
@@ -905,8 +913,12 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 				if (SelectedPiece->mColorIndex != ColorIndex)
 					ColorIndex = gDefaultColor;
 
-				if (SelectedPiece->mPieceInfo != Info)
-					Info = NULL;
+                if (SelectedPiece->mPieceInfo != Info)
+                    Info = NULL;
+
+                /*** LPub3D modification 920: - multiple selection ***/
+                multipleSelection = true;
+                /*** LPub3D modification end ***/
 			}
 		}
 	}
@@ -930,13 +942,19 @@ void lcQPropertiesTree::SetPiece(const lcArray<lcObject*>& Selection, lcObject* 
 	partColor->setIcon(1, QIcon(QPixmap::fromImage(img)));
 	partColor->setText(1, color->Name);
 	partColor->setData(0, PropertyValueRole, ColorIndex);
-
-	partID->setText(1, Info ? Info->m_strDescription : QString());
+    /*** LPub3D modification 946: - multiple selection ***/
+    QString mInfo = multipleSelection ? "Multiple Selection" : QString();
+    partID->setText(1, Info ? Info->m_strDescription : mInfo);
+    /*** LPub3D modification end ***/
 	partID->setData(0, PropertyValueRole, qVariantFromValue((void*)Info));
 
-    /*** LPub3D modification 899: - timeline part display ***/
-    gMainWindow->mPreviewWidget->SetCurrentPiece(Info);
-    gMainWindow->SetColorIndex(ColorIndex);
+    /*** LPub3D modification 955: - timeline part display ***/
+    if (Piece) {
+        gMainWindow->mPreviewWidget->SetCurrentPiece(Info);
+        gMainWindow->SetColorIndex(ColorIndex);
+    } else {
+        gMainWindow->mPreviewWidget->SetDefaultPiece();
+    }
     /*** LPub3D modification end ***/
 }
 

@@ -22,7 +22,6 @@
 #include "resolution.h"
 #include "updatecheck.h"
 
-#include "QsLog.h"
 #include "QsLogDest.h"
 
 #ifdef Q_OS_WIN
@@ -128,22 +127,7 @@ Application* Application::instance()
 
 void Application::initialize(int &argc, char **argv)
 {
-  // splash
-  QPixmap pixmap(":/resources/LPub512Splash.png");
-  splash = new QSplashScreen(pixmap);
-
-  QFont splashFont;
-  splashFont.setFamily("Arial");
-  splashFont.setPixelSize(16);
-  splashFont.setStretch(130);
-
-  splash->setFont(splashFont);
-  splash->show();
-
-  logInfo() << QString("Initializing application.");
-
-  emit splashMsgSig("5% - Initializing application...");
-
+  // initialize directories
   Preferences::lpubPreferences();
 
   // initialize the logger
@@ -175,6 +159,22 @@ void Application::initialize(int &argc, char **argv)
   // set log destinations on the logger
   logger.addDestination(debugDestination);
   logger.addDestination(fileDestination);
+
+  logInfo() << QString("Initializing application...");
+
+  // splash
+  QPixmap pixmap(":/resources/LPub512Splash.png");
+  splash = new QSplashScreen(pixmap);
+
+  QFont splashFont;
+  splashFont.setFamily("Arial");
+  splashFont.setPixelSize(16);
+  splashFont.setStretch(130);
+
+  splash->setFont(splashFont);
+  splash->show();
+
+  emit splashMsgSig("5% - Initializing application...");
 
   // logging examples
   bool showLogExamples = false;
@@ -244,8 +244,6 @@ void Application::initialize(int &argc, char **argv)
   m_LDrawPath = NULL;
 #endif
 
-  logInfo() << QString("-Initialize: New gui instance created.");
-
   emit splashMsgSig(QString("30% - %1 Mainwindow loading...").arg(VER_PRODUCTNAME_STR));
 
   gui = new Gui();
@@ -262,6 +260,7 @@ void Application::main()
 {
 
   emit splashMsgSig(QString("100% %1 loaded.").arg(VER_PRODUCTNAME_STR));
+  Preferences::setLPub3DLoaded();
 
   splash->finish(gui);
 
@@ -284,21 +283,20 @@ int Application::run()
   try
   {
     // Call the main function
-    logInfo() << QString("Run: Starting application...");
 
     main();
 
-    logInfo() << QString("Run: Application started.");
+    logInfo() << QString("Application started.");
 
     returnCode = m_application.exec();
   }
   catch(const std::exception& ex)
   {
-    logError() << QString("Run: %1\n%2").arg("LOG_ERROR").arg(ex.what());
+    logError() << QString("%1\n%2").arg("LOG_ERROR").arg(ex.what());
   }
   catch(...)
   {
-    logError() << QString("Run: An unhandled exception has been thrown.");
+    logError() << QString("An unhandled exception has been thrown.");
   }
 
   delete gMainWindow;
@@ -307,7 +305,7 @@ int Application::run()
   delete g_App;
   g_App = NULL;
 
-  logInfo() << QString("Run: Application terminated with return code %1.").arg(returnCode);
+  logInfo() << QString("Application terminated with return code %1.").arg(returnCode);
 
   return returnCode;
 }

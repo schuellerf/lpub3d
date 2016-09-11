@@ -71,7 +71,7 @@ class Step : public AbstractRangeElement
     QVector<lcVector3>    viewMatrix;
     QString               ldrName;
     QString               pngName;
-    QString               csi3DName;
+    QString               viewerCsiName;
     PlacementHeader       pageHeader;
     PlacementFooter       pageFooter;  
 

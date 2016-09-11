@@ -61,6 +61,8 @@
 #include "render.h"
 
 #include "csiitem.h"
+// Test multi-step
+#include "step.h"
 
 void MetaItem::setGlobalMeta(
   QString  &topLevelFile,
@@ -3063,17 +3065,17 @@ void MetaItem::writeRotateStep(QString &value)
     Meta content;
     Where here;
     QString modelName;
-    int firstPos                = 0;
     QString prefix              = "0 ROTSTEP ";
     bool multiStep              = false;
     bool rotStep                = false;
     bool ok;
 
     QStringList argv = value.split(QRegExp("\\s"));
-    int lineNumber = argv[firstPos].toInt(&ok);
+    int stepNumber = gui->getViewerStepStepNum(argv[0]);
     QString meta("%1 %2 %3 %4 %5");
     meta = meta.arg(prefix,argv[1],argv[2],argv[3],argv[4]);
 
+    // Test if multi-step page to get model name and find step's top line number
     Steps *steps = dynamic_cast<Steps *>(&gui->page);
     if (steps && steps->list.size() > 0) {
         modelName = steps->modelName();
@@ -3087,10 +3089,26 @@ void MetaItem::writeRotateStep(QString &value)
         }
     }
 
-    QString stepType = (multiStep)? "iMulti-Step " : "iSingle-Step ";
-    logTrace() << "-STARTING INPUT: " << stepType << " iModel: " << modelName << "iLineNum: " << lineNumber << " iMeta (ROTSTEP): " << meta ;
+    QString stepType = multiStep ? "iMulti-Step " : "iSingle-Step ";
+    //logTrace() << "-STARTING INPUT - iStepType " << stepType << " iModel: " << modelName << " iStepNumber: " << stepNumber << " iMeta (ROTSTEP): " << meta ;
 
-    if (ok && multiStep) {                                                          //ok, we have a multi-step page
+    // If multi-step find step's top line Number
+    int lineNumber = -1;
+    if (multiStep) {                                //ok, we have a multi-step page
+        Page *page = dynamic_cast<Page *>(steps);
+        Range *range = dynamic_cast<Range *>(page->list[0]);
+        for (int j = 0; j < range->list.size(); j++){
+            if (range->relativeType == RangeType) {
+                Step *step = dynamic_cast<Step *>(range->list[j]);
+                if (step && step->relativeType == StepType && step->stepNumber.number == stepNumber){
+                    lineNumber = step->topOfStep().lineNumber + 1; // increment + 1 to place 'ROTSETP' below '0 STEP' meta.
+//                    logDebug() << "MS STEP NUMBER:" << step->stepNumber.number <<
+//                                  ",TOP OF STEP LINE NUMBER:" << step->topOfStep().lineNumber <<
+//                                  ",LINE NUMBER:" << lineNumber;
+                    break;
+                }
+            }
+        }
 
         Rc rc;
         QString line;
@@ -3133,7 +3151,7 @@ void MetaItem::writeRotateStep(QString &value)
             }
         }
 
-    } else if (ok) {
+    } else {                //we have a single-step page
 
         logTrace() << "-SS MODEL NAME      :       " << modelName;
         Where pagePosition = gui->topOfPages[gui->displayPageNum];
@@ -3159,6 +3177,9 @@ void MetaItem::writeRotateStep(QString &value)
             rotStep = true;
         }
     }
+
+    gui->clearPLICache();
+    gui->clearCSICache();
 
     if (! rotStep && ! multiStep){
         logNotice() << "FIN - INSERT SINGLE PAGE STEP HERE - LINE: " << here.lineNumber;
