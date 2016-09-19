@@ -318,6 +318,7 @@ public:
 public slots:
     void halt3DViewer(bool b);
     void enable3DActions();
+    void disable3DActions();
 
 signals:
     lcVector3 GetStepRotation();
@@ -327,6 +328,7 @@ signals:
     void SetRotStepAngleY(float);
     void SetRotStepAngleZ(float);
 /*** LPub3D modification end ***/
+
 protected slots:
 	void ModelTabClosed(int Index);
 	void ModelTabChanged(int Index);
