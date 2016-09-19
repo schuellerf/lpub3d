@@ -827,6 +827,8 @@ bool LDrawFile::mirrored(
 
 void LDrawFile::countInstances(const QString &mcFileName, bool isMirrored, bool callout)
 {
+  //logTrace() << QString("countInstances, File: %1, Mirrored: %2, Callout: %3").arg(mcFileName,(isMirrored?"Yes":"No"),(callout?"Yes":"No"));
+
   QString fileName = mcFileName.toLower();
   bool partsAdded = false;
   bool noStep = false;
@@ -834,6 +836,7 @@ void LDrawFile::countInstances(const QString &mcFileName, bool isMirrored, bool 
   
   QMap<QString, LDrawSubFile>::iterator f = _subFiles.find(fileName);
   if (f != _subFiles.end()) {
+    // count mirrored instance automatically
     if (f->_beenCounted) {
       if (isMirrored) {
         ++f->_mirrorInstances;
@@ -842,22 +845,25 @@ void LDrawFile::countInstances(const QString &mcFileName, bool isMirrored, bool 
       }
       return;
     }
+    // get content size and reset numSteps
     int j = f->_contents.size();
     f->_numSteps = 0;
+
+    // process submodel content...
     for (int i = 0; i < j; i++) {
       QStringList tokens;
       QString line = f->_contents[i];
       split(line,tokens);
       
       /* Sorry, but models that are callouts are not counted as instances */
-      
+          // called out
       if (tokens.size() == 4 && 
           tokens[0] == "0" && 
           (tokens[1] == "LPUB" || tokens[1] == "!LPUB") && 
           tokens[2] == "CALLOUT" && 
           tokens[3] == "BEGIN") {
         partsAdded = true;
-
+           //process callout content
         for (++i; i < j; i++) {
           split(f->_contents[i],tokens);
           if (tokens.size() == 15 && tokens[0] == "1") {
@@ -873,6 +879,7 @@ void LDrawFile::countInstances(const QString &mcFileName, bool isMirrored, bool 
             break;
           }
         }
+        //lpub3d ignore part - so set ignore step
       } else if (tokens.size() == 5 &&
                  tokens[0] == "0" &&
                  (tokens[1] == "LPUB" || tokens[1] == "!LPUB") &&
@@ -880,39 +887,47 @@ void LDrawFile::countInstances(const QString &mcFileName, bool isMirrored, bool 
                  tokens[3] == "BEGIN"  &&
                  tokens[4] == "IGN") {
         stepIgnore = true;
+        // lpub3d part - so set include step
       } else if (tokens.size() == 4 &&
                  tokens[0] == "0" &&
                  (tokens[1] == "LPUB" || tokens[1] == "!LPUB") &&
                  tokens[2] == "PART"&&
                  tokens[3] == "END") {
         stepIgnore = false;
+        // no step
       } else if (tokens.size() == 3 && tokens[0] == "0" &&
                 (tokens[1] == "LPUB" || tokens[1] == "!LPUB") &&
                  tokens[2] == "NOSTEP") {
         noStep = true;
+        // LDraw step or rotstep - so check if parts added
       } else if (tokens.size() >= 2 && tokens[0] == "0" &&
                 (tokens[1] == "STEP" || tokens[1] == "ROTSTEP")) {
+        // parts added - increment step
         if (partsAdded && ! noStep) {
           int incr = (isMirrored && f->_mirrorInstances == 0) ||
                      (!isMirrored && f->_instances == 0);
           f->_numSteps += incr;
         }
+        // reset partsAdded
         partsAdded = false;
         noStep = false;
+        // buffer exchange - do nothing
       } else if (tokens.size() == 4 && tokens[0] == "0"
                                      && tokens[1] == "BUFEXCHG") {
+        // check if subfile and process...
       } else if (tokens.size() == 15 && tokens[0] == "1") {
         bool containsSubFile = contains(tokens[14]);
-
         if (containsSubFile && ! stepIgnore) {
           countInstances(tokens[14],mirrored(tokens),false);
         }
         partsAdded = true;
       }
     }
+    //add step if parts added
     f->_numSteps += partsAdded && ! noStep &&
                        ( (isMirrored && f->_mirrorInstances == 0) ||
                        (!isMirrored && f->_instances == 0) );
+    //
     if ( ! callout) {
       if (isMirrored) {
         ++f->_mirrorInstances;
@@ -920,7 +935,8 @@ void LDrawFile::countInstances(const QString &mcFileName, bool isMirrored, bool 
         ++f->_instances;
       }
     }
-  }
+
+  } // file end
   f->_beenCounted = true;
 }
 

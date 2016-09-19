@@ -783,6 +783,7 @@ private:
 
   QUndoStack     *undoStack;       // the undo/redo stack
   int             macroNesting;
+  int             renderStepNum;    // at what step in the model is a submodel detected and rendered
 
   void countPages();
 
@@ -791,7 +792,7 @@ private:
   int findPage(                    // traverse the hierarchy until we get to the
     LGraphicsView  *view,          // page of interest, let traverse process the
     QGraphicsScene *scene,         // page, and then finish by counting the rest
-    int           &pageNum,        // of the pages
+    int           &pageNum,
     QString const &addLine,
     Where         &current,
     bool           mirrored,

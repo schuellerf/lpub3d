@@ -2092,8 +2092,6 @@ void FadeStepMeta::init(
   fadeStep.init     (this, "FADE");
 }
 
-/* ------------------ */
-
 void RemoveMeta::init(BranchMeta *parent, QString name)
 {
   AbstractMeta::init(parent, name);
@@ -3039,6 +3037,7 @@ LPubMeta::LPubMeta() : BranchMeta()
   rotateIcon.placement.setValue(RightOutside,CsiType);
   stepNumber.placement.setValue(BottomLeftOutside,PageHeaderType);      // TopLeftInsideCorner,PageType
   stepNumber.color.setValue("black");
+  mergeInstanceCount.setValue(false);
   // stepNumber - default
 }
 
@@ -3061,6 +3060,7 @@ void LPubMeta::init(BranchMeta *parent, QString name)
   nostep                 .init(this,"NOSTEP", NoStepRc);\
   fadeStep               .init(this,"FADE_STEP");
   rotateIcon             .init(this,"ROTATE_ICON");
+  mergeInstanceCount     .init(this,"CONSOLIDATE_INSTANCE_COUNT");
   reserve.setRange(0.0,1000000.0);
 }
 
