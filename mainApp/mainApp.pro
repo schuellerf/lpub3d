@@ -307,7 +307,7 @@ SOURCES += \
     plisubstituteparts.cpp \
     pointeritem.cpp \
     preferencesdialog.cpp \
-    printpdf.cpp \
+    printfile.cpp \
     projectglobals.cpp \
     range.cpp \
     range_element.cpp \

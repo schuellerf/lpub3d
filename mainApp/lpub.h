@@ -350,7 +350,8 @@
 #include <QFile>
 #include <QProgressBar>
 #include <QElapsedTimer>
- 
+#include <QPdfWriter>
+
 #include "color.h"
 #include "ranges.h"
 #include "ldrawfiles.h"
@@ -429,9 +430,10 @@ public:
   int             boms;            // the number of pli BOMs in the document
   int             bomOccurrence;   // the acutal occurenc of each pli BOM
 
-  int             exportType;      // export Type
-  int             exportOption;    // export Option
+  int             exportType;       // export Type
+  int             exportOption;     // export Option
   QString         pageRangeText;    // page range parameters
+  bool            mixedPageSize;    // mixed page size and orientation
 
   bool             m_cancelPrinting; // cancel print job
   ProgressDialog  *m_progressDialog; // general use progress dialog
@@ -711,6 +713,8 @@ public slots:
   void processFadeColourParts();
   void loadFile(const QString &file);
 
+  void TogglePrintPreview();
+
 signals:       
 
     /* tell the editor to display this file */
@@ -868,11 +872,6 @@ private slots:
     bool aboutDialog();
     bool aboutViewerDialog();
 
-    bool printToPdfDialog();
-    bool exportAsPngDialog();
-    bool exportAsJpgDialog();
-    bool exportAsBmpDialog();
-
     void editTitleAnnotations();
     void editFreeFormAnnitations();
     void editFadeColourParts();
@@ -920,13 +919,25 @@ private slots:
     void zoomOut(LGraphicsView *view);
 
     void GetPixelDimensions(float &, float &);
-    void GetPagePixelDimensions(float &, float &, QPrinter::PaperSize &, QPrinter::Orientation &);
 
+    void ShowPrintDialog();
+    bool printToPdfFileDialog();
+
+    void Print(QPrinter* Printer);
     void printToPdfFile();
+
+    bool exportAsPngDialog();
+    bool exportAsJpgDialog();
+    bool exportAsBmpDialog();
+
     void exportAs(QString &);
     void exportAsPng();
     void exportAsJpg();
     void exportAsBmp();
+
+    QPageLayout getPageLayout();
+    QPageLayout retrievePageLayout();
+    FloatPairMeta retrievePageSize();
 
     void closeEvent(QCloseEvent *event);
 
@@ -1002,7 +1013,8 @@ private:
   QAction  *saveAct;
   QAction  *saveAsAct;
   QAction  *printToPdfFileAct;
-//  QAction  *printToFileAct;
+  QAction  *printToFileAct;
+  QAction  *printToFilePreviewAct;
   QAction  *exportPngAct;
   QAction  *exportJpgAct;
   QAction  *exportBmpAct;
@@ -1095,6 +1107,9 @@ protected:
   float mRotStepAngleX;
   float mRotStepAngleY;
   float mRotStepAngleZ;
+
+  QMap<int, QPageLayout> pageLayouts;
+  QMap<int, FloatPairMeta> pageSizes;
 
 };
 

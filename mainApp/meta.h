@@ -1901,6 +1901,7 @@ public:
   // top    == top of page
   // bottom == bottom of page
   UnitsMeta                 size;
+  StringMeta                sizeid;
   PageOrientationMeta       orientation;
   MarginsMeta               margin;
   BorderMeta                border;
