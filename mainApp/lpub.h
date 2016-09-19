@@ -959,6 +959,8 @@ private slots:
     
     void enableActions();
     void enableActions2();
+    void disableActions();
+    void disableActions2();
 
     /******************************************************************
      * File management functions
@@ -970,6 +972,7 @@ private slots:
     bool saveFile(const QString &fileName);
     void closeFile();
     void updateRecentFileActions();
+    void closeModelFile();
 
 private:
   /* Initialization stuff */
@@ -1012,6 +1015,7 @@ private:
   QAction  *openAct;
   QAction  *saveAct;
   QAction  *saveAsAct;
+  QAction  *closeFileAct;
   QAction  *printToPdfFileAct;
   QAction  *printToFileAct;
   QAction  *printToFilePreviewAct;
