@@ -2407,14 +2407,14 @@ PageMeta::PageMeta() : BranchMeta()
    * Back Cover Default Attribute Placements
    * **********************************
    *               Logo               *  (Top of Page)
-   *  Title                           *  (Top of Author)
-   *  Author                          *  (Top of Copyright)
-   *  Copyright                       *  (Top of URL)
-   *  URL                             *  (Top of LEGO Disclaimer)
-   *  Email                           *
-   *  LEGO Disclaimer                 *  (Center of Page)
-   *  LPub3D Plug                     *  (Below LEGO Disclaimer)
-   *  LPub3D Plug Image               *  (Right of LPub3D Plug)
+   *  Title                           *  (Center of Page)
+   *  Author                          *  (Bottom of Title)
+   *  Copyright                       *  (Bottom of Author)
+   *  URL                             *  (Bottom of Copyright)
+   *  Email                           *  (Bottom of URL)
+   *  LEGO Disclaimer                 *  (Bottom of Email)
+   *  LPub3D Plug                     *  (Bottom of LEGO Disclaimer)
+   *  LPub3D Plug Image               *  (Bottom of Page)
    *                                  *
    ************************************
 
