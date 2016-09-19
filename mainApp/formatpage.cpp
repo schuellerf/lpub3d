@@ -427,10 +427,7 @@ int Gui::addGraphicsPageItems(
 
               // URL
               PlacementData pld = url->placement.value();
-              if (pld.relativeTo == PageType) {
-                  plPage.appendRelativeTo(url);
-                  plPage.placeRelative(url);
-                } else if (pld.relativeTo == PageHeaderType) {
+             if (pld.relativeTo == PageHeaderType) {
                   pageHeader.placeRelative(url);
                 } else if (pld.relativeTo == PageFooterType) {
                   pageFooter.placeRelative(url);
@@ -446,7 +443,6 @@ int Gui::addGraphicsPageItems(
                            page->meta.LPub.page.author.display.value()) {
                   author->placeRelative(url);
                 } else {
-                  url->placement.setValue(TopLeftInsideCorner,PageType);
                   plPage.appendRelativeTo(url);
                   plPage.placeRelative(url);
                 }
@@ -458,10 +454,7 @@ int Gui::addGraphicsPageItems(
 
               //Email
               PlacementData pld = email->placement.value();
-              if (pld.relativeTo == PageType) {
-                  plPage.appendRelativeTo(email);
-                  plPage.placeRelative(email);
-                } else if (pld.relativeTo == PageHeaderType) {
+              if (pld.relativeTo == PageHeaderType) {
                   pageHeader.placeRelative(email);
                 } else if (pld.relativeTo == PageFooterType) {
                   pageFooter.placeRelative(email);
@@ -477,7 +470,6 @@ int Gui::addGraphicsPageItems(
                            page->meta.LPub.page.author.display.value()) {
                   author->placeRelative(email);
                 } else {
-                  email->placement.setValue(TopRightInsideCorner,PageType);
                   plPage.appendRelativeTo(email);
                   plPage.placeRelative(email);
                 }
@@ -489,10 +481,7 @@ int Gui::addGraphicsPageItems(
 
               // Author
               PlacementData pld = author->placement.value();
-              if (pld.relativeTo == PageType) {
-                  plPage.appendRelativeTo(author);
-                  plPage.placeRelative(author);
-                } else if (pld.relativeTo == PageHeaderType) {
+              if (pld.relativeTo == PageHeaderType) {
                   pageHeader.placeRelative(author);
                 } else if (pld.relativeTo == PageFooterType) {
                   pageFooter.placeRelative(author);
@@ -508,7 +497,6 @@ int Gui::addGraphicsPageItems(
                            page->meta.LPub.page.copyright.display.value()) {
                   copyright->placeRelative(author);
                 } else {
-                  author->placement.setValue(BottomRightInsideCorner,PageType);
                   plPage.appendRelativeTo(author);
                   plPage.placeRelative(author);
                 }
@@ -521,10 +509,7 @@ int Gui::addGraphicsPageItems(
 
               //Copyright
               PlacementData pld = copyright->placement.value();
-              if (pld.relativeTo == PageType) {
-                  plPage.appendRelativeTo(copyright);
-                  plPage.placeRelative(copyright);
-                } else if (pld.relativeTo == PageHeaderType) {
+              if (pld.relativeTo == PageHeaderType) {
                   pageHeader.placeRelative(copyright);
                 } else if (pld.relativeTo == PageFooterType) {
                   pageFooter.placeRelative(copyright);
@@ -540,7 +525,6 @@ int Gui::addGraphicsPageItems(
                            page->meta.LPub.page.author.display.value()) {
                   author->placeRelative(copyright);
                 } else {
-                  copyright->placement.setValue(BottomLeftInsideCorner,PageType);
                   plPage.appendRelativeTo(copyright);
                   plPage.placeRelative(copyright);
                 }
