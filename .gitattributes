@@ -357,6 +357,7 @@ mainApp/images/clearcsicache.png -text
 mainApp/images/clearfadecache.png -text
 mainApp/images/clearimagemodelcache.png -text
 mainApp/images/clearplicache.png -text
+mainApp/images/closemodelfile.png -text
 mainApp/images/contentspage.png -text
 mainApp/images/convertcallout.png -text
 mainApp/images/copy.png -text
@@ -412,6 +413,7 @@ mainApp/images/partslist.png -text
 mainApp/images/partslistsetup.png -text
 mainApp/images/paste.png -text
 mainApp/images/pdf_logo.png -text
+mainApp/images/pdf_print_preview.png -text
 mainApp/images/placement.png -text
 mainApp/images/pliannotation.png -text
 mainApp/images/plus.png -text
