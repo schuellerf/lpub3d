@@ -308,6 +308,8 @@ mainApp/dividerdialog.cpp -text
 mainApp/dividerdialog.h -text
 mainApp/editwindow.cpp -text
 mainApp/editwindow.h -text
+mainApp/excludedparts.cpp -text
+mainApp/excludedparts.h -text
 mainApp/extras/LDConfig.ldr -text
 mainApp/extras/PDFPrint.jpg -text
 mainApp/extras/fadeStepColorParts.lst -text

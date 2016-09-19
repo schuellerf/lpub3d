@@ -195,6 +195,7 @@ HEADERS += \
     dialogexportpages.h \
     dividerdialog.h \
     editwindow.h \
+    excludedparts.h \
     fadestepcolorparts.h \
     globals.h \
     gradients.h \
@@ -270,6 +271,7 @@ SOURCES += \
     dialogexportpages.cpp \
     dividerdialog.cpp \
     editwindow.cpp \
+    excludedparts.cpp \
     fadestepcolorparts.cpp \
     fadestepglobals.cpp \
     formatpage.cpp \
