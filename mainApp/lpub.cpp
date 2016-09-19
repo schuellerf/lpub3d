@@ -1169,6 +1169,8 @@ bool Gui::InitializeApp(int argc, char *argv[], const char* LibraryInstallPath, 
       connect(gMainWindow,    SIGNAL(GetStepRotation()),
               this,           SLOT(GetStepRotation()));
 
+      connect(this,           SIGNAL(disable3DActionsSig()),
+              gMainWindow,    SLOT(  disable3DActions()));
     }
 
   return initialized;
