@@ -915,11 +915,17 @@ void Gui::preferences()
         bool useLDViewSCallChanged = useLDViewSCall != renderer->useLDViewSCall();
         bool povFileGeneratorChanged = useLDViewPOVFileGenerator != Preferences::ldviewPOVRayFileGenerator;
 
-        if (rendererChanged && Preferences::preferredRenderer == "LDGLite") {
-            partWorkerLdgLiteSearchDirs.populateLdgLiteSearchDirs();
-        }
         if (Preferences::fadeStepSettingChanged){
+            logInfo() << (Preferences::enableFadeStep ? QString("Fade Step is ON.") : QString("Fade Step is OFF."));
             processFadePartsArchive();
+        }
+        if (fadeStepColorChanged){
+            logInfo() << QString("Fade Step Colour preference changed to %1").arg(Preferences::fadeStepColor);
+        }
+        if (rendererChanged) {
+            logInfo() << QString("Renderer preference changed to %1").arg(Render::getRenderer());
+            if (Preferences::preferredRenderer == "LDGLite")
+                partWorkerLdgLiteSearchDirs.populateLdgLiteSearchDirs();
         }
         if (!getCurFile().isEmpty()) {
             if (Preferences::fadeStepSettingChanged){
