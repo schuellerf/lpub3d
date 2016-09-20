@@ -50,7 +50,6 @@ lcMainWindow::lcMainWindow()
 	mLockZ = false;
 	mRelativeTransform = true;
 	/*** LPub3D modification 49: - halt viewer ***/
-	mHalt3DViewer = false;
     viewerCameraPosition = lcVector3(0, 0, 0);
     viewerTargetPosition = lcVector3(375.0f,  -375.0f,   187.5);
     viewerUpVector       = lcVector3(0.2357f, -0.2357f, 0.94281f);
@@ -1513,11 +1512,9 @@ void lcMainWindow::SetLockZ(bool LockZ)
 /*** LPub3D modification 1501: - hald viewer ***/
 void lcMainWindow::Halt3DViewer(bool b){
 
-  logStatus() << "2. lcMainWindow (SLOT) halt3DViewer Status: " << b;
+  logStatus() << "2. lcMainWindow (SLOT) Halt3DViewer Status: " << b;
 
-  mHalt3DViewer = b;
-
-  if(mHalt3DViewer){
+  if(b){
       mToolsToolBar->setEnabled(false);
       menuBar()->setEnabled(false);
     } else {

@@ -129,12 +129,6 @@ public:
 		return mAddKeys;
 	}
 
-    /*** LPub3D modification 132: - halt viewer ***/
-    bool GetHalt3DViewer() const
-    {
-        return mHalt3DViewer;
-    }
-	/*** LPub3D modification end ***/
 
 	float GetMoveXYSnap() const
 	{
@@ -385,9 +379,6 @@ protected:
 	bool mLockY;
 	bool mLockZ;
 	bool mRelativeTransform;
-    /*** LPub3D modification 365: - halt viewer ***/
-	bool mHalt3DViewer;
-	/*** LPub3D modification end ***/
 
     friend class Gui;
 
