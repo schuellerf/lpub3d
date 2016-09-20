@@ -234,7 +234,8 @@ public:
 	void SetTransformType(lcTransformType TransformType);
     /*** LPub3D modification 242: - rotate view ***/
 	void SetRotateStepType(lcRotateStepType RotateStepType);
-    bool ViewStepContent(const QString& CsiName, const QVector<lcVector3> &viewMatrix);
+	bool ViewStepContent(const QString& CsiName, const QVector<lcVector3> &viewMatrix);
+	bool LoadViewerBanner(const QString& FileName, const QVector<lcVector3> &viewMatrix);
 	/*** LPub3D modification end ***/
 	void SetColorIndex(int ColorIndex);
 	void SetMoveSnapEnabled(bool Enabled);

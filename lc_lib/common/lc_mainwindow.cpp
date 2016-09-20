@@ -2101,50 +2101,73 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 	return false;
 }
 
- /*** LPub3D modification 2092: - view content, camera settings ***/
+/*** LPub3D modification 2092: - view content, camera settings ***/
 bool lcMainWindow::ViewStepContent(const QString& CsiName, const QVector<lcVector3> &viewMatrix)
 {
 
-    QString LoadFileName = gui->getViewerStepFilePath(CsiName);
+  QString LoadFileName = gui->getViewerStepFilePath(CsiName);
 
-    Project* NewProject = new Project();
-    if (NewProject->LoadViewer(CsiName))
+  Project* NewProject = new Project();
+  if (NewProject->LoadViewer(CsiName))
     {
 
-        mCsiName = CsiName;
-        logStatus() << "CsiName:            " << mCsiName;
-        logStatus() << "Viewer LoadFileName:" << LoadFileName;
+      mCsiName = CsiName;
+//      logStatus() << "CsiName:            " << mCsiName;
+//      logStatus() << "Viewer LoadFileName:" << LoadFileName;
 
-        viewerCameraPosition = viewMatrix.at(0);
-        viewerTargetPosition = viewMatrix.at(1);
-        viewerUpVector       = viewMatrix.at(2);
-        viewerFovY           = viewMatrix.at(3).x;
-        viewerZNear          = viewMatrix.at(3).y;
-        viewerZFar           = viewMatrix.at(3).z;
-        logStatus() << QString("Viewer Step Camera Settings = fx %1, fy %2, fz %3, tx %4, ty %5, tz %6, ux %7, uy %8, uz %9, fov %10, znear %11, zfar %12")
-                      .arg(viewerCameraPosition.x,0,'f',4)
-                      .arg(viewerCameraPosition.y,0,'f',4)
-                      .arg(viewerCameraPosition.z,0,'f',4)
-                      .arg(viewerTargetPosition.x,0,'f',4)
-                      .arg(viewerTargetPosition.y,0,'f',4)
-                      .arg(viewerTargetPosition.z,0,'f',4)
-                      .arg(viewerUpVector.x,0,'f',4)
-                      .arg(viewerUpVector.y,0,'f',4)
-                      .arg(viewerUpVector.z,0,'f',4)
-                      .arg(viewerFovY)
-                      .arg(viewerZNear)
-                      .arg(viewerZFar);
-        g_App->SetProject(NewProject);
-        AddRecentFile(LoadFileName);
-        UpdateAllViews();
+      viewerCameraPosition = viewMatrix.at(0);
+      viewerTargetPosition = viewMatrix.at(1);
+      viewerUpVector       = viewMatrix.at(2);
+      viewerFovY           = viewMatrix.at(3).x;
+      viewerZNear          = viewMatrix.at(3).y;
+      viewerZFar           = viewMatrix.at(3).z;
+//      logStatus() << QString("Viewer Step Camera Settings = fx %1, fy %2, fz %3, tx %4, ty %5, tz %6, ux %7, uy %8, uz %9, fov %10, znear %11, zfar %12")
+//                     .arg(viewerCameraPosition.x,0,'f',4)
+//                     .arg(viewerCameraPosition.y,0,'f',4)
+//                     .arg(viewerCameraPosition.z,0,'f',4)
+//                     .arg(viewerTargetPosition.x,0,'f',4)
+//                     .arg(viewerTargetPosition.y,0,'f',4)
+//                     .arg(viewerTargetPosition.z,0,'f',4)
+//                     .arg(viewerUpVector.x,0,'f',4)
+//                     .arg(viewerUpVector.y,0,'f',4)
+//                     .arg(viewerUpVector.z,0,'f',4)
+//                     .arg(viewerFovY)
+//                     .arg(viewerZNear)
+//                     .arg(viewerZFar);
+      g_App->SetProject(NewProject);
+      UpdateAllViews();
 
-        return true;
+      return true;
     }
-
-    delete NewProject;
-
-    return false;
+  emit gui->messageSig(true, tr("Error loading step'%1'.").arg(LoadFileName));
+  delete NewProject;
+  return false;
 }
+
+bool lcMainWindow::LoadViewerBanner(const QString& FileName, const QVector<lcVector3> &viewMatrix)
+{
+  QString LoadFileName = FileName;
+
+  Project* NewProject = new Project();
+  if (NewProject->Load(LoadFileName))
+    {
+      viewerCameraPosition = viewMatrix.at(0);
+      viewerTargetPosition = viewMatrix.at(1);
+      viewerUpVector       = viewMatrix.at(2);
+      viewerFovY           = viewMatrix.at(3).x;
+      viewerZNear          = viewMatrix.at(3).y;
+      viewerZFar           = viewMatrix.at(3).z;
+      g_App->SetProject(NewProject);
+      AddRecentFile(LoadFileName);
+      UpdateAllViews();
+
+      return true;
+    }
+  emit gui->messageSig(true, tr("Error loading banner'%1'.").arg(LoadFileName));
+  delete NewProject;
+  return false;
+}
+
 /*** LPub3D modification end ***/
 
 void lcMainWindow::MergeProject()
