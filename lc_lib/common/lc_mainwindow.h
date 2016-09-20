@@ -235,7 +235,6 @@ public:
 	void AddView(View* View);
 	void RemoveView(View* View);
 	void SetActiveView(View* ActiveView);
-	void UpdateAllViews();
 
 	void SetTool(lcTool Tool);
 	void SetTransformType(lcTransformType TransformType);
@@ -254,8 +253,7 @@ public:
 	void SetLockZ(bool LockZ);
 	void SetRelativeTransform(bool RelativeTransform);
 
-	void NewProject();
-    bool OpenProject(const QString& FileName);
+	bool OpenProject(const QString& FileName);
 	void MergeProject();
 	bool SaveProject(const QString& FileName);
 	bool SaveProjectIfModified();
@@ -319,6 +317,8 @@ public slots:
     void halt3DViewer(bool b);
     void enable3DActions();
     void disable3DActions();
+	void NewProject();
+	void UpdateAllViews();
 
 signals:
     lcVector3 GetStepRotation();
