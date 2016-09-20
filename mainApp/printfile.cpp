@@ -207,7 +207,7 @@ bool Gui::printToPdfFileDialog()
           clearCSICache();
           //TODO add remove ldraw viewer content when move to 2.1
         }
-      if (! m_previewRequest){
+      if (! m_previewDialog){
           printToPdfFile();
         }
       return true;
@@ -577,7 +577,7 @@ void Gui::printToPdfFile()
       box.setWindowTitle(tr ("Print pdf"));
 
       //display completion message
-      QString title = "<b> Printing instructions to pdf. </b>";
+      QString title = "<b> Print to pdf completed. </b>";
       QString text = tr ("Your instruction document has finished printing.\n"
                         "Do you want to open this document ?\n %1").arg(fileName);
 
@@ -1224,13 +1224,13 @@ void Gui::Print(QPrinter* Printer)
 
   if (preview){
       // reset
-      m_previewRequest = false;
+      m_previewDialog = false;
     }
 }
 
 void Gui::showPrintedFile(){
 
-  if (! pdfPrintedFile.isEmpty() && ! m_cancelPrinting){
+  if (! pdfPrintedFile.isEmpty()){
 
       QMessageBox box;
       box.setTextFormat (Qt::RichText);
@@ -1243,7 +1243,7 @@ void Gui::showPrintedFile(){
       box.setStandardButtons (QMessageBox::Yes | QMessageBox::No);
       box.setDefaultButton   (QMessageBox::Yes);
 
-      QString title = "<b> Printing instructions. </b>";
+      QString title = "<b> Print to pdf completed. </b>";
       QString text = tr ("Your instruction document has finished printing.\n"
                          "Do you want to open this document ?\n %1").arg(pdfPrintedFile);
 
@@ -1292,7 +1292,7 @@ void Gui::ShowPrintDialog()
 
 void Gui::TogglePrintPreview()
 {
-  m_previewRequest = true;
+  m_previewDialog = true;
   if (! printToPdfFileDialog()) {
       logInfo() << "Print to pdf dialog returned false";
       return;
@@ -1324,7 +1324,14 @@ void Gui::TogglePrintPreview()
 
   connect(&Preview, SIGNAL(paintRequested(QPrinter*)),          SLOT(Print(QPrinter*)));
   connect(this,     SIGNAL(hidePreviewDialogSig()),   &Preview, SLOT(hide()));
-  //connect(&Preview, SIGNAL(accepted()),             this,    SLOT(showPrintedFile());
 
-  Preview.exec();
+  int rc = Preview.exec();
+
+  logStatus() << "Pdf print preview result is" << (rc == 1 ? pdfPrintedFile + " printed" : "preview only");  // 0=preview only, 1=print output
+
+  if (rc == 1) {
+      showPrintedFile();
+    }
+
+  m_previewDialog = false;
 }

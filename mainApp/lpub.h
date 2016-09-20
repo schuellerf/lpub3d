@@ -437,7 +437,7 @@ public:
   QString         pageRangeText;    // page range parameters
   bool            mixedPageSize;    // mixed page size and orientation
 
-  bool             m_previewRequest;
+  bool             m_previewDialog;
   bool             m_cancelPrinting; // cancel print job
   ProgressDialog  *m_progressDialog; // general use progress dialog
   QLabel          *m_progressDlgMessageLbl;

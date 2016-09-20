@@ -973,7 +973,7 @@ Gui::Gui()
     pageRangeText = displayPageNum;
     mixedPageSize = false;
     m_exportingContent = false;
-    m_previewRequest = false;
+    m_previewDialog = false;
 
 
     editWindow    = new EditWindow(this);
