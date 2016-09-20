@@ -555,7 +555,7 @@ public:
   void beginMacro (QString name);
   void endMacro   ();
 
-  bool InitializeApp(int argc, char *argv[], const char* LibraryInstallPath, const char* LDrawPath);
+  bool InitializeViewer(int argc, char *argv[], const char* LibraryInstallPath, const char* LDrawPath);
 
   void displayFile(LDrawFile *ldrawFile, const QString &modelName);
   void displayParmsFile(const QString &fileName);
@@ -724,27 +724,30 @@ public slots:
 
 signals:       
 
-    /* tell the editor to display this file */
+  /* tell the editor to display this file */
 
   void displayFileSig(LDrawFile *ldrawFile, const QString &subFile);
-  void displayParmsFileSig(const QString &fileName);  
+  void displayParmsFileSig(const QString &fileName);
   void showLineSig(int lineNumber);
+
   void enable3DActionsSig();
   void disable3DActionsSig();
-
   void halt3DViewerSig(bool b);
+  void updateAllViewsSig();
+  void newProjectSig();
+
   void hidePreviewDialogSig();
   void showPrintedFileSig(int);
 
   // right side progress bar
- void progressBarInitSig();
- void progressMessageSig(const QString &text);
- void progressRangeSig(const int &min, const int &max);
- void progressSetValueSig(const int &value);
- void progressResetSig();
- void removeProgressStatusSig();
+  void progressBarInitSig();
+  void progressMessageSig(const QString &text);
+  void progressRangeSig(const int &min, const int &max);
+  void progressSetValueSig(const int &value);
+  void progressResetSig();
+  void removeProgressStatusSig();
 
-   // right side progress bar
+  // right side progress bar
   void progressBarPermInitSig();
   void progressPermMessageSig(const QString &text);
   void progressPermRangeSig(const int &min, const int &max);

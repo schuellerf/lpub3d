@@ -314,11 +314,12 @@ public:
 
 /*** LPub3D modification 314: - signals ***/
 public slots:
-    void halt3DViewer(bool b);
-    void enable3DActions();
-    void disable3DActions();
 	void NewProject();
 	void UpdateAllViews();
+
+    void Halt3DViewer(bool b);
+    void Enable3DActions();
+    void Disable3DActions();
 
 signals:
     lcVector3 GetStepRotation();

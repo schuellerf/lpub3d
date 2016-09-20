@@ -1125,7 +1125,7 @@ void Gui::closeEvent(QCloseEvent *event)
     }
 }
 
-bool Gui::InitializeApp(int argc, char *argv[], const char* LibraryInstallPath, const char* LDrawPath){
+bool Gui::InitializeViewer(int argc, char *argv[], const char* LibraryInstallPath, const char* LDrawPath){
 
   /* load sequence
    * lc_application::LoadDefaults
@@ -1151,27 +1151,20 @@ bool Gui::InitializeApp(int argc, char *argv[], const char* LibraryInstallPath, 
 
       readSettings();
 
-      connect(this,           SIGNAL(loadFileSig(QString)),
-              this,           SLOT(  loadFile(QString)));
-      connect(this,           SIGNAL(halt3DViewerSig(bool)),
-              gMainWindow,    SLOT(  halt3DViewer   (bool)));
-      connect(this,           SIGNAL(enable3DActionsSig()),
-              gMainWindow,    SLOT(  enable3DActions()));
-      connect(gMainWindow,    SIGNAL(SetStepRotation(QString&,bool)),
-              this,           SLOT(SetStepRotation(QString&,bool)));
-      connect(gMainWindow,    SIGNAL(ResetStepRotation()),
-              this,           SLOT(ResetStepRotation()));
-      connect(gMainWindow,    SIGNAL(SetRotStepAngleX(float)),
-              this,           SLOT(SetRotStepAngleX(float)));
-      connect(gMainWindow,    SIGNAL(SetRotStepAngleY(float)),
-              this,           SLOT(SetRotStepAngleY(float)));
-      connect(gMainWindow,    SIGNAL(SetRotStepAngleZ(float)),
-              this,           SLOT(SetRotStepAngleZ(float)));
-      connect(gMainWindow,    SIGNAL(GetStepRotation()),
-              this,           SLOT(GetStepRotation()));
+	  connect(this,       SIGNAL(loadFileSig(QString)),  this,        SLOT(loadFile(QString)));
+	  connect(this,       SIGNAL(halt3DViewerSig(bool)), gMainWindow, SLOT(Halt3DViewer(bool)));
+	  connect(this,       SIGNAL(enable3DActionsSig()),  gMainWindow, SLOT(Enable3DActions()));
+	  connect(this,       SIGNAL(disable3DActionsSig()), gMainWindow, SLOT(Disable3DActions()));
+	  connect(this,       SIGNAL(updateAllViewsSig()),   gMainWindow, SLOT(UpdateAllViews()));
+	  connect(this,       SIGNAL(newProjectSig()),       gMainWindow, SLOT(NewProject()));
 
-      connect(this,           SIGNAL(disable3DActionsSig()),
-              gMainWindow,    SLOT(  disable3DActions()));
+
+      connect(gMainWindow,    SIGNAL(SetStepRotation(QString&,bool)), this,           SLOT(SetStepRotation(QString&,bool)));
+      connect(gMainWindow,    SIGNAL(ResetStepRotation()),            this,           SLOT(ResetStepRotation()));
+      connect(gMainWindow,    SIGNAL(SetRotStepAngleX(float)),        this,           SLOT(SetRotStepAngleX(float)));
+      connect(gMainWindow,    SIGNAL(SetRotStepAngleY(float)),        this,           SLOT(SetRotStepAngleY(float)));
+      connect(gMainWindow,    SIGNAL(SetRotStepAngleZ(float)),        this,           SLOT(SetRotStepAngleZ(float)));
+      connect(gMainWindow,    SIGNAL(GetStepRotation()),              this,           SLOT(GetStepRotation()));
     }
 
   return initialized;
