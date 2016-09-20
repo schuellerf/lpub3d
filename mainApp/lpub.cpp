@@ -519,19 +519,21 @@ void Gui::UpdateStepRotationStatus()
 
 
 void Gui::displayFile(
-  LDrawFile     *ldrawFile, 
-  const QString &modelName)
+    LDrawFile     *ldrawFile,
+    const QString &modelName)
 {
-    displayFileSig(ldrawFile, modelName);
-    curSubFile = modelName;
-    int currentIndex = 0;
-    for (int i = 0; i < mpdCombo->count(); i++) {
-      if (mpdCombo->itemText(i) == modelName) {
-        currentIndex = i;
-        break;
-      }
+  if (! m_exportingContent) {
+      displayFileSig(ldrawFile, modelName);
+      curSubFile = modelName;
+      int currentIndex = 0;
+      for (int i = 0; i < mpdCombo->count(); i++) {
+          if (mpdCombo->itemText(i) == modelName) {
+              currentIndex = i;
+              break;
+            }
+        }
+      mpdCombo->setCurrentIndex(currentIndex);
     }
-    mpdCombo->setCurrentIndex(currentIndex);
 }
 
 void Gui::displayParmsFile(
@@ -561,8 +563,8 @@ void Gui::halt3DViewer(bool b)
         installExportBanner(exportType, printBanner,imageFile);
     }
 
-    bool rc = b;
-    emit halt3DViewerSig(rc);
+    emit exportingContentSig(b);
+
 }
 /*-----------------------------------------------------------------------------*/
 
@@ -970,7 +972,9 @@ Gui::Gui()
     exportType    = EXPORT_PDF;
     pageRangeText = displayPageNum;
     mixedPageSize = false;
+    m_exportingContent = false;
     m_previewRequest = false;
+
 
     editWindow    = new EditWindow(this);
     parmsWindow   = new ParmsWindow(this);
@@ -1028,6 +1032,9 @@ Gui::Gui()
 
     undoStack = new QUndoStack();
     macroNesting = 0;
+
+    connect(this,           SIGNAL(exportingContentSig(bool)),
+            this,           SLOT(  exportingContent(   bool)));
 
     connect(this,           SIGNAL(displayFileSig(LDrawFile *, const QString &)),
             editWindow,     SLOT(  displayFile   (LDrawFile *, const QString &)));
@@ -1151,20 +1158,19 @@ bool Gui::InitializeViewer(int argc, char *argv[], const char* LibraryInstallPat
 
       readSettings();
 
-	  connect(this,       SIGNAL(loadFileSig(QString)),  this,        SLOT(loadFile(QString)));
-	  connect(this,       SIGNAL(halt3DViewerSig(bool)), gMainWindow, SLOT(Halt3DViewer(bool)));
-	  connect(this,       SIGNAL(enable3DActionsSig()),  gMainWindow, SLOT(Enable3DActions()));
-	  connect(this,       SIGNAL(disable3DActionsSig()), gMainWindow, SLOT(Disable3DActions()));
-	  connect(this,       SIGNAL(updateAllViewsSig()),   gMainWindow, SLOT(UpdateAllViews()));
-	  connect(this,       SIGNAL(newProjectSig()),       gMainWindow, SLOT(NewProject()));
+	  connect(this,        SIGNAL(loadFileSig(QString)),           this,        SLOT(loadFile(QString)));
+	  connect(this,        SIGNAL(exportingContentSig(bool)),      gMainWindow, SLOT(Halt3DViewer(bool)));
+	  connect(this,        SIGNAL(enable3DActionsSig()),           gMainWindow, SLOT(Enable3DActions()));
+	  connect(this,        SIGNAL(disable3DActionsSig()),          gMainWindow, SLOT(Disable3DActions()));
+	  connect(this,        SIGNAL(updateAllViewsSig()),            gMainWindow, SLOT(UpdateAllViews()));
+	  connect(this,        SIGNAL(newProjectSig()),                gMainWindow, SLOT(NewProject()));
 
-
-      connect(gMainWindow,    SIGNAL(SetStepRotation(QString&,bool)), this,           SLOT(SetStepRotation(QString&,bool)));
-      connect(gMainWindow,    SIGNAL(ResetStepRotation()),            this,           SLOT(ResetStepRotation()));
-      connect(gMainWindow,    SIGNAL(SetRotStepAngleX(float)),        this,           SLOT(SetRotStepAngleX(float)));
-      connect(gMainWindow,    SIGNAL(SetRotStepAngleY(float)),        this,           SLOT(SetRotStepAngleY(float)));
-      connect(gMainWindow,    SIGNAL(SetRotStepAngleZ(float)),        this,           SLOT(SetRotStepAngleZ(float)));
-      connect(gMainWindow,    SIGNAL(GetStepRotation()),              this,           SLOT(GetStepRotation()));
+      connect(gMainWindow, SIGNAL(SetStepRotation(QString&,bool)), this,           SLOT(SetStepRotation(QString&,bool)));
+      connect(gMainWindow, SIGNAL(ResetStepRotation()),            this,           SLOT(ResetStepRotation()));
+      connect(gMainWindow, SIGNAL(SetRotStepAngleX(float)),        this,           SLOT(SetRotStepAngleX(float)));
+      connect(gMainWindow, SIGNAL(SetRotStepAngleY(float)),        this,           SLOT(SetRotStepAngleY(float)));
+      connect(gMainWindow, SIGNAL(SetRotStepAngleZ(float)),        this,           SLOT(SetRotStepAngleZ(float)));
+      connect(gMainWindow, SIGNAL(GetStepRotation()),              this,           SLOT(GetStepRotation()));
     }
 
   return initialized;

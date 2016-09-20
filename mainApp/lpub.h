@@ -648,8 +648,14 @@ public slots:
   void showPrintedFile();
   void showLine(const Where &topOfStep)
   {
-    displayFile(&ldrawFile,topOfStep.modelName);
-    showLineSig(topOfStep.lineNumber);
+    if (! m_exportingContent) {
+        displayFile(&ldrawFile,topOfStep.modelName);
+        showLineSig(topOfStep.lineNumber);
+      }
+  }
+
+  void exportingContent(bool b){
+    m_exportingContent = b;
   }
 
   // cancel printing
@@ -732,10 +738,9 @@ signals:
 
   void enable3DActionsSig();
   void disable3DActionsSig();
-  void halt3DViewerSig(bool b);
   void updateAllViewsSig();
   void newProjectSig();
-
+  void exportingContentSig(bool b);
   void hidePreviewDialogSig();
   void showPrintedFileSig(int);
 
@@ -786,6 +791,7 @@ private:
 
   FadeStepColorParts     fadeStepColorParts; // internal list of color parts to be processed for fade step.
   PliSubstituteParts     pliSubstituteParts; // internal list of PLI/BOM substitute parts
+  bool                   m_exportingContent;   // indicate export/pring underway
 
 #ifdef WATCHER
   QFileSystemWatcher watcher;        // watch the file system for external
