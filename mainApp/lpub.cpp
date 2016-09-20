@@ -522,7 +522,7 @@ void Gui::displayFile(
     LDrawFile     *ldrawFile,
     const QString &modelName)
 {
-  if (! m_exportingContent) {
+  if (! exporting()) {
       displayFileSig(ldrawFile, modelName);
       curSubFile = modelName;
       int currentIndex = 0;
@@ -542,29 +542,26 @@ void Gui::displayParmsFile(
     displayParmsFileSig(fileName);
 }
 
-void Gui::halt3DViewer(bool b)
+void Gui::deployExportBanner(bool b)
 {
 
-    QString printBanner, imageFile;
+  if (b) {
+      QString printBanner, imageFile;
 
 #ifdef __APPLE__
 
-    printBanner = QString("%1/%2").arg(Preferences::lpubDataPath,"extras/printbanner.ldr");
-    imageFile = QString("%1/%2").arg(Preferences::lpubDataPath,"extras/PDFPrint.jpg");
+      printBanner = QString("%1/%2").arg(Preferences::lpubDataPath,"extras/printbanner.ldr");
+      imageFile = QString("%1/%2").arg(Preferences::lpubDataPath,"extras/PDFPrint.jpg");
 
 #else
 
-    printBanner = QDir::toNativeSeparators(QString("%1/%2").arg(Preferences::lpubDataPath,"extras/printbanner.ldr"));
-    imageFile = QDir::toNativeSeparators(QString("%1/%2").arg(Preferences::lpubDataPath,"extras/PDFPrint.jpg"));
+      printBanner = QDir::toNativeSeparators(QString("%1/%2").arg(Preferences::lpubDataPath,"extras/printbanner.ldr"));
+      imageFile = QDir::toNativeSeparators(QString("%1/%2").arg(Preferences::lpubDataPath,"extras/PDFPrint.jpg"));
 
 #endif
 
-    if (b){
-        installExportBanner(exportType, printBanner,imageFile);
+      installExportBanner(exportType, printBanner,imageFile);
     }
-
-    emit exportingContentSig(b);
-
 }
 /*-----------------------------------------------------------------------------*/
 
@@ -1033,8 +1030,8 @@ Gui::Gui()
     undoStack = new QUndoStack();
     macroNesting = 0;
 
-    connect(this,           SIGNAL(exportingContentSig(bool)),
-            this,           SLOT(  exportingContent(   bool)));
+    connect(this,           SIGNAL(setExportingSig(bool)),
+            this,           SLOT(  setExporting(   bool)));
 
     connect(this,           SIGNAL(displayFileSig(LDrawFile *, const QString &)),
             editWindow,     SLOT(  displayFile   (LDrawFile *, const QString &)));
@@ -1078,7 +1075,7 @@ Gui::Gui()
     m_progressDlgProgressBar = m_progressDialog->findChild<QProgressBar*>("progressBar");
     m_progressDlgMessageLbl  = m_progressDialog->findChild<QLabel*>("ui_progress_bar");
 
-    connect (m_progressDialog, SIGNAL (cancelClicked()), this, SLOT (cancelPrinting()));
+    connect (m_progressDialog, SIGNAL (cancelClicked()), this, SLOT (cancelExporting()));
 
 #ifdef WATCHER
     connect(&watcher,       SIGNAL(fileChanged(const QString &)),
@@ -1159,11 +1156,12 @@ bool Gui::InitializeViewer(int argc, char *argv[], const char* LibraryInstallPat
       readSettings();
 
 	  connect(this,        SIGNAL(loadFileSig(QString)),           this,        SLOT(loadFile(QString)));
-	  connect(this,        SIGNAL(exportingContentSig(bool)),      gMainWindow, SLOT(Halt3DViewer(bool)));
+	  connect(this,        SIGNAL(setExportingSig(bool)),          this,        SLOT(deployExportBanner(bool)));
+	  connect(this,        SIGNAL(setExportingSig(bool)),          gMainWindow, SLOT(Halt3DViewer(bool)));
 	  connect(this,        SIGNAL(enable3DActionsSig()),           gMainWindow, SLOT(Enable3DActions()));
 	  connect(this,        SIGNAL(disable3DActionsSig()),          gMainWindow, SLOT(Disable3DActions()));
 	  connect(this,        SIGNAL(updateAllViewsSig()),            gMainWindow, SLOT(UpdateAllViews()));
-	  connect(this,        SIGNAL(newProjectSig()),                gMainWindow, SLOT(NewProject()));
+	  connect(this,        SIGNAL(clearViewerWindowSig()),         gMainWindow, SLOT(NewProject()));
 
       connect(gMainWindow, SIGNAL(SetStepRotation(QString&,bool)), this,           SLOT(SetStepRotation(QString&,bool)));
       connect(gMainWindow, SIGNAL(ResetStepRotation()),            this,           SLOT(ResetStepRotation()));

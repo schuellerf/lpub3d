@@ -559,7 +559,6 @@ public:
 
   void displayFile(LDrawFile *ldrawFile, const QString &modelName);
   void displayParmsFile(const QString &fileName);
-  void halt3DViewer(bool b);
   QString elapsedTime(const qint64 &time);
 
   int             maxPages;
@@ -654,12 +653,10 @@ public slots:
       }
   }
 
-  void exportingContent(bool b){
-    m_exportingContent = b;
-  }
-
-  // cancel printing
-  void cancelPrinting(){m_cancelPrinting = true;}
+  void deployExportBanner(bool b);
+  void setExporting(bool b){ m_exportingContent = b;}
+  bool exporting() {return m_exportingContent;}
+  void cancelExporting(){m_exportingContent = false;}
 
   // left side progress bar
   void progressBarInit();
@@ -739,8 +736,8 @@ signals:
   void enable3DActionsSig();
   void disable3DActionsSig();
   void updateAllViewsSig();
-  void newProjectSig();
-  void exportingContentSig(bool b);
+  void clearViewerWindowSig();
+  void setExportingSig(bool b);
   void hidePreviewDialogSig();
   void showPrintedFileSig(int);
 
@@ -791,7 +788,7 @@ private:
 
   FadeStepColorParts     fadeStepColorParts; // internal list of color parts to be processed for fade step.
   PliSubstituteParts     pliSubstituteParts; // internal list of PLI/BOM substitute parts
-  bool                   m_exportingContent;   // indicate export/pring underway
+  bool                   m_exportingContent; // indicate export/pring underway
 
 #ifdef WATCHER
   QFileSystemWatcher watcher;        // watch the file system for external

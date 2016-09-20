@@ -259,7 +259,7 @@ int Step::createCsi(
     }
 
   // Populate the 3D Viewer
-  if (! gMainWindow->GetHalt3DViewer() ) {
+  if (! gui->exporting()) {
 
       // Populate the viewerCsiName
       viewerCsiName = QString("%1_%2").arg(csiName()).arg(sn);

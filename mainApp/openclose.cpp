@@ -232,7 +232,7 @@ void Gui::closeFile()
 
 void Gui::closeModelFile(){
   //3D Viewer
-  emit newProjectSig();
+  emit clearViewerWindowSig();
   emit updateAllViewsSig();
   emit disable3DActionsSig();
   // Editor
