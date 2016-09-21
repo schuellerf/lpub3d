@@ -1005,6 +1005,7 @@ private:
   QMenu    *recentFileMenu;
   QMenu    *editMenu;
   QMenu    *viewMenu;
+  QMenu    *setupMenu;
   QMenu    *toolsMenu;
   QMenu    *configMenu;
   QMenu    *helpMenu;

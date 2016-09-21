@@ -1845,6 +1845,7 @@ void Gui::enableActions()
   zoomInAct->setEnabled(true);
   zoomOutAct->setEnabled(true);
 
+  setupMenu->setEnabled(true);
   cacheMenu->setEnabled(true);
   exportMenu->setEnabled(true);
 }
@@ -1893,6 +1894,7 @@ void Gui::disableActions()
   zoomInAct->setEnabled(false);
   zoomOutAct->setEnabled(false);
 
+  setupMenu->setEnabled(false);
   cacheMenu->setEnabled(false);
   exportMenu->setEnabled(false);
 
@@ -1999,14 +2001,17 @@ void Gui::createMenus()
     cacheMenu->setDisabled(true);
 
     configMenu = menuBar()->addMenu(tr("&Configuration"));
-    configMenu->addAction(pageSetupAct);
-    configMenu->addAction(assemSetupAct);
-    configMenu->addAction(pliSetupAct);
-    configMenu->addAction(bomSetupAct);
-    configMenu->addAction(calloutSetupAct);
-    configMenu->addAction(multiStepSetupAct);
-    configMenu->addAction(projectSetupAct);
-    configMenu->addAction(fadeStepSetupAct);
+    // TODO - insert Render Preferences Action Here....
+    setupMenu = configMenu->addMenu("Instructions Setup...");
+    setupMenu->setIcon(QIcon(":/resources/instructionsetup.png"));
+    setupMenu->addAction(pageSetupAct);
+    setupMenu->addAction(assemSetupAct);
+    setupMenu->addAction(pliSetupAct);
+    setupMenu->addAction(bomSetupAct);
+    setupMenu->addAction(calloutSetupAct);
+    setupMenu->addAction(multiStepSetupAct);
+    setupMenu->addAction(projectSetupAct);
+    setupMenu->addAction(fadeStepSetupAct);
 
     configMenu->addSeparator();
 
