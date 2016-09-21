@@ -2002,6 +2002,7 @@ void Gui::createMenus()
 
     configMenu = menuBar()->addMenu(tr("&Configuration"));
     // TODO - insert Render Preferences Action Here....
+
     setupMenu = configMenu->addMenu("Instructions Setup...");
     setupMenu->setIcon(QIcon(":/resources/instructionsetup.png"));
     setupMenu->addAction(pageSetupAct);
@@ -2012,6 +2013,7 @@ void Gui::createMenus()
     setupMenu->addAction(multiStepSetupAct);
     setupMenu->addAction(projectSetupAct);
     setupMenu->addAction(fadeStepSetupAct);
+    setupMenu->setDisabled(true);
 
     configMenu->addSeparator();
 
