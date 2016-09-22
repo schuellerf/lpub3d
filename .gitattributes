@@ -306,6 +306,8 @@ mainApp/displaypagethread.cpp -text
 mainApp/displaypagethread.h -text
 mainApp/dividerdialog.cpp -text
 mainApp/dividerdialog.h -text
+mainApp/dividerpointeritem.cpp -text
+mainApp/dividerpointeritem.h -text
 mainApp/editwindow.cpp -text
 mainApp/editwindow.h -text
 mainApp/excludedparts.cpp -text
@@ -486,6 +488,8 @@ mainApp/pagebackgrounditem.h -text
 mainApp/pageglobals.cpp -text
 mainApp/pageorientationdialog.cpp -text
 mainApp/pageorientationdialog.h -text
+mainApp/pagepointeritem.cpp -text
+mainApp/pagepointeritem.h -text
 mainApp/pagesizedialog.cpp -text
 mainApp/pagesizedialog.h -text
 mainApp/pairdialog.cpp -text

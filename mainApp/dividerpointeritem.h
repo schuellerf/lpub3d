@@ -12,40 +12,43 @@
 **
 ****************************************************************************/
 
-/**************************************************************************** 
+/****************************************************************************
  *
- * This class implements the graphical pointers that extend from callouts to
- * assembly images as visual indicators to the builder as to where to 
- * add the completed submodel into partially assembeled final model.
+ * This class implements the graphical pointers that extend from the divider to
+ * as visual indicators to the builder as to where what the referenced
+ * item is associated with on the page.
  *
  * Please see lpub.h for an overall description of how the files in LPub
  * make up the LPub program.
  *
  ***************************************************************************/
 
-#ifndef CALLOUTPOINTERITEMH
-#define CALLOUTPOINTERITEMH
+#ifndef DIVIDERPOINTERITEM_H
+#define DIVIDERPOINTERITEM_H
 
 #include "pointeritem.h"
 #include "metaitem.h"
+#include "ranges_item.h"
 
 class QGraphicsPolygonItem;
 class QGraphicsLineItem;
 class QGraphicsItemGroup;
-class Callout;
+class DividerItem;
+class Steps;
 
-class CalloutPointerItem : public PointerItem
+class DividerPointerItem  : public PointerItem
 {
 public:
-  CalloutPointerItem(
-    Callout             *co,
-    Meta                *meta,
-    Pointer             *pointer,
-    QGraphicsItem       *parent,
-    QGraphicsView       *view);
+  DividerPointerItem(    DividerItem         *divider,
+                         Meta                *meta,
+                         Pointer             *pointer,
+                         QGraphicsItem       *parent,
+                         QGraphicsView       *view);
 
 private:
-  Callout              *callout;
+  Step   *step;
+  Steps  *steps;
+  SepData sepData;
 
   /*
    *   +--------------------------------------------++
@@ -54,30 +57,19 @@ private:
    *   |   |                                     | . |
    *   |   |                                     |   |
    *
-   *
-   *  callout size defines the outside edge of the callout.
+   *  divider size defines the outside edge of the divider.
    *  When there is a border, the inside rectangle starts
    *  at +thickness,+thickness, and ends at size-thickness,
    *  size-tickness.
-   *
-   *  Using round end cap caps the ends of the lines that
-   *  intersect the callout are at +- tickness/2.  I'm not
-   *  sure the affect of thickness is even vs. odd.
-   *
-   *  Loc should be calculated on the inside rectangle?
-   *  The triangles have to go to the edge of the inner
-   *  rectangle to obscure the border.
-   *
    */
 
-public:
+  DividerItem  *divider;
 
   /* When the user "Add Pointer", we need to give a default/
      reasonable pointer */
 
   virtual void defaultPointer();
 
-private:
   /* Drag the tip of the pointer, and calculate a good
    * location for the pointer to connect to the callout. */
 
@@ -98,7 +90,6 @@ private:
   virtual void calculatePointerMetaLoc();
 
   virtual void calculatePointerMeta();
-
 };
 
-#endif
+#endif // DIVIDERPOINTERITEM_H
