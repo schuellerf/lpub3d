@@ -33,13 +33,11 @@
 class QGraphicsPolygonItem;
 class QGraphicsLineItem;
 class QGraphicsItemGroup;
-class QGraphicsView;
 
 class PointerItem : public QGraphicsItemGroup, public MetaItem, public AbstractResize 
 {
 public:
   PointerItem(QGraphicsItem *parent = 0);
-  virtual ~PointerItem();
 
   enum SelectedPoint { Tip, Base, MidBase, MidTip, NumGrabbers };
   enum ShaftSegments { OneSegment = 1, TwoSegments, ThreeSegments};
@@ -50,8 +48,8 @@ public:
   Pointer               pointer;
   PlacementEnc          placement;
   bool                  positionChanged;
-  int			baseX;
-  int			baseY;
+  int					baseX;
+  int					baseY;
   QGraphicsLineItem    *shaft;
   QGraphicsPolygonItem *head;
   QList<QGraphicsLineItem *> shaftSegments;

@@ -44,6 +44,8 @@ public:
     QGraphicsItem       *parent,
     QGraphicsView       *view);
 
+  virtual ~CalloutPointerItem();
+
 private:
   Callout              *callout;
 

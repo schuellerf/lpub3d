@@ -151,6 +151,10 @@ CalloutPointerItem::CalloutPointerItem(
   setFlag(QGraphicsItem::ItemIsFocusable,true);
 }
 
+CalloutPointerItem::~CalloutPointerItem(){
+    shaftSegments.clear();
+}
+
 /*
  * Given the location of the Tip (as dragged around by the user)
  * calculate a reasonable placement and Loc for Base or MidTip points.
