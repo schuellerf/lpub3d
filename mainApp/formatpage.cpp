@@ -1632,12 +1632,13 @@ int Gui::addGraphicsPageItems(
   view->setSceneRect(pageBg->sceneBoundingRect());
 
 
+  QRectF pageRect(0,0,pW,pH);
   if (printing) {
-      view->fitInView(0,0,pW,pH);
-    } else if (fitMode == FitWidth) {
-      fitWidth(view);
-    } else if (fitMode == FitVisible) {
-      fitVisible(view);
+      view->fitInView(pageRect);
+    } else if (view->fitMode == FitWidth) {
+      view->fitWidth(pageRect);
+    } else if (view->fitMode == FitVisible) {
+      view->fitVisible(pageRect);
     }
 
   page->relativeType = SingleStepType;

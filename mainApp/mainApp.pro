@@ -194,6 +194,7 @@ HEADERS += \
     dependencies.h \
     dialogexportpages.h \
     dividerdialog.h \
+    dividerpointeritem.h \
     editwindow.h \
     excludedparts.h \
     fadestepcolorparts.h \
@@ -203,6 +204,7 @@ HEADERS += \
     hoverpoints.h \
     ldrawfiles.h \
     ldsearchdirs.h \
+    lgraphicsview.h \
     lpub.h \
     lpub_preferences.h \
     meta.h \
@@ -220,6 +222,7 @@ HEADERS += \
     parmshighlighter.h \
     parmswindow.h \
     paths.h \
+    pagepointeritem.h \
     placement.h \
     placementdialog.h \
     pli.h \
@@ -270,6 +273,7 @@ SOURCES += \
     dependencies.cpp \
     dialogexportpages.cpp \
     dividerdialog.cpp \
+    dividerpointeritem.cpp \
     editwindow.cpp \
     excludedparts.cpp \
     fadestepcolorparts.cpp \
@@ -280,6 +284,7 @@ SOURCES += \
     hoverpoints.cpp \
     ldrawfiles.cpp \
     ldsearchdirs.cpp \
+    lgraphicsview.cpp \
     lpub.cpp \
     lpub_preferences.cpp \
     meta.cpp \
@@ -298,6 +303,7 @@ SOURCES += \
     parmshighlighter.cpp \
     parmswindow.cpp \
     paths.cpp \
+    pagepointeritem.cpp \
     placement.cpp \
     placementdialog.cpp \
     pli.cpp \

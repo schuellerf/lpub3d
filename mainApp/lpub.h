@@ -350,6 +350,7 @@
 #include <QProgressBar>
 #include <QElapsedTimer>
 #include <QPdfWriter>
+#include "lgraphicsview.h"
 #include "color.h"
 #include "ranges.h"
 #include "ldrawfiles.h"
@@ -403,9 +404,6 @@ class LGraphicsView;
 class PageBackgroundItem;
 
 enum traverseRc { HitEndOfPage = 1 };
-
-enum FitMode { FitNone, FitWidth, FitVisible, FitTwoPages, FitContinuousScroll };
-
 enum ExportOption { EXPORT_ALL_PAGES, EXPORT_PAGE_RANGE, EXPORT_CURRENT_PAGE };
 enum ExportType { EXPORT_PDF, EXPORT_PNG, EXPORT_JPG, EXPORT_BMP };
 
@@ -444,7 +442,6 @@ public:
   void            *noData;
   /**Fade Step variables**/
   FadeStepMeta    *fadeMeta;             // propagate fade color and fade bool
-  FitMode          fitMode;              // how to fit the scene into the view
 
   Where &topOfPage();
   Where &bottomOfPage();
@@ -458,7 +455,7 @@ public:
   /* We need to send ourselved these, to eliminate resursion and the model
    * changing under foot */
   void drawPage(                   // this is the workhorse for preparing a
-    LGraphicsView *view,           // page for viewing.  It depends heavily
+    LGraphicsView  *view,           // page for viewing.  It depends heavily
     QGraphicsScene *scene,         // on the next two functions
     bool            printing);
 
@@ -560,11 +557,6 @@ public:
   QString elapsedTime(const qint64 &time);
 
   int             maxPages;
-  
-  LGraphicsView *pageview()
-  {
-    return KpageView;
-  }
 
   QString getCurFile()
   {
@@ -695,17 +687,6 @@ public slots:
   void fitWidth();
   void fitVisible();
   void actualSize();
-
-  void twoPages();
-  void continuousScroll();
-
-  
-  void fitWidth(  LGraphicsView *view);
-  void fitVisible(LGraphicsView *view);
-  void actualSize(LGraphicsView *view);
-
-  void twoPages(LGraphicsView *view);
-  void continuousScroll(LGraphicsView *view);
 
   void clearPLICache();
   void clearCSICache();
@@ -933,8 +914,8 @@ private slots:
     void zoomIn();
     void zoomOut();
 
-    void zoomIn(LGraphicsView *view);
-    void zoomOut(LGraphicsView *view);
+//    void zoomIn(LGraphicsView *view);
+//    void zoomOut(LGraphicsView *view);
 
     void GetPixelDimensions(float &, float &);
     bool validatePageRange();
@@ -1132,305 +1113,6 @@ protected:
 
 extern class Gui *gui;
 
-/* Ruler Class
-#include <QGridLayout>
-#define RULER_BREADTH 20
-class QDRuler : public QWidget
-{
-Q_OBJECT
-Q_ENUMS(RulerType)
-Q_PROPERTY(qreal origin READ origin WRITE setOrigin)
-Q_PROPERTY(qreal rulerUnit READ rulerUnit WRITE setRulerUnit)
-Q_PROPERTY(qreal rulerZoom READ rulerZoom WRITE setRulerZoom)
-public:
-  enum RulerType { Horizontal, Vertical };
-QDRuler(QDRuler::RulerType rulerType, QWidget* parent)
-: QWidget(parent), mRulerType(rulerType), mOrigin(0.), mRulerUnit(1.),
-  mRulerZoom(1.), mMouseTracking(false), mDrawText(false)
-{
-  setMouseTracking(true);
-    QFont txtFont("Goudy Old Style", 5,20);
-    txtFont.setStyleHint(QFont::TypeWriter,QFont::PreferOutline);
-    setFont(txtFont);
-}
-
-QSize minimumSizeHint() const
-{
-  return QSize(RULER_BREADTH,RULER_BREADTH);
-}
-
-QDRuler::RulerType rulerType() const
-{
-  return mRulerType;
-}
-
-qreal origin() const
-{
-  return mOrigin;
-}
-
-qreal rulerUnit() const
-{
-  return mRulerUnit;
-}
-
-qreal rulerZoom() const
-{
-  return mRulerZoom;
-}
-
-public slots:
-
-void setOrigin(const qreal origin)
-{
-  if (mOrigin != origin)
-  {
-    mOrigin = origin;
-    update();
-  }
-}
-
-void setRulerUnit(const qreal rulerUnit)
-{
-  if (mRulerUnit != rulerUnit)
-  {
-    mRulerUnit = rulerUnit;
-    update();
-  }
-}
-
-void setRulerZoom(const qreal rulerZoom)
-{
-  if (mRulerZoom != rulerZoom)
-  {
-    mRulerZoom = rulerZoom;
-    update();
-  }
-}
-
-
-void setCursorPos(const QPoint cursorPos)
-{
-  mCursorPos = this->mapFromGlobal(cursorPos);
-  mCursorPos += QPoint(RULER_BREADTH,RULER_BREADTH);
-  update();
-}
-
-void setMouseTrack(const bool track)
-{
-  if (mMouseTracking != track)
-  {
-    mMouseTracking = track;
-    update();
-  }
-}
-
-protected:
-void mouseMoveEvent(QMouseEvent* event)
-{
-  mCursorPos = event->pos();
-  update();
-  QWidget::mouseMoveEvent(event);
-}
-
-void paintEvent(QPaintEvent* event)
-{
-  QPainter painter(this);
-    painter.setRenderHints(QPainter::TextAntialiasing | QPainter::HighQualityAntialiasing);
-    QPen pen(Qt::black,0); // zero width pen is cosmetic pen
-    //pen.setCosmetic(true);
-    painter.setPen(pen);
-  // We want to work with floating point, so we are considering
-  // the rect as QRectF
-  QRectF rulerRect = this->rect();
-
-  // at first fill the rect
-  //painter.fillRect(rulerRect,QColor(220,200,180));
-  painter.fillRect(rulerRect,QColor(236,233,216));
-
-  // drawing a scale of 25
-  drawAScaleMeter(&painter,rulerRect,25,(Horizontal == mRulerType ? rulerRect.height()
-        : rulerRect.width())/2);
-  // drawing a scale of 50
-  drawAScaleMeter(&painter,rulerRect,50,(Horizontal == mRulerType ? rulerRect.height()
-        : rulerRect.width())/4);
-  // drawing a scale of 100
-  mDrawText = true;
-  drawAScaleMeter(&painter,rulerRect,100,0);
-  mDrawText = false;
-
-  // drawing the current mouse position indicator
-    painter.setOpacity(0.4);
-  drawMousePosTick(&painter);
-    painter.setOpacity(1.0);
-
-  // drawing no man's land between the ruler & view
-  QPointF starPt = Horizontal == mRulerType ? rulerRect.bottomLeft()
-      : rulerRect.topRight();
-  QPointF endPt = Horizontal == mRulerType ? rulerRect.bottomRight()
-      : rulerRect.bottomRight();
-  painter.setPen(QPen(Qt::black,2));
-  painter.drawLine(starPt,endPt);
-}
-
-private:
-void drawAScaleMeter(QPainter* painter, QRectF rulerRect, qreal scaleMeter, qreal startPositoin)
-{
-  // Flagging whether we are horizontal or vertical only to reduce
-  // to cheching many times
-  bool isHorzRuler = Horizontal == mRulerType;
-
-  scaleMeter  = scaleMeter * mRulerUnit * mRulerZoom;
-
-  // Ruler rectangle starting mark
-  qreal rulerStartMark = isHorzRuler ? rulerRect.left() : rulerRect.top();
-  // Ruler rectangle ending mark
-  qreal rulerEndMark = isHorzRuler ? rulerRect.right() : rulerRect.bottom();
-
-  // Condition A # If origin point is between the start & end mard,
-  //we have to draw both from origin to left mark & origin to right mark.
-  // Condition B # If origin point is left of the start mark, we have to draw
-  // from origin to end mark.
-  // Condition C # If origin point is right of the end mark, we have to draw
-  // from origin to start mark.
-  if (mOrigin >= rulerStartMark && mOrigin <= rulerEndMark)
-  {
-    drawFromOriginTo(painter, rulerRect, mOrigin, rulerEndMark, 0, scaleMeter, startPositoin);
-    drawFromOriginTo(painter, rulerRect, mOrigin, rulerStartMark, 0, -scaleMeter, startPositoin);
-  }
-  else if (mOrigin < rulerStartMark)
-  {
-        int tickNo = int((rulerStartMark - mOrigin) / scaleMeter);
-        drawFromOriginTo(painter, rulerRect, mOrigin + scaleMeter * tickNo,
-            rulerEndMark, tickNo, scaleMeter, startPositoin);
-  }
-  else if (mOrigin > rulerEndMark)
-  {
-        int tickNo = int((mOrigin - rulerEndMark) / scaleMeter);
-    drawFromOriginTo(painter, rulerRect, mOrigin - scaleMeter * tickNo,
-            rulerStartMark, tickNo, -scaleMeter, startPositoin);
-  }
-}
-
-void drawFromOriginTo(QPainter* painter, QRectF rulerRect, qreal startMark, qreal endMark, int startTickNo, qreal step, qreal startPosition)
-{
-  bool isHorzRuler = Horizontal == mRulerType;
-  int iterate = 0;
-
-  for (qreal current = startMark;
-      (step < 0 ? current >= endMark : current <= endMark); current += step)
-  {
-    qreal x1 = isHorzRuler ? current : rulerRect.left() + startPosition;
-    qreal y1 = isHorzRuler ? rulerRect.top() + startPosition : current;
-    qreal x2 = isHorzRuler ? current : rulerRect.right();
-    qreal y2 = isHorzRuler ? rulerRect.bottom() : current;
-    painter->drawLine(QLineF(x1,y1,x2,y2));
-    if (mDrawText)
-    {
-      QPainterPath txtPath;
-            txtPath.addText(x1 + 1,y1 + (isHorzRuler ? 7 : -2),this->font(),QString::number(qAbs(int(step) * startTickNo++)));
-      painter->drawPath(txtPath);
-      iterate++;
-    }
-  }
-}
-
-void drawMousePosTick(QPainter* painter)
-{
-  if (mMouseTracking)
-  {
-    QPoint starPt = mCursorPos;
-    QPoint endPt;
-    if (Horizontal == mRulerType)
-    {
-      starPt.setY(this->rect().top());
-      endPt.setX(starPt.x());
-      endPt.setY(this->rect().bottom());
-    }
-    else
-    {
-      starPt.setX(this->rect().left());
-      endPt.setX(this->rect().right());
-      endPt.setY(starPt.y());
-    }
-    painter->drawLine(starPt,endPt);
-  }
-}
-private:
-  RulerType mRulerType;
-  qreal mOrigin;
-  qreal mRulerUnit;
-  qreal mRulerZoom;
-  QPoint mCursorPos;
-  bool mMouseTracking;
-  bool mDrawText;
-};
-
-*/
-
-class LGraphicsView : public QGraphicsView
-{
-public:
-  //LGraphicsView();
-  LGraphicsView(QGraphicsScene *scene)
-  {
-    setScene(scene);
-    pageBackgroundItem = NULL;
-
-    /* Ruler
-    setViewportMargins(RULER_BREADTH,RULER_BREADTH,0,0);
-    QGridLayout* gridLayout = new QGridLayout();
-    gridLayout->setSpacing(0);
-    gridLayout->setMargin(0);
-
-    QWidget* fake = new QWidget();
-    fake->setBackgroundRole(QPalette::Window);
-    fake->setFixedSize(RULER_BREADTH,RULER_BREADTH);
-
-    QDRuler * mHorzRuler = new QDRuler(QDRuler::Horizontal,fake);
-    QDRuler * mVertRuler = new QDRuler(QDRuler::Vertical,fake);
-
-    gridLayout->addWidget(fake,0,0);
-    gridLayout->addWidget(mHorzRuler,0,1);
-    gridLayout->addWidget(mVertRuler,1,0);
-    gridLayout->addWidget(this->viewport(),1,1);
-
-    this->setLayout(gridLayout);
-
-     */
-  }
-  //~LGraphicsView();
-
-  PageBackgroundItem *pageBackgroundItem;
-
-protected:
-    
-  void resizeEvent(QResizeEvent * /* unused */)
-  {
-    if (pageBackgroundItem) {
-      if (gui->fitMode == FitVisible) {
-        gui->fitVisible(gui->pageview());
-      } else if (gui->fitMode == FitWidth) {
-        gui->fitWidth(gui->pageview());
-      }
-    }
-  }
-};
-//custom type definition and meta-type declaration
-//Q_DECLARE_METATYPE(LGraphicsView);
-
-enum zValues {
-  PageBackgroundZValue = 0,
-  PageNumberZValue = 10,
-  PagePLIZValue = 20,
-  PageInstanceZValue = 30,
-  AssemZValue = 30,
-  StepGroupZValue = 30,
-  CalloutPointerZValue = 45,
-  CalloutBackgroundZValue = 50,
-  CalloutAssemZValue = 55,
-  CalloutInstanceZValue = 60,
-};
 
 class GlobalFadeStep
 {

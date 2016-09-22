@@ -454,6 +454,8 @@ mainApp/ldrawfiles.cpp -text
 mainApp/ldrawfiles.h -text
 mainApp/ldsearchdirs.cpp -text
 mainApp/ldsearchdirs.h -text
+mainApp/lgraphicsview.cpp -text
+mainApp/lgraphicsview.h -text
 mainApp/license.gpl3 -text
 mainApp/lpub.cpp -text
 mainApp/lpub.h -text

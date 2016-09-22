@@ -361,115 +361,29 @@ void Gui::setGoToPage(int index)
 
 void Gui::fitWidth()
 {
-  fitWidth(pageview());
-}
-
-void Gui::fitWidth(
-  LGraphicsView *view)
-{
-  view->scale(1.0,1.0);
-
   QRectF rect(0,0,page.meta.LPub.page.size.valuePixels(0),page.meta.LPub.page.size.valuePixels(1));
-
-  QRectF unity = view->matrix().mapRect(QRectF(0,0,1,1));
-  view->scale(1/unity.width(), 1 / unity.height());
-
-  int margin = 2;
-  QRectF viewRect = view->viewport()->rect().adjusted(margin, margin, -margin, -margin);
-  QRectF sceneRect = view->matrix().mapRect(rect);
-  qreal xratio = viewRect.width() / sceneRect.width();
-
-  view->scale(xratio,xratio);
-  view->centerOn(rect.center());
-  fitMode = FitWidth;
+  KpageView->fitWidth(rect);
 }
 
 void Gui::fitVisible()
 {
-  fitVisible(pageview());
-}
-
-void Gui::fitVisible(
-  LGraphicsView *view)
-{
-  view->scale(1.0,1.0);
-
   QRectF rect(0,0,page.meta.LPub.page.size.valuePixels(0),page.meta.LPub.page.size.valuePixels(1));
-
-  QRectF unity = view->matrix().mapRect(QRectF(0,0,1,1));
-  view->scale(1/unity.width(), 1 / unity.height());
-
-  int margin = 2;
-  QRectF viewRect = view->viewport()->rect().adjusted(margin, margin, -margin, -margin);
-  QRectF sceneRect = view->matrix().mapRect(rect);
-  qreal xratio = viewRect.width() / sceneRect.width();
-  qreal yratio = viewRect.height() / sceneRect.height();
-
-  xratio = yratio = qMin(xratio,yratio);
-  view->scale(xratio,yratio);
-  view->centerOn(rect.center());
-  fitMode = FitVisible;
+  KpageView->fitVisible(rect);
 }
 
 void Gui::actualSize()
 {
-  actualSize(pageview());
+  KpageView->actualSize();
 }
-
-void Gui::actualSize(
-  LGraphicsView *view)
-{
-  view->resetMatrix();
-  fitMode = FitNone;
-}
-//~~~~~~~~~~~~~~
-void Gui::twoPages()
-{
-  twoPages(pageview());
-}
-
-void Gui::twoPages(
-  LGraphicsView *view)
-{
-   view->scale(1.0,1.0);
-  fitMode = FitTwoPages;
-}
-
-void Gui::continuousScroll()
-{
-  continuousScroll(pageview());
-}
-void Gui::continuousScroll(
-  LGraphicsView *view)
-{
-  view->scale(1.0,1.0);
-  fitMode = FitContinuousScroll;
-}
-//~~~~~~~~~~~~~~
-
 
 void Gui::zoomIn()
 {
-  zoomIn(pageview());
-}
-
-void Gui::zoomIn(
-  LGraphicsView *view)
-{
-  fitMode = FitNone;
-  view->scale(1.1,1.1);
+  KpageView->zoomIn();
 }
 
 void Gui::zoomOut()
 {
-  zoomOut(pageview());
-}
-
-void Gui::zoomOut(
-  LGraphicsView *view)
-{
-  fitMode = FitNone;
-  view->scale(1.0/1.1,1.0/1.1);
+  KpageView->zoomOut();
 }
 
 void Gui::SetStepRotation(QString &rotationValue, bool propagate)
@@ -1090,7 +1004,7 @@ Gui::Gui()
 
     gui = this;
 
-    fitMode = FitVisible;
+    KpageView->fitMode = FitVisible;
 
 #ifdef __APPLE__
     extern void qt_mac_set_native_menubar(bool);
