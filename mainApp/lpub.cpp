@@ -891,7 +891,7 @@ Gui::Gui()
     editWindow    = new EditWindow(this);
     parmsWindow   = new ParmsWindow(this);
 
-    KpageScene    = new QGraphicsScene(this);
+    KpageScene    = new LGraphicsScene(this);
     KpageScene->setBackgroundBrush(Qt::lightGray);
     KpageView     = new LGraphicsView(KpageScene);
     KpageView->pageBackgroundItem = NULL;

@@ -26,7 +26,6 @@
 
 #include <QGraphicsItem>
 #include <QGraphicsPixmapItem>
-#include <QGraphicsScene>
 #include <QScrollBar>
 #include <QPixmap>
 #include <QBitmap>
@@ -59,7 +58,7 @@
 
 void Gui::clearPage(
     LGraphicsView  *view,
-    QGraphicsScene *scene)
+    LGraphicsScene *scene)
 {
   page.freePage();
   page.pli.clear();
@@ -79,9 +78,8 @@ void Gui::clearPage(
  ********************************************/
 
 class SubmodelInstanceCount : public NumberPlacementItem
-{
-  Page *page;
-  
+{  
+
 public:
   SubmodelInstanceCount(
       Page                *pageIn,
@@ -99,6 +97,9 @@ public:
                   toolTip,
                   parentIn);
   }
+
+  Page *page;
+
 protected:
   void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
   virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
@@ -207,7 +208,7 @@ int Gui::addGraphicsPageItems(
     bool            endOfSubmodel,
     int             instances,
     LGraphicsView  *view,
-    QGraphicsScene *scene,
+    LGraphicsScene *scene,
     bool            printing)
 {
 
@@ -281,7 +282,7 @@ int Gui::addGraphicsPageItems(
   if (modelDisplayPage)
     page->modelDisplayPage = true;
 
-  pageBg = new PageBackgroundItem(page, pW, pH);
+  pageBg = new PageBackgroundItem(page, pW, pH, view);
 
   view->pageBackgroundItem = pageBg;
   pageBg->setPos(0,0);
@@ -1456,6 +1457,14 @@ int Gui::addGraphicsPageItems(
                   rotateIcon->setFlag(QGraphicsItem::ItemIsMovable,true);
               }
 
+              // allocate QGraphicsPixampItems for page pointers
+
+              for (int i = 0; i < page->pointerList.size(); i++) {
+                  Pointer *pointer = page->pointerList[i];
+                  PointerAttributes *attributes = page->pointerBaseList[i];
+                  page->addGraphicsPointerItem(pointer,attributes);
+              }
+
               // allocate QGraphicsTextItem for step number
 
               if ( ! step->onlyChild() && ! modelDisplayPage) {
@@ -1632,7 +1641,7 @@ int Gui::addGraphicsPageItems(
   view->setSceneRect(pageBg->sceneBoundingRect());
 
 
-  QRectF pageRect(0,0,pW,pH);
+  QRectF pageRect = QRectF(0,0,pW,pH);
   if (printing) {
       view->fitInView(pageRect);
     } else if (view->fitMode == FitWidth) {

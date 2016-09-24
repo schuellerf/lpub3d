@@ -154,7 +154,7 @@ void CalloutBackgroundItem::contextMenuEvent(
   if (selectedAction == NULL) {
       return;
   } else if (selectedAction == addPointerAction) {
-    Pointer *pointer = new Pointer(callout->topOfCallout(),calloutMeta);
+    Pointer *pointer = new Pointer(callout->topOfCallout(),calloutMeta.pointer);
     float _loc = 0, _x1 = 0, _y1 = 0, _base = -1, _segments = 1;
     float           _x2 = 0, _y2 = 0;
     float           _x3 = 0, _y3 = 0;

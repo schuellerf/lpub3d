@@ -37,8 +37,8 @@
 #else
 #include <QtGui>
 #endif
+
 #include <QGraphicsItem>
-#include <QGraphicsScene>
 #include <QString>
 #include <QFileInfo>
 #include "lpub_preferences.h"
@@ -50,6 +50,7 @@
 #include "step.h"
 #include "paths.h"
 #include "metaitem.h"
+#include "pointer.h"
 
 #include "QsLog.h"
 
@@ -227,8 +228,9 @@ Range *newRange(
   return range;
 }
 
-int Gui::drawPage(LGraphicsView  *view,
-    QGraphicsScene *scene,
+int Gui::drawPage(
+    LGraphicsView  *view,
+    LGraphicsScene *scene,
     Steps          *steps,
     int             stepNum,
     QString const  &addLine,
@@ -268,6 +270,10 @@ int Gui::drawPage(LGraphicsView  *view,
   steps->setTopOfSteps(current);
 
   QList<InsertMeta> inserts;
+  QList<Pointer *>  pagePointerList;
+  QList<PointerAttributes *> pointerBase;
+  QList<Pointer *>  stepGroupDividerPointerList;
+  QList<Pointer *>  calloutDividerPointerList;
 
   Where topOfStep = current;
   Rc gprc = OkRc;
@@ -811,6 +817,16 @@ int Gui::drawPage(LGraphicsView  *view,
               }
               break;
 
+            case PagePointerRc:
+              {
+                  Pointer *pointer = new Pointer(current, curMeta.LPub.page.pointer);
+                  pagePointerList.append(pointer);
+                   // we can set the default placement as needed here.
+                  PointerAttributes *_pointerBase = new PointerAttributes(curMeta.LPub.page.pointerBase);
+                  pointerBase.append(_pointerBase);
+              }
+              break;
+
             case CalloutBeginRc:
               if (callout) {
                   parseError("Nested CALLOUT not allowed within the same file",current);
@@ -830,7 +846,7 @@ int Gui::drawPage(LGraphicsView  *view,
 
             case CalloutPointerRc:
               if (callout) {
-                  callout->appendPointer(current,curMeta.LPub.callout);
+                  callout->appendPointer(current,curMeta.LPub.callout.pointer);
                 }
               break;
 
@@ -910,6 +926,8 @@ int Gui::drawPage(LGraphicsView  *view,
                   Page *page = dynamic_cast<Page *>(steps);                  
                   if (page) {
                       page->inserts = inserts;
+                      page->pointerList = pagePointerList;
+                      page->pointerBaseList = pointerBase;
                     }
 
                   bool endOfSubmodel = stepNum >= ldrawFile.numSteps(current.modelName);;
@@ -1031,8 +1049,10 @@ int Gui::drawPage(LGraphicsView  *view,
                       Page *page = dynamic_cast<Page *>(steps);
                       if (page) {
                           page->inserts = inserts;
+                          page->pointerList = pagePointerList;
+                          page->pointerBaseList = pointerBase;
                         }
-
+                        //TODO add page pointers here
                       if (pliPerStep) {
                           PlacementType relativeType;
                           if (multiStep) {
@@ -1083,7 +1103,10 @@ int Gui::drawPage(LGraphicsView  *view,
                           Page *page = dynamic_cast<Page *>(steps);
                           if (page) {
                               page->inserts = inserts;
+                              page->pointerList = pagePointerList;
+                              page->pointerBaseList = pointerBase;
                             }
+                          //TODO add page pointers here
                         }
                     }
 
@@ -1186,7 +1209,7 @@ int Gui::drawPage(LGraphicsView  *view,
 
 int Gui::findPage(
 	LGraphicsView  *view,
-    QGraphicsScene *scene,
+    LGraphicsScene *scene,
     int            &pageNum,
     QString const  &addLine,
     Where          &current,
@@ -1985,7 +2008,7 @@ void Gui::countPages()
 
 void Gui::drawPage(
     LGraphicsView  *view,
-    QGraphicsScene *scene,
+    LGraphicsScene *scene,
     bool            printing)
 {
   QApplication::setOverrideCursor(Qt::WaitCursor);

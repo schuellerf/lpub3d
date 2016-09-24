@@ -86,9 +86,9 @@ AllocMeta &Callout::allocMeta()
   }
 }
 
-void Callout::appendPointer(const Where &here, CalloutMeta &attrib)
+void Callout::appendPointer(const Where &here, PointerMeta &pointerMeta)
 {
-  Pointer *pointer = new Pointer(here,attrib);
+  Pointer *pointer = new Pointer(here,pointerMeta);
   pointerList.append(pointer);
 }
 

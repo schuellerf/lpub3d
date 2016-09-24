@@ -335,7 +335,8 @@ void Gui::printToPdfFile()
   pdfWriter.setPageLayout(getPageLayout());
 
   // instantiate the scene and view
-  QGraphicsScene scene;
+  LGraphicsScene scene;
+  scene.setGuidesEnabled(false);
   LGraphicsView view(&scene);
 
   int _displayPageNum = 0;
@@ -740,7 +741,8 @@ void Gui::exportAs(QString &suffix)
         return;
     }
 
-    QGraphicsScene scene;
+    LGraphicsScene scene;
+    scene.setGuidesEnabled(false);
     LGraphicsView view(&scene);
     float pageWidthPx, pageHeightPx;
     int _displayPageNum = 0;
@@ -1050,7 +1052,8 @@ void Gui::Print(QPrinter* Printer)
 
   // paint to the printer the scene we view
   QPainter Painter(Printer);
-  QGraphicsScene scene;
+  LGraphicsScene scene;
+  scene.setGuidesEnabled(false);
   LGraphicsView view(&scene);
 
   // initialize progress bar dialog

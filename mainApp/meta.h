@@ -66,10 +66,13 @@ enum Rc {
          StepGroupEndRc,
 
          CalloutBeginRc,
-         CalloutPointerRc,
          CalloutDividerRc,
-         CalloutEndRc,             
+         CalloutPointerRc,
+         CalloutEndRc,
          
+         DividerPointerRc,
+         IllustrationPointerRc,
+
          InsertRc,
          InsertPageRc,
          InsertCoverPageRc,
@@ -88,6 +91,8 @@ enum Rc {
 
          PartBeginIgnRc,
          PartEndRc,
+
+         PagePointerRc,
 
          BomBeginIgnRc,
          BomEndRc,
@@ -1264,7 +1269,8 @@ public:
   void setValue(QString color, 
                 float thickness,
                 float margin0,
-                float margin1)
+                float margin1,
+                bool  haspointer)
   {
     if (resolutionType() == DPCM) {
       thickness = centimeters2inches(thickness);
@@ -1275,6 +1281,7 @@ public:
     _value[pushed].thickness = thickness;
     _value[pushed].margin[0] = margin0;
     _value[pushed].margin[1] = margin1;
+    _value[pushed].haspointer= haspointer;
   }
   void setValue(SepData goods)
   {
@@ -1296,12 +1303,14 @@ public:
   void setValueInches(QString color, 
                 float thickness,
                 float margin0,
-                float margin1)
+                float margin1,
+                bool  haspointer)
   {
     _value[pushed].color = color;
     _value[pushed].thickness = thickness;
     _value[pushed].margin[0] = margin0;
     _value[pushed].margin[1] = margin1;
+    _value[pushed].haspointer= haspointer;
   }
   void setValueInches(SepData &sepData)
   {
@@ -1911,6 +1920,8 @@ public:
   NumberPlacementMeta       number;
   NumberPlacementMeta       instanceCount;
   StringListMeta            subModelColor;
+  PointerMeta               pointer;
+  PlacementMeta             pointerBase;
 
   PageHeaderMeta            pageHeader;
   PageFooterMeta            pageFooter;
@@ -2052,6 +2063,7 @@ public:
   FreeFormMeta   freeform;
   CalloutBeginMeta begin;
   RcMeta         divider;
+  PointerMeta    dividerPointer;
   RcMeta         end;
   AllocMeta      alloc;
   NumberPlacementMeta instance;
@@ -2087,6 +2099,7 @@ public:
   FreeFormMeta   freeform;
   RcMeta         begin;
   RcMeta         divider;
+  PointerMeta    dividerPointer;
   RcMeta         end;
   AllocMeta      alloc;
   FontListMeta   subModelFont;

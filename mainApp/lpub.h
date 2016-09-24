@@ -342,7 +342,6 @@
 #include <QStatusBar>
 #include <QDockWidget>
 #include <QSettings>
-#include <QGraphicsView>
 #include <QDateTime>
 #include <QFileSystemWatcher>
 #include <QPrinter>
@@ -375,7 +374,6 @@
 
 class QString;
 class QSplitter;
-class QGraphicsScene;
 class QFrame;
 class QFileDialog;
 class QResizeEvent;
@@ -401,6 +399,7 @@ class GlobalFadeStep;
 class UpdateCheck;
 
 class LGraphicsView;
+class LGraphicsScene;
 class PageBackgroundItem;
 
 enum traverseRc { HitEndOfPage = 1 };
@@ -456,7 +455,7 @@ public:
    * changing under foot */
   void drawPage(                   // this is the workhorse for preparing a
     LGraphicsView  *view,           // page for viewing.  It depends heavily
-    QGraphicsScene *scene,         // on the next two functions
+    LGraphicsScene *scene,         // on the next two functions
     bool            printing);
 
   /*--------------------------------------------------------------------*
@@ -752,7 +751,7 @@ public:
   ParmsWindow           *parmsWindow;             // the parametrer file editor
 
 private:    
-  QGraphicsScene        *KpageScene;      // top of displayed page's graphics items
+  LGraphicsScene        *KpageScene;      // top of displayed page's graphics items
   LGraphicsView         *KpageView;       // the visual representation of the scene
   LDrawFile              ldrawFile;       // contains MPD or all files used in model
   QString                curFile;         // the file name for MPD, or top level file
@@ -788,7 +787,7 @@ private:
 
   int findPage(                    // traverse the hierarchy until we get to the
     LGraphicsView  *view,          // page of interest, let traverse process the
-    QGraphicsScene *scene,         // page, and then finish by counting the rest
+    LGraphicsScene *scene,         // page, and then finish by counting the rest
     int           &pageNum,
     QString const &addLine,
     Where         &current,
@@ -798,7 +797,7 @@ private:
 
   int drawPage(// process the page of interest and any callouts
     LGraphicsView  *view,
-    QGraphicsScene *scene,
+    LGraphicsScene *scene,
     Steps          *steps,
     int            stepNum,
     QString const &addLine,
@@ -829,7 +828,7 @@ private:
     bool            endOfSubmodel,
     int             instances,
     LGraphicsView  *view,
-    QGraphicsScene *scene,
+    LGraphicsScene *scene,
     bool            printing);
 
   int getBOMParts(
@@ -947,7 +946,7 @@ private slots:
 
     void clearPage(
       LGraphicsView  *view,
-      QGraphicsScene *scene);
+      LGraphicsScene *scene);
     
     void enableActions();
     void enableActions2();
@@ -1130,6 +1129,5 @@ public:
         mi.sortedGlobalWhere(meta,topLevelFile,"ZZZZZZZ");
     }
 };
-
 
 #endif

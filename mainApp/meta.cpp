@@ -1184,7 +1184,7 @@ PointerMeta::PointerMeta() : LeafMeta()
  * (Top|Right|Bottom|Left) <loc> <x> <y> (<base>)
  */
 
-Rc PointerMeta::parse(QStringList &argv, int index,Where &here)
+Rc PointerMeta::parse(QStringList &argv, int index, Where &here)
 {
   float _loc = 0, _x1 = 0, _y1 = 0, _base = -1, _segments = 1;
   float           _x2 = 0, _y2 = 0;
@@ -1192,6 +1192,8 @@ Rc PointerMeta::parse(QStringList &argv, int index,Where &here)
   float           _x4 = 0, _y4 = 0;
   int   n_tokens = argv.size() - index;
   bool    fail = true;
+
+//  logTrace() << "Pointer: " << argv.join(" ") << ", Index:" << index;
 
   if (argv.size() - index > 0) {
       QRegExp rx("^(TOP_LEFT|TOP_RIGHT|BOTTOM_LEFT|BOTTOM_RIGHT)$");
@@ -1315,7 +1317,20 @@ Rc PointerMeta::parse(QStringList &argv, int index,Where &here)
         }
       _here[0] = here;
       _here[1] = here;
-      return CalloutPointerRc;
+
+      if (     argv[1] == "CALLOUT") {
+        logTrace() << "Return CalloutPointerRc"; return CalloutPointerRc;}
+      else if (argv[1] == "DIVIDER") {
+        logTrace() << "Return DividerPointerRc"; return DividerPointerRc;}
+      else if (argv[1] == "PAGE") {
+        logTrace() << "Return PagePointerRc"; return PagePointerRc;         }
+      else if (argv[1] == "ILLUSTRATION") {
+        logTrace() << "Return IllustrationPointerRc"; return IllustrationPointerRc;}
+
+      emit gui->messageSig(false,"Pointer type not defined. Returning 0.");
+
+      return OkRc; // this should never fire.
+
     } else {
 
       if (reportErrors) {
@@ -2373,6 +2388,8 @@ PageMeta::PageMeta() : BranchMeta()
   subModelColor.setValue("#ffcccc");
   subModelColor.setValue("#ccccff");
 
+  pointerBase.setValue(LeftInside,PageType);
+
   /* PAGE ATTRIBUTE FORMAT
    *
    * Front Cover Default Attribute Placements
@@ -2594,6 +2611,8 @@ void PageMeta::init(BranchMeta *parent, QString name)
   number.init             (this, "NUMBER");
   instanceCount.init      (this, "SUBMODEL_INSTANCE_COUNT");
   subModelColor.init      (this, "SUBMODEL_BACKGROUND_COLOR");
+  pointer.init            (this, "POINTER");
+  pointerBase.init        (this, "POINTER_BASE");
 
   pageHeader.init         (this, "PAGE_HEADER");
   pageFooter.init         (this, "PAGE_FOOTER");
@@ -2858,7 +2877,7 @@ CalloutMeta::CalloutMeta() : BranchMeta()
   stepNum.color.setValue("black");
   // stepNum.font - default
   stepNum.placement.setValue(LeftTopOutside,PartsListType);
-  sep.setValueInches("Black",DEFAULT_THICKNESS,DEFAULT_MARGINS);
+  sep.setValueInches("Black",DEFAULT_THICKNESS,DEFAULT_MARGINS, false);
   BorderData borderData;
   borderData.type = BorderData::BdrSquare;
   borderData.line = BorderData::BdrLnSolid;
@@ -2907,6 +2926,7 @@ void CalloutMeta::init(BranchMeta *parent, QString name)
 
   begin      .init(this,      "BEGIN",   CalloutBeginRc);
   divider    .init(this,      "DIVIDER", CalloutDividerRc);
+  dividerPointer .init(this,  "DIVIDER_POINTER"),
   end        .init(this,      "END",     CalloutEndRc);
   csi        .init(this,      "ASSEM");
   pli        .init(this,      "PLI");
@@ -2921,7 +2941,7 @@ MultiStepMeta::MultiStepMeta() : BranchMeta()
   stepNum.color.setValue("black");
   // stepNum.font - default
   placement.setValue(CenterCenter,PageType);
-  sep.setValue("black",DEFAULT_THICKNESS,DEFAULT_MARGINS);
+  sep.setValue("black",DEFAULT_THICKNESS,DEFAULT_MARGINS,false);
   // subModelFont - default
   subModelFontColor.setValue("black");
   // freeform
@@ -2950,6 +2970,7 @@ void MultiStepMeta::init(BranchMeta *parent, QString name)
 
   begin    .init(this,    "BEGIN",  StepGroupBeginRc);
   divider  .init(this,    "DIVIDER",StepGroupDividerRc);
+  dividerPointer .init(this,  "DIVIDER_POINTER"),
   end      .init(this,    "END",    StepGroupEndRc);
 }
 

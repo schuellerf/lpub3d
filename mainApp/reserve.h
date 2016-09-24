@@ -29,8 +29,6 @@
 #ifndef reserveH
 #define reserveH
 
-#include <QGraphicsScene>
-#include <QGraphicsItem>
 #include "meta.h"
 #include "where.h"
 #include "range_element.h"

@@ -38,13 +38,17 @@
 #include "step.h"
 #include "lpub.h"
 #include "lpub_preferences.h"
+#include "pointer.h"
+#include "pagepointeritem.h"
 
 PageBackgroundItem::PageBackgroundItem(
   Page   *_page,
   int     width,
-  int     height)
+  int     height,
+  LGraphicsView *_view)
 {
   page = _page;
+  view = _view;
 
   relativeType = page->relativeType;
 #if 0
@@ -90,6 +94,8 @@ void PageBackgroundItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
   QAction *backgroundAction = NULL;
   QAction *sizeAndOrientationAction = NULL;
+
+  QAction *addPointerAction = NULL;
 
   Step    *lastStep = NULL;
   Step    *firstStep = NULL;
@@ -159,6 +165,10 @@ void PageBackgroundItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
   sizeAndOrientationAction->setIcon(QIcon(":/resources/pagesizeandorientation.png"));
   sizeAndOrientationAction->setWhatsThis("Change the page size and orientation");
 
+  addPointerAction = menu.addAction("Add Arrow");
+  addPointerAction->setWhatsThis("Add arrow from any point on the page to the step where it is used");
+  addPointerAction->setIcon(QIcon(":/resources/addarrow.png"));
+
   QAction *selectedAction     = menu.exec(event->screenPos());
 
   if (selectedAction == NULL) {
@@ -209,6 +219,22 @@ void PageBackgroundItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
                                page->bottom,
                                &page->meta.LPub.page.size,
                                &page->meta.LPub.page.orientation, useTop);
+    } else if (selectedAction == addPointerAction) {
+      Pointer *pointer = new Pointer(page->top,page->meta.LPub.page.pointer);
+      float _loc = 0, _x1 = 0, _y1 = 0, _base = -1, _segments = 1;
+      float           _x2 = 0, _y2 = 0;
+      float           _x3 = 0, _y3 = 0;
+      float           _x4 = 0, _y4 = 0;
+      pointer->pointerMeta.setValue(
+      PlacementEnc(TopLeft),
+      _loc,
+      _base,
+      _segments,
+      _x1,_y1,_x2,_y2,_x3,_y3,_x4,_y4);
+      PointerAttributes *pointerBase =
+          new PointerAttributes(page->meta.LPub.page.pointerBase);
+      PagePointerItem *pagePointer =
+          new PagePointerItem(page,pointerBase,pointer,this,view);
+      pagePointer->defaultPointer();
     }
-
 }

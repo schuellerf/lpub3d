@@ -96,7 +96,7 @@ class Callout : public Steps {
 
     virtual ~Callout();
 
-    void appendPointer(const Where &here, CalloutMeta &attrib);
+    void appendPointer(const Where &here, PointerMeta &attrib);
 
     virtual void sizeIt();
             void sizeitFreeform(int xx, int yy);

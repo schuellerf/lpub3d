@@ -58,6 +58,10 @@ bool rectLineIntersect(
 PointerItem::PointerItem(QGraphicsItem *parent)
     : QGraphicsItemGroup(parent){}
 
+PointerItem::~PointerItem(){
+  shaftSegments.clear();
+}
+
 void PointerItem::drawPointerPoly()
 {
 

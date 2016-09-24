@@ -44,7 +44,7 @@ Steps::Steps()
   isMirrored = false;
 }
 
-Steps::Steps(Meta &_meta,QGraphicsView *_view)
+Steps::Steps(Meta &_meta, LGraphicsView *_view)
 {
   meta = _meta;
   view = _view;
@@ -554,4 +554,116 @@ Boundary Steps::boundary(AbstractStepsElement *me)
     }
   }
   return Middle;
+}
+
+/*
+ * These functions manage page pointers
+ */
+
+PointerAttributes::PointerAttributes(PlacementMeta &_placementMeta){
+
+  // add underpinnings
+  int offsetX, offsetY;
+  placementMeta = _placementMeta;
+
+  if (placementMeta.value().relativeTo == PageType ||
+      placementMeta.value().relativeTo == StepGroupType ||
+      placementMeta.value().relativeTo == CalloutType) {
+    offsetX = 0;
+    offsetY = 0;
+  }
+
+  // TODO - transfer to meta
+  size[XX] = 4;
+  size[YY] = 4;
+
+   int newLoc[2] = { offsetX + loc[XX], offsetY + loc[YY] };
+
+   underpinnings = new QGraphicsRectItem(
+         qreal(newLoc[XX]),qreal(newLoc[YY]),qreal(size[XX]),qreal(size[YY])/*,parent*/);
+   underpinnings->setZValue(97);
+   QPen pen;
+   QColor none(0,0,0,0);
+   pen.setColor(none);
+   underpinnings->setPen(pen);
+   underpinnings->setPos(newLoc[XX],newLoc[YY]);
+   underpinnings->setFlag(QGraphicsItem::ItemIsMovable, true);
+}
+
+Page::Page()
+{
+  coverPage           = false;
+  frontCover          = false;
+  backCover           = false;
+  modelDisplayPage    = false;
+}
+
+void Page::addInsertPixmap(InsertPixmapItem *pixMap)
+{
+  insertPixmaps.append(pixMap);
+}
+
+void Page::addPageAttributePixmap(PageAttributePixmapItem *pixMap)
+{
+  pageAttributePixmaps.append(pixMap);
+}
+
+void Page::freePage()
+{
+  for (int i = 0; i < insertPixmaps.size(); i++) {
+    InsertPixmapItem *pixmap = insertPixmaps[i];
+    delete pixmap;
+  }
+  for (int i = 0; i < pageAttributePixmaps.size(); i++) {
+    PageAttributePixmapItem *pixmap = pageAttributePixmaps[i];
+    delete pixmap;
+  }
+  insertPixmaps.clear();
+  pageAttributePixmaps.clear();
+  inserts.clear();
+  freeSteps();
+  pointerList.clear();
+  graphicsPointerList.clear();
+  pointerBaseList.clear();
+}
+
+/*
+ * These functions manage page pointers
+ *
+ */
+
+void Page::addGraphicsPointerItem(
+  Pointer *pointer,
+  PointerAttributes *attributes)
+{
+  PagePointerItem *t =
+    new PagePointerItem(
+        this,
+          attributes,
+          pointer,
+          attributes->underpinnings,
+          view);
+  graphicsPointerList.append(t);
+}
+
+void Page::appendPointer(const Where &here, PointerMeta &pointerMeta)
+{
+  Pointer *pointer = new Pointer(here,pointerMeta);
+  pointerList.append(pointer);
+}
+
+void Page::updatePointers(QPoint &delta)
+{
+  for (int i = 0; i < graphicsPointerList.size(); i++) {
+    PagePointerItem *pointer = graphicsPointerList[i];
+    pointer->updatePointer(delta);
+  }
+}
+
+void Page::drawTips(QPoint &delta)
+{
+  for (int i = 0; i < graphicsPointerList.size(); i++) {
+    PagePointerItem *pointer = graphicsPointerList[i];
+    pointer->drawTip(delta);
+  }
 }

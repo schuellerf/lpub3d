@@ -12,41 +12,44 @@
 **
 ****************************************************************************/
 
-/**************************************************************************** 
+/****************************************************************************
  *
- * This class implements the graphical pointers that extend from callouts to
- * assembly images as visual indicators to the builder as to where to 
- * add the completed submodel into partially assembeled final model.
+ * This class implements the graphical pointers that extend from the page to
+ * as visual indicators to the builder as to where what the referenced
+ * item is associated with on the page.
  *
  * Please see lpub.h for an overall description of how the files in LPub
  * make up the LPub program.
  *
  ***************************************************************************/
-
-#ifndef CALLOUTPOINTERITEMH
-#define CALLOUTPOINTERITEMH
+#ifndef PAGEPOINTERITEM_H
+#define PAGEPOINTERITEM_H
 
 #include "pointeritem.h"
-#include "metaitem.h"
 
 class QGraphicsPolygonItem;
 class QGraphicsLineItem;
 class QGraphicsItemGroup;
-class Callout;
+class PointerAttributes;
+class LGraphicsView;
+class Page;
+class Step;
 
-class CalloutPointerItem : public PointerItem
+class PagePointerItem : public PointerItem
 {
 public:
-  CalloutPointerItem(
-    Callout             *co,
-    Meta                *meta,
+  PagePointerItem(
+    Page                *pg,
+    PointerAttributes   *attributes,
     Pointer             *pointer,
     QGraphicsItem       *parent,
-    QGraphicsView       *view);
+    LGraphicsView       *view);
 
 private:
-  Callout              *callout;
-
+  Page              *page;
+  LGraphicsView     *view;
+  Step              *step;
+  PointerAttributes *pa;
   /*
    *   +--------------------------------------------++
    *   |                                             |
@@ -55,13 +58,13 @@ private:
    *   |   |                                     |   |
    *
    *
-   *  callout size defines the outside edge of the callout.
+   *  page size defines the outside edge of the page.
    *  When there is a border, the inside rectangle starts
    *  at +thickness,+thickness, and ends at size-thickness,
    *  size-tickness.
    *
    *  Using round end cap caps the ends of the lines that
-   *  intersect the callout are at +- tickness/2.  I'm not
+   *  intersect the page are at +- tickness/2.  I'm not
    *  sure the affect of thickness is even vs. odd.
    *
    *  Loc should be calculated on the inside rectangle?
@@ -78,17 +81,19 @@ public:
   virtual void defaultPointer();
 
 private:
-  /* Drag the tip of the pointer, and calculate a good
-   * location for the pointer to connect to the callout. */
 
+  /* Drag the tip of the pointer, and calculate a good
+   * location for the pointer to connect to the page. */
+
+  void drawPointerPoly();
   virtual bool autoLocFromTip();
 
   /* Drag the MidBase point of the pointer, and calculate a good
-   * location for the pointer to connect to the callout. */
+   * location for the pointer to connect to the page. */
 
   virtual bool autoLocFromMidBase();
 
-  /* When we drag the CSI or the pointer's callout, we
+  /* When we drag the CSI or the pointer's page, we
    * need recalculate the Location portion of the pointer
    * meta, but the offset remains unchanged.
    * When we have more than one segment we calculate
@@ -101,4 +106,4 @@ private:
 
 };
 
-#endif
+#endif // PAGEPOINTERITEM_H

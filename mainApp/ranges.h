@@ -36,7 +36,9 @@
 #include "resize.h"
 #include "rotateiconitem.h"
 #include "pageattributepixmapitem.h"
-
+#include "pointer.h"
+#include "pagepointeritem.h"
+#include "lgraphicsview.h"
 
 /*
  * This is a base class for multi-step and
@@ -45,20 +47,21 @@
 class Step;
 class AbstractStepsElement;
 class Where;
+class LGraphicsView;
 
 class Steps : public Placement {
   public:
     Meta           meta;
     Meta           stepGroupMeta;
     QList<AbstractStepsElement *> list;  // of range
-    QGraphicsView *view;
+    LGraphicsView *view;
     Pli            pli;
     Where          top;                  // needed for non-step pages
     Where          bottom;
     bool           isMirrored;
 
     Steps();
-    Steps(Meta &_meta,QGraphicsView *_view);
+    Steps(Meta &_meta,LGraphicsView *_view);
    ~Steps();
 
     QString modelName();
@@ -91,48 +94,47 @@ class Steps : public Placement {
 
 #include "render.h"
 
+class Pointer;
+class PagePointerItem;
+class PageAttributePixmapItem;
+
+class PointerAttributes: public Placement{
+public:
+  PointerAttributes(PlacementMeta &placementMeta);
+  PlacementMeta          placementMeta;
+  QGraphicsRectItem     *underpinnings;
+};
+
 class Page : public Steps {
   public:
     QList<InsertMeta> inserts;
     QList<InsertPixmapItem *> insertPixmaps;
     QList<PageAttributePixmapItem *> pageAttributePixmaps;
+    QList<Pointer *> pointerList;
+    QList<PagePointerItem *> graphicsPointerList;
+    QList<PointerAttributes *> pointerBaseList;
     bool coverPage;
     bool frontCover;
     bool backCover;
     bool modelDisplayPage;
-    Page()
-    {
-      coverPage           = false;
-      frontCover          = false;
-      backCover           = false;
-      modelDisplayPage    = false;
-    }
+
+    Page();
     
-    void addInsertPixmap(InsertPixmapItem *pixMap)
-    {
-      insertPixmaps.append(pixMap);
-    }
+    void addInsertPixmap(InsertPixmapItem *pixMap);
+    void addPageAttributePixmap(PageAttributePixmapItem *pixMap);
+    void freePage();
 
-    void addPageAttributePixmap(PageAttributePixmapItem *pixMap)
-    {
-      pageAttributePixmaps.append(pixMap);
-    }
+    /*
+     * These functions manage page pointers (Not sure these are needed for page)
+     *
+     */
 
-    void freePage()
-    {
-      for (int i = 0; i < insertPixmaps.size(); i++) {
-        InsertPixmapItem *pixmap = insertPixmaps[i];
-        delete pixmap;
-      }
-      for (int i = 0; i < pageAttributePixmaps.size(); i++) {
-        PageAttributePixmapItem *pixmap = pageAttributePixmaps[i];
-        delete pixmap;
-      }
-      insertPixmaps.clear();
-      pageAttributePixmaps.clear();
-      inserts.clear();
-      freeSteps();
-    }
+    void addGraphicsPointerItem(Pointer *pointer, PointerAttributes *attributes);
+    void appendPointer( const Where &here, PointerMeta &pointerMeta);
+    void updatePointers( QPoint &delta);
+    void drawTips( QPoint &delta);
 };
+
+
 
 #endif

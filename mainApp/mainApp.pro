@@ -204,6 +204,7 @@ HEADERS += \
     hoverpoints.h \
     ldrawfiles.h \
     ldsearchdirs.h \
+    lgraphicsscene.h \
     lgraphicsview.h \
     lpub.h \
     lpub_preferences.h \
@@ -284,6 +285,7 @@ SOURCES += \
     hoverpoints.cpp \
     ldrawfiles.cpp \
     ldsearchdirs.cpp \
+    lgraphicsscene.cpp \
     lgraphicsview.cpp \
     lpub.cpp \
     lpub_preferences.cpp \
