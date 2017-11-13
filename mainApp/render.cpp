@@ -351,7 +351,7 @@ int POVRay::renderCsi(
 
   ldview.start(Preferences::ldviewExe,arguments);
   if ( ! ldview.waitForFinished(rendererTimeout())) {
-      if (ldview.exitCode() != 0 || 1) {
+      if (ldview.exitCode() != 0) {
           QByteArray status = ldview.readAll();
           QString str;
           str.append(status);
